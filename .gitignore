@@ -1,0 +1,29 @@
+# Build artifacts
+*.o
+*.a
+*.dylib
+build/
+.gradle/
+
+# Compiled binaries (ObjC demos)
+contrib/kmp-ane/mnist/mnist_ane
+contrib/kmp-ane/tmp/mnist_demo
+tmp/mnist_demo
+tmp/test_matmul
+tmp/test_mil_parse
+
+# MNIST data (downloadable)
+**/data/train-images-idx3-ubyte
+**/data/train-labels-idx1-ubyte
+**/data/t10k-images-idx3-ubyte
+**/data/t10k-labels-idx1-ubyte
+
+# Gradle wrapper jar (optional - uncomment to track)
+# gradle/wrapper/gradle-wrapper.jar
+
+# Logs
+run.log
+*.log
+
+# macOS
+.DS_Store
