@@ -7,7 +7,7 @@
 
 #define CKPT_PATH "ane_stories110M_ckpt.bin"
 #define MODEL_PATH "../../assets/models/stories110M.bin"
-#define DATA_PATH "tinystories_data00.bin"
+#define DATA_PATH_DEFAULT "tinystories_data00.bin"
 
 // ===== Weight loading from llama2.c format =====
 static bool load_pretrained(LayerWeights *lw, float *rms_final, float *embed, const char *path) {
@@ -193,11 +193,13 @@ int main(int argc, char *argv[]) {
         int adam_t = 0, start_step = 0;
 
         // Parse args
+        const char *data_path = DATA_PATH_DEFAULT;
         bool do_resume = false;
         for (int i=1; i<argc; i++) {
             if (strcmp(argv[i], "--resume") == 0) do_resume = true;
             else if (strcmp(argv[i], "--steps") == 0 && i+1<argc) total_steps = atoi(argv[++i]);
             else if (strcmp(argv[i], "--lr") == 0 && i+1<argc) lr = atof(argv[++i]);
+            else if (strcmp(argv[i], "--data") == 0 && i+1<argc) data_path = argv[++i];
         }
 
         // Allocate per-layer state
@@ -271,8 +273,12 @@ int main(int argc, char *argv[]) {
         }
 
         // mmap token data
-        int data_fd = open(DATA_PATH, O_RDONLY);
-        if (data_fd < 0) { printf("Cannot open %s\n", DATA_PATH); return 1; }
+        int data_fd = open(data_path, O_RDONLY);
+        if (data_fd < 0) {
+            printf("Cannot open token data: %s\n", data_path);
+            printf("Hint: run `bash download_data.sh` in training/ or pass --data /path/to/tinystories_data00.bin\n");
+            return 1;
+        }
         struct stat st; fstat(data_fd, &st);
         size_t data_len = st.st_size;
         uint16_t *token_data = (uint16_t*)mmap(NULL, data_len, PROT_READ, MAP_PRIVATE, data_fd, 0);
@@ -328,7 +334,7 @@ int main(int argc, char *argv[]) {
                     lw, la, rms_final, &arms_final, embed, &aembed);
                 printf("[exec() restart step %d, %d compiles, loss=%.4f]\n", step, g_compile_count, last_loss);
                 fflush(stdout);
-                execl(argv[0], argv[0], "--resume", NULL);
+                execl(argv[0], argv[0], "--resume", "--data", data_path, NULL);
                 perror("execl"); return 1;
             }
 

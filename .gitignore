@@ -1,0 +1,12 @@
+*.o
+*.a
+*.dylib
+*.so
+*.exe
+train_large
+train_large.*
+*.rej
+*.rej.*
+*.orig
+.DS_Store
+*.dSYM/

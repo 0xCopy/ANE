@@ -78,7 +78,20 @@ typedef struct {
 static int model_load_weights(Model *m, const char *path) {
     FILE *f = fopen(path, "rb");
     if (!f) { fprintf(stderr, "Cannot open %s\n", path); return -1; }
-    fread(&m->cfg, sizeof(Config), 1, f);
+
+    #define FREAD_CHECK(buf, count, file, label) do { \
+        size_t _n = fread(buf, sizeof(float), count, file); \
+        if (_n != (size_t)(count)) { \
+            fprintf(stderr, "ERROR: short read on %s: got %zu, expected %zu (file truncated?)\n", \
+                    label, _n, (size_t)(count)); \
+            fclose(file); return -1; \
+        } \
+    } while(0)
+
+    if (fread(&m->cfg, sizeof(Config), 1, f) != 1) {
+        fprintf(stderr, "ERROR: failed to read config from %s\n", path);
+        fclose(f); return -1;
+    }
     bool shared = m->cfg.vocab_size > 0;
     if (m->cfg.vocab_size < 0) m->cfg.vocab_size = -m->cfg.vocab_size;
 
@@ -89,7 +102,7 @@ static int model_load_weights(Model *m, const char *path) {
     int d = m->cfg.dim, hd = m->cfg.hidden_dim, nl = m->cfg.n_layers, vs = m->cfg.vocab_size;
 
     m->token_embedding = (float*)malloc(vs * d * sizeof(float));
-    fread(m->token_embedding, sizeof(float), vs * d, f);
+    FREAD_CHECK(m->token_embedding, vs * d, f, "token_embedding");
 
     float *rms_att_all = (float*)malloc(nl * d * sizeof(float));
     float *wq_all = (float*)malloc(nl * d * d * sizeof(float));
@@ -101,15 +114,15 @@ static int model_load_weights(Model *m, const char *path) {
     float *w2_all = (float*)malloc(nl * d * hd * sizeof(float));
     float *w3_all = (float*)malloc(nl * hd * d * sizeof(float));
 
-    fread(rms_att_all, sizeof(float), nl * d, f);
-    fread(wq_all, sizeof(float), nl * d * d, f);
-    fread(wk_all, sizeof(float), nl * d * d, f);
-    fread(wv_all, sizeof(float), nl * d * d, f);
-    fread(wo_all, sizeof(float), nl * d * d, f);
-    fread(rms_ffn_all, sizeof(float), nl * d, f);
-    fread(w1_all, sizeof(float), nl * hd * d, f);
-    fread(w2_all, sizeof(float), nl * d * hd, f);
-    fread(w3_all, sizeof(float), nl * hd * d, f);
+    FREAD_CHECK(rms_att_all, nl * d, f, "rms_att");
+    FREAD_CHECK(wq_all, nl * d * d, f, "wq");
+    FREAD_CHECK(wk_all, nl * d * d, f, "wk");
+    FREAD_CHECK(wv_all, nl * d * d, f, "wv");
+    FREAD_CHECK(wo_all, nl * d * d, f, "wo");
+    FREAD_CHECK(rms_ffn_all, nl * d, f, "rms_ffn");
+    FREAD_CHECK(w1_all, nl * hd * d, f, "w1");
+    FREAD_CHECK(w2_all, nl * d * hd, f, "w2");
+    FREAD_CHECK(w3_all, nl * hd * d, f, "w3");
 
     for (int l = 0; l < nl; l++) {
         m->rms_att_w[l] = (float*)malloc(d * sizeof(float));
@@ -135,14 +148,15 @@ static int model_load_weights(Model *m, const char *path) {
     free(rms_ffn_all); free(w1_all); free(w2_all); free(w3_all);
 
     m->rms_final_w = (float*)malloc(d * sizeof(float));
-    fread(m->rms_final_w, sizeof(float), d, f);
+    FREAD_CHECK(m->rms_final_w, d, f, "rms_final");
 
     if (shared) {
         m->wcls = m->token_embedding;
     } else {
         m->wcls = (float*)malloc(vs * d * sizeof(float));
-        fread(m->wcls, sizeof(float), vs * d, f);
+        FREAD_CHECK(m->wcls, vs * d, f, "wcls");
     }
+    #undef FREAD_CHECK
     fclose(f);
     return 0;
 }
