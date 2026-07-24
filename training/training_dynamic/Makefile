@@ -11,7 +11,11 @@ train: train.m config.h io.h cpu_ops.h mil_dynamic.h $(MODEL_HDR)
 	@echo "Building for model: $(MODEL)"
 	$(CC) $(CFLAGS) -include $(MODEL_HDR) -o train train.m
 
+generate: generate.m config.h io.h cpu_ops.h mil_dynamic.h $(MODEL_HDR)
+	@echo "Building generate for model: $(MODEL)"
+	$(CC) $(CFLAGS) -include $(MODEL_HDR) -o generate generate.m
+
 clean:
-	rm -f train
+	rm -f train generate
 
 .PHONY: clean
