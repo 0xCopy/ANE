@@ -123,6 +123,26 @@
       "ane_util_pct": [4.57, 4.70],
       "notes": "MacBook Pro, static pipeline train_large, 20 steps, random init.",
       "contributor": "log-wade"
+    },
+    {
+      "chip": "M5 Max",
+      "cores": "18-core (6P+12E)",
+      "ram_gb": 128,
+      "macos": "26.4.1",
+      "ane_subtype": "h17",
+      "ms_per_step": [89.7, 90.2],
+      "ane_ms": [7.8, 8.1],
+      "compile_ms": [3335, 3384],
+      "ane_tflops": 1.03,
+      "ane_util_pct": 5.4,
+      "peak_tflops_inmem": 13.80,
+      "peak_tflops_int8_w8a8": 35.61,
+      "peak_tflops_fp16_64x64": 19.27,
+      "ms_per_step_dynamic_stories110m": 73.5,
+      "ms_per_step_dynamic_qwen3_06b": 320.0,
+      "compile_ms_dynamic": 421,
+      "notes": "First H17 ANE on record — distinct subtype from M4/M5 base (both H16). FP16/INT8 peak compute matches M4 within 4%; training gains over M5 base are CPU-driven (12P cores + Accelerate). See benchmarks/m5max_result.md for the full probe report.",
+      "contributor": "lixiang.ict@gmail.com"
     }
   ],
   "neural_engine_specs": {
@@ -137,6 +157,7 @@
     "M3_Ultra": {"ne_cores": 32, "rated_tops": 31.6},
     "M4":       {"ne_cores": 16, "rated_tops": 38, "note": "INT8/mixed-precision spec"},
     "M4_Max":   {"ne_cores": 16, "rated_tops": 38, "note": "INT8/mixed-precision spec"},
-    "M5":       {"ne_cores": 16, "rated_tops": null, "estimated_tops": 19}
+    "M5":       {"ne_cores": 16, "rated_tops": null, "estimated_tops": 19, "ane_subtype": "h16"},
+    "M5_Max":   {"ne_cores": 16, "rated_tops": null, "measured_fp16_tflops": 19.27, "measured_int8_tops": 35.61, "ane_subtype": "h17", "note": "First chip on record reporting H17 ANE subtype; peak math matches M4 H16."}
   }
 }
