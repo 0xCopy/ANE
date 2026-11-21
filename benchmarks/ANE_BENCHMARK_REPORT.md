@@ -40,6 +40,8 @@ M5              101-120   9.1-9.8  3.2-3.4s     0.77-0.91    4.9-5.8  @GitBubble
 
 *M3 Ultra = reference platform this project was developed on.
 
+M2 dynamic pipeline data was submitted separately from the static training table: Stories110M dynamic weight pipeline averaged 1554.0 ms/step over 20 steps on an 8 GB M2 Mac mini (compile once: 1.2s).
+
 ## Peak ANE Throughput (inmem_peak, 128x conv 512ch sp64)
 
 ```
@@ -47,6 +49,7 @@ Chip            NE Cores  FP16 TFLOPS (measured)    Rated TOPS (Apple spec*)
 ────────────────────────────────────────────────────────────────────────────
 M1 Pro          16        FAIL                      11    (MIL compat issue)
 M1 Max          16        FAIL                      11    (MIL compat issue)
+M2              16        7.99                      15.8  (Mac mini, median of 3)
 M3 Pro          16        9.98                      15.8
 M3 Ultra        32        -                         31.6  (ref platform)
 M4 Pro          16        12.57                     38
@@ -83,6 +86,7 @@ Peak ANE Throughput (TFLOPS, higher is better)
 
 M1 Pro    FAIL (MIL compat)
 M1 Max    FAIL (MIL compat)
+M2        ████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  7.99
 M3 Pro    ████████████████████░░░░░░░░░░░░░░░░░░░░░░░░  9.98
 M4 Pro    ████████████████████████████████░░░░░░░░░░░░░  12.57
 M4 Max    ██████████████████████░░░░░░░░░░░░░░░░░░░░░░  10.93
@@ -108,6 +112,13 @@ M3 Pro    ███████████████████████�
 - ANE compiler handles weight blobs differently from M4+
 - Training at 148-167 ms/step, ~0.6 TFLOPS
 
+### M2
+- In-memory MIL benchmarks compile and run on macOS 26.5 with h14 ANE subtype
+- Peak-style `inmem_peak` median: 7.99 TFLOPS at 128x conv 512ch sp64 (about 50.6% of the 15.8 TFLOPS FP16 reference)
+- `inmem_bench` accepts 256/512/1024/2048/3072/4096 channel configurations tested here
+- INT8 W8A8 is roughly parity to modestly faster than FP16 on tested kernels (median ratios 1.01x-1.11x)
+- Stories110M dynamic weight pipeline works but is IO-dominated on the tested 8 GB Mac mini: 1554.0 ms/step over 20 steps
+
 ### M3 Pro
 - **Only ch=512 compiles** — 52 channel values tested (1-4096), only 512 accepted
 - Fixed 512-wide lane structure in SRAM tiling
@@ -131,13 +142,13 @@ M3 Pro    ███████████████████████�
 ### Cross-Generation MIL Compatibility
 
 ```
-Feature                    M1       M3       M4       M5
-─────────────────────────────────────────────────────────
-program(1.3) / ios18       PARTIAL  YES      YES      YES
-Single-blob weights        FAIL     YES      YES      YES
-Per-matrix weight blobs    YES      YES      YES      YES
-Channel flexibility        ?        ch=512   FLEX     FLEX
-BLOBFILE offset refs       FAIL     YES      YES      YES
+Feature                    M1       M2       M3       M4       M5
+──────────────────────────────────────────────────────────────────
+program(1.3) / ios18       PARTIAL  YES      YES      YES      YES
+Single-blob weights        FAIL     YES      YES      YES      YES
+Per-matrix weight blobs    YES      YES      YES      YES      YES
+Channel flexibility        ?        FLEX     ch=512   FLEX     FLEX
+BLOBFILE offset refs       FAIL     YES      YES      YES      YES
 ```
 
 ## macOS Compatibility Issues
@@ -159,5 +170,5 @@ cd training && make train_large
 Include: chip model, macOS version, full output with JSON lines.
 
 ---
-*Report compiled 2026-03-04 from community submissions.*
-*Contributors: @SethBurkart123, @srt54558, @andyg5000, @moriwang, @D-Ogi, @GitBubble, @elijah-pelton*
+*Report compiled 2026-03-04 from community submissions; updated 2026-06-05 with local M2 results.*
+*Contributors: @SethBurkart123, @srt54558, @andyg5000, @moriwang, @D-Ogi, @GitBubble, @elijah-pelton, kimhyoyeol*
