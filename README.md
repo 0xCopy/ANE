@@ -214,6 +214,22 @@ No external dependencies. Uses only system frameworks + private ANE APIs resolve
 | Stories110M | 6.7ms | 1.9ms | 8.8ms |
 | Qwen3-0.6B | 9.7ms | 2.3ms | 12.0ms |
 
+| Optimization | ms/step | ANE util |
+|---|---|---|
+| Baseline (vDSP transpose) | 33.5 | 3.1% |
+| Channel-first layout | 20.3 | 5.2% |
+| vDSP vectorized RMSNorm | 14.2 | 7.4% |
+| GCD async cblas overlap | 11.4 | 9.2% |
+| ANE RMSNorm fusion | 11.4 | 9.2% |
+| Wo^T fusion (7→6 kernels) | 11.4 | 9.2% |
+| Deferred cblas wait | **9.3** | **11.2%** |
+
+## Community Benchmarks
+
+Community hardware benchmark submissions live in [`benchmarks/submissions/`](benchmarks/submissions/).
+
+- [Mac Studio (Apple M3 Ultra, 256 GB) — 2026-03-03](benchmarks/submissions/m3-ultra-mac-studio-2026-03-03/README.md)
+
 ## Disclaimer
 
 This project uses Apple's private, undocumented APIs (`_ANEClient`, `_ANECompiler`, `_ANEInMemoryModelDescriptor`). These APIs are not covered by any public stability guarantee and may change or break with any macOS update. This is independent research into Apple Neural Engine architecture, using APIs discovered through runtime introspection for research and educational purposes under fair use and interoperability provisions (see *Sega v. Accolade*, 1992; DMCA §1201(f)). No Apple proprietary code or binaries are included in this repository. This project is not affiliated with or endorsed by Apple Inc. Use at your own risk.
