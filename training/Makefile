@@ -1,5 +1,5 @@
 CC = xcrun clang
-CFLAGS = -O2 -Wall -DACCELERATE_NEW_LAPACK -fobjc-arc
+CFLAGS = -O2 -Wall -DACCELERATE_NEW_LAPACK -Wno-deprecated-declarations -fobjc-arc
 FRAMEWORKS = -framework Foundation -framework CoreML -framework IOSurface
 LDFLAGS = $(FRAMEWORKS) -ldl
 
@@ -19,6 +19,9 @@ train_large_ane: train_large_ane.m $(HEADERS_ANE)
 
 train_opt: train_opt.m $(HEADERS_OPT)
 	$(CC) $(CFLAGS) -o $@ train_opt.m $(LDFLAGS) -framework Accelerate -framework Metal -framework MetalPerformanceShaders
+
+train_double_buffer: train_double_buffer.m $(HEADERS_LARGE)
+	$(CC) $(CFLAGS) -o $@ train_double_buffer.m $(LDFLAGS) -framework Accelerate
 
 PROBES = test_weight_reload test_perf_stats test_qos_sweep test_ane_advanced
 
@@ -46,7 +49,7 @@ tokenize:
 	python3 tokenize.py
 
 clean:
-	rm -f train train_large train_large_ane train_opt $(PROBES) test_rmsnorm_bwd test_classifier
+	rm -f train train_large train_large_ane train_opt train_double_buffer $(PROBES) test_rmsnorm_bwd test_classifier
 
 .PHONY: clean tokenize probes
 
