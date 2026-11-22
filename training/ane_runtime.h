@@ -240,12 +240,10 @@ static ANEKernel *ane_compile_with_weights(NSData *milText, NSData *weightData,
 
     // Pre-populate temp dir with MIL + weights
     id hx = ((id(*)(id,SEL))objc_msgSend)(mdl, @selector(hexStringIdentifier));
-    // MED-02: pid + atomic sequence counter make the directory unique per process and
-    // per call, preventing TOCTOU conflicts when two instances compile the same model.
-    static int ane_compile_seq = 0;
-    int seq = __sync_fetch_and_add(&ane_compile_seq, 1);  // atomic, consistent with g_compile_count
-    NSString *td = [NSTemporaryDirectory() stringByAppendingPathComponent:
-        [NSString stringWithFormat:@"ANE_%d_%d_%@", getpid(), seq, hx]];
+    // The bundle directory is named by the model hash and sits directly under the temp directory.  MED-02 (a pid_seq prefix, or a unique parent) is not
+    // applied: on macOS 27.2.1 ANECompilerService verifies a bundle against that exact path and answers any other with
+    // "verifyBundleAtPath: invalid model" (every compile fails).  See docs/d3m/2026-11-22.md.
+    NSString *td = [NSTemporaryDirectory() stringByAppendingPathComponent:hx];
     NSFileManager *fm = [NSFileManager defaultManager];
     [fm createDirectoryAtPath:[td stringByAppendingPathComponent:@"weights"]
         withIntermediateDirectories:YES attributes:nil error:nil];

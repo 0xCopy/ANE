@@ -31,6 +31,9 @@ training/train_large_ane
 training/train_opt
 training/train_double_buffer
 training/train
+training/m5_performance_suite
+training/m5_pipeline_suite
+training/benchmark_ane
 training/probe_*
 training/test_*
 !training/test_*.m

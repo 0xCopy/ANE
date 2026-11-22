@@ -16,7 +16,7 @@ static ANESDKLayer anesdk_linear_create(const char *name, int in_dim, int out_di
     
     NSString *mil = anesdk_gen_linear_fwd(in_dim, out_dim, seq);
     int in_sizes[] = { in_dim * seq * 2, out_dim * in_dim * 2 }; // input x, weight W
-    l.kern = compile_kern_mil_w(mil, @{}, in_sizes, 2, out_dim * seq * 2);
+    l.kern = compile_kern_mil_multi(mil, @{}, in_sizes, 2, out_dim * seq * 2);
     
     return l;
 }
@@ -37,7 +37,7 @@ static ANESDKLayer anesdk_conv2d_create(const char *name, int in_ch, int out_ch,
     
     NSString *mil = anesdk_gen_conv2d_fwd(in_ch, out_ch, in_h, in_w, k_h, k_w, stride_h, stride_w, pad, pad, pad, pad, 1, 1);
     int in_sizes[] = { in_ch * in_h * in_w * 2, out_ch * in_ch * k_h * k_w * 2 };
-    l.kern = compile_kern_mil_w(mil, @{}, in_sizes, 2, out_ch * out_h * out_w * 2);
+    l.kern = compile_kern_mil_multi(mil, @{}, in_sizes, 2, out_ch * out_h * out_w * 2);
     
     return l;
 }
@@ -54,7 +54,7 @@ static ANESDKLayer anesdk_relu_create(const char *name, int ch, int h, int w) {
     
     NSString *mil = anesdk_gen_relu_fwd(ch, h * w);
     int in_sizes[] = { ch * h * w * 2 };
-    l.kern = compile_kern_mil_w(mil, @{}, in_sizes, 1, ch * h * w * 2);
+    l.kern = compile_kern_mil_multi(mil, @{}, in_sizes, 1, ch * h * w * 2);
     
     return l;
 }
@@ -71,7 +71,7 @@ static ANESDKLayer anesdk_softmax_create(const char *name, int ch, int h, int w)
     
     NSString *mil = anesdk_gen_softmax_fwd(ch, h * w);
     int in_sizes[] = { ch * h * w * 2 };
-    l.kern = compile_kern_mil_w(mil, @{}, in_sizes, 1, ch * h * w * 2);
+    l.kern = compile_kern_mil_multi(mil, @{}, in_sizes, 1, ch * h * w * 2);
     
     return l;
 }
@@ -89,7 +89,7 @@ static ANESDKLayer anesdk_layernorm_create(const char *name, int dim, int seq) {
     
     NSString *mil = anesdk_gen_layernorm_fwd(dim, seq);
     int in_sizes[] = { dim * seq * 2, dim * 2, dim * 2 }; // x, weight, bias
-    l.kern = compile_kern_mil_w(mil, @{}, in_sizes, 3, dim * seq * 2);
+    l.kern = compile_kern_mil_multi(mil, @{}, in_sizes, 3, dim * seq * 2);
     
     return l;
 }

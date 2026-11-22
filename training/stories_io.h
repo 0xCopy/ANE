@@ -160,11 +160,10 @@ static Kern *compile_kern_mil_multi(NSString *mil, NSDictionary *weights, int *i
     id mdl = ((id(*)(Class,SEL,id))objc_msgSend)(g_I, @selector(inMemoryModelWithDescriptor:), desc);
     if (!mdl) { printf("  [compile] mdl=NULL\n"); return NULL; }  // CRIT-02
     id hx = ((id(*)(id,SEL))objc_msgSend)(mdl, @selector(hexStringIdentifier));
-    // MED-02: pid + atomic sequence counter make the directory unique per process and
-    // per call, preventing TOCTOU conflicts when two instances compile the same model.
-    int seq = __sync_fetch_and_add(&g_compile_seq, 1);
-    NSString *td = [NSTemporaryDirectory() stringByAppendingPathComponent:
-        [NSString stringWithFormat:@"ANE_%d_%d_%@", getpid(), seq, hx]];
+    // The bundle directory is named by the model hash and sits directly under the temp directory.  MED-02 (a pid_seq prefix, or a unique parent) is not
+    // applied: on macOS 27.2.1 ANECompilerService verifies a bundle against that exact path and answers any other with
+    // "verifyBundleAtPath: invalid model" (every compile fails).  See docs/d3m/2026-11-22.md.
+    NSString *td = [NSTemporaryDirectory() stringByAppendingPathComponent:hx];
     [[NSFileManager defaultManager] createDirectoryAtPath:[td stringByAppendingPathComponent:@"weights"] withIntermediateDirectories:YES attributes:nil error:nil];
     [md writeToFile:[td stringByAppendingPathComponent:@"model.mil"] atomically:YES];
     for (NSString *path in weights) {

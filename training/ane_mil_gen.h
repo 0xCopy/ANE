@@ -116,7 +116,6 @@ static NSString *mil_gen_dynamic_matmul(int ic, int oc, int seq) {
         "        tensor<fp32, [1, 1, %d, %d]> y = cast(dtype = to_fp32, x = y16)[name = string(\"cast_out\")];\n"
         "    } -> (y);\n"
         "}\n",
-        mil_ver,
         seq, ic, ic, oc,
         seq, ic, ic, oc,
         seq, oc, seq, oc];

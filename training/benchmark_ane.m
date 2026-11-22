@@ -41,10 +41,10 @@ void load_checkpoint_inference(const char *path) {
 // Compile one layer's kernels (subset of train_large.m)
 static bool compile_fwd_kernels(LayerKernels *lk) {
     int fwdAttn_ins[] = { DIM*SEQ*2, DIM*2, WQ_SZ*2, WQ_SZ*2, WQ_SZ*2, WO_SZ*2, SEQ*SEQ*2 };
-    lk->fwdAttn = compile_kern_mil_w(gen_sdpa_fwd_flex(), @{}, fwdAttn_ins, 7, 6*DIM*SEQ*2);
+    lk->fwdAttn = compile_kern_mil_multi(gen_sdpa_fwd_flex(), @{}, fwdAttn_ins, 7, 6*DIM*SEQ*2);
 
     int fwdFFN_ins[] = { DIM*SEQ*2, DIM*2, W1_SZ*2, W2_SZ*2, W3_SZ*2 };
-    lk->fwdFFN = compile_kern_mil_w(gen_ffn_fwd_flex(), @{}, fwdFFN_ins, 5, (2*DIM+3*HIDDEN)*SEQ*2);
+    lk->fwdFFN = compile_kern_mil_multi(gen_ffn_fwd_flex(), @{}, fwdFFN_ins, 5, (2*DIM+3*HIDDEN)*SEQ*2);
 
     return lk->fwdAttn && lk->fwdFFN;
 }

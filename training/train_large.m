@@ -211,7 +211,6 @@ int main(int argc, char *argv[]) {
     @autoreleasepool {
         setbuf(stdout, NULL);
         ane_init();
-        init_accum_steps();
         mach_timebase_info(&g_tb);
 
         int total_steps = 10000;
@@ -279,7 +278,7 @@ int main(int argc, char *argv[]) {
         if (!resuming) {
             printf("=== ANE Training: Stories110M (12 layers) ===\n");
             printf("dim=%d hidden=%d heads=%d seq=%d vocab=%d layers=%d\n", DIM, HIDDEN, HEADS, SEQ, VOCAB, NLAYERS);
-            printf("model=%s data=%s ckpt=%s\n", model_path, DATA_PATH, ckpt_path);
+            printf("model=%s data=%s ckpt=%s\n", model_path, data_path, ckpt_path);
             if (!load_pretrained(lw, rms_final, embed, model_path)) {
                 printf("Pretrained load failed, using random init\n");
                 srand48(42);

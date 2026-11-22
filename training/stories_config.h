@@ -124,7 +124,6 @@ static Class g_D, g_I, g_AR, g_AIO;
 static bool g_ane_ok_large = false;    // true only when all private classes loaded successfully
 static mach_timebase_info_data_t g_tb;
 static int g_compile_count = 0;
-static int g_compile_seq = 0;  // MED-02: per-call unique index for temp-dir naming
 
 static void ane_init(void) {
     // MED-06: dispatch_once provides thread-safe one-time init with full memory barrier.
