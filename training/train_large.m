@@ -4,17 +4,29 @@
 #include "stories_io.h"
 #include "stories_mil.h"
 #include "stories_cpu_ops.h"
+#include <limits.h>  // PATH_MAX for realpath() (HIGH-02)
+#include "data_validation.h"
 
 #define CKPT_PATH_DEFAULT "ane_stories110M_ckpt.bin"
 #define MODEL_PATH_DEFAULT "stories110M.bin"
 #define DATA_PATH_DEFAULT "tinystories_data00.bin"
 
+static const char *get_path(const char *env_var, const char *default_val) {
+    const char *v = getenv(env_var);
+    return (v && v[0]) ? v : default_val;
+}
+
 // ===== Weight loading from llama2.c format =====
 static bool load_pretrained(LayerWeights *lw, float *rms_final, float *embed, const char *path) {
     FILE *f = fopen(path, "rb");
     if (!f) { printf("Cannot open %s\n", path); return false; }
+    { char rp[PATH_MAX]; if (realpath(path, rp)) printf("  Model path: %s\n", rp); }  // HIGH-02: audit resolved path
     Llama2Config cfg;
-    fread(&cfg, sizeof(cfg), 1, f);
+    // Validate config read — gatekeeper before any dimension-based logic (CRIT-03)
+    if (fread(&cfg, sizeof(cfg), 1, f) != 1) {
+        printf("  ERROR: Config read failed (truncated file?)\n");
+        fclose(f); return false;
+    }
     printf("  Model config: dim=%d hidden=%d layers=%d heads=%d vocab=%d seq=%d\n",
            cfg.dim, cfg.hidden_dim, cfg.n_layers, cfg.n_heads, abs(cfg.vocab_size), cfg.seq_len);
     if (cfg.dim != DIM || cfg.hidden_dim != HIDDEN || cfg.n_layers != NLAYERS) {
@@ -112,6 +124,7 @@ static void save_checkpoint(const char *path, int step, int total_steps, float l
                             LayerWeights *lw, LayerAdam *la, float *rms_final, AdamState *arms_final,
                             float *embed, AdamState *aembed) {
     FILE *f = fopen(path, "wb");
+    if (!f) { fprintf(stderr, "save_checkpoint: cannot open %s\n", path); return; }  // CRIT-03
     CkptHdr h = {0};
     h.magic = 0x424C5A54; h.version = 2;
     h.step = step; h.total_steps = total_steps;
@@ -120,6 +133,7 @@ static void save_checkpoint(const char *path, int step, int total_steps, float l
     h.lr = lr; h.loss = loss;
     h.cum_compile = cc; h.cum_train = ct; h.cum_wall = cw;
     h.cum_steps = cs; h.cum_batches = cb; h.adam_t = adam_t;
+    h.pad[0] = 0x01020304;  // byte-order sentinel (MED-04): LE marker, see CkptHdr
     fwrite(&h, sizeof(h), 1, f);
     // Per-layer weights + adam
     for (int L = 0; L < NLAYERS; L++) {
@@ -152,8 +166,20 @@ static bool load_checkpoint(const char *path, int *step, int *total_steps, float
     FILE *f = fopen(path, "rb");
     if (!f) return false;
     CkptHdr h;
-    fread(&h, sizeof(h), 1, f);
+    // Validate header read before magic-byte check (CRIT-03)
+    if (fread(&h, sizeof(h), 1, f) != 1) {
+        fprintf(stderr, "load_checkpoint: header read failed\n");
+        fclose(f); return false;
+    }
     if (h.magic != 0x424C5A54 || h.version != 2) { fclose(f); return false; }
+    // MED-04: Byte-order check. pad[0]=0 = legacy checkpoint (no sentinel, accept).
+    // pad[0]=0x01020304 = LE ok. Anything else = big-endian or corrupt checkpoint.
+    _Static_assert(__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__,
+        "Checkpoint format is little-endian (Apple Silicon only)");
+    if (h.pad[0] != 0 && h.pad[0] != 0x01020304) {
+        fprintf(stderr, "load_checkpoint: byte-order mismatch (big-endian checkpoint?)\n");
+        fclose(f); return false;
+    }
     *step = h.step; *total_steps = h.total_steps; *lr = h.lr; *loss = h.loss;
     *cc = h.cum_compile; *ct = h.cum_train; *cw = h.cum_wall;
     *cs = h.cum_steps; *cb = h.cum_batches; *adam_t = h.adam_t;
@@ -191,6 +217,8 @@ int main(int argc, char *argv[]) {
         float lr = 3e-4f;
         float adam_b1=0.9f, adam_b2=0.999f, adam_eps=1e-8f;
         int adam_t = 0, start_step = 0;
+        int accum_steps = get_accum_steps();
+        int max_compiles = get_max_compiles();
 
         // Parse args
         const char *ckpt_path = CKPT_PATH_DEFAULT;
@@ -229,10 +257,10 @@ int main(int argc, char *argv[]) {
         }
 
         // Final RMSNorm + embedding + classifier
-        float *rms_final = (float*)malloc(DIM*4);
-        float *embed = (float*)malloc(VOCAB*DIM*4);  // [VOCAB, DIM] row-major
-        float *grms_final = (float*)calloc(DIM, 4);
-        float *gembed = (float*)calloc(VOCAB*DIM, 4);
+        float *rms_final = xmf(DIM);
+        float *embed = xmf((size_t)VOCAB*DIM);  // [VOCAB, DIM] row-major
+        float *grms_final = xcf(DIM);
+        float *gembed = xcf((size_t)VOCAB*DIM);
         AdamState arms_final = adam_alloc(DIM);
         AdamState aembed = adam_alloc((size_t)VOCAB*DIM);
 
@@ -250,6 +278,7 @@ int main(int argc, char *argv[]) {
         if (!resuming) {
             printf("=== ANE Training: Stories110M (12 layers) ===\n");
             printf("dim=%d hidden=%d heads=%d seq=%d vocab=%d layers=%d\n", DIM, HIDDEN, HEADS, SEQ, VOCAB, NLAYERS);
+            printf("model=%s data=%s ckpt=%s\n", model_path, data_path, ckpt_path);
             if (!load_pretrained(lw, rms_final, embed, model_path)) {
                 printf("Pretrained load failed, using random init\n");
                 srand48(42);
@@ -272,7 +301,7 @@ int main(int argc, char *argv[]) {
             printf("Params: %.2fM (transformer %.2fM + embed %.2fM)\n", tp/1e6, xfmr_params/1e6, embed_params/1e6);
             printf("Kernels: %d (%d weight-bearing + %d static sdpaBwd2)\n",
                    TOTAL_WEIGHT_KERNELS+NLAYERS, TOTAL_WEIGHT_KERNELS, NLAYERS);
-            printf("Accum %d steps per recompile | Adam LR=%.1e b1=%.1f b2=%.3f\n", ACCUM_STEPS, lr, adam_b1, adam_b2);
+            printf("Accum %d steps per recompile | Adam LR=%.1e b1=%.1f b2=%.3f\n", accum_steps, lr, adam_b1, adam_b2);
             double fwd_f = NLAYERS*(4.0*2*DIM*DIM*SEQ + 2.0*2*DIM*HIDDEN*SEQ + 2.0*HIDDEN*DIM*SEQ);
             double bwd_dx_f = fwd_f, bwd_dw_f = fwd_f;
             double sdpa_f = NLAYERS*2.0*HEADS*5*SEQ*SEQ*HD;
@@ -291,17 +320,25 @@ int main(int argc, char *argv[]) {
             printf("Hint: run `bash download_data.sh` in training/ or pass --data /path/to/tinystories_data00.bin\n");
             return 1;
         }
-        struct stat st; fstat(data_fd, &st);
-        size_t data_len = st.st_size;
-        uint16_t *token_data = (uint16_t*)mmap(NULL, data_len, PROT_READ, MAP_PRIVATE, data_fd, 0);
-        if (token_data == MAP_FAILED) { printf("mmap failed\n"); return 1; }
-        size_t n_tokens = data_len / 2;
-        if (n_tokens <= (size_t)(SEQ + 1)) {
-            printf("Token data too short: need at least %d tokens, got %zu\n", SEQ + 2, n_tokens);
-            munmap(token_data, data_len);
+        struct stat st;
+        if (fstat(data_fd, &st) != 0) { perror("fstat"); close(data_fd); return 1; }
+        size_t data_len = (size_t)st.st_size;
+        size_t n_tokens = 0, extra_bytes = 0;
+        if (!token_data_bytes_to_token_count(data_len, &n_tokens, &extra_bytes)) {
+            fprintf(stderr,
+                    "Token data validation failed: file size %zu bytes has %zu extra byte(s); expected 16-bit tokens\n",
+                    data_len, extra_bytes);
             close(data_fd);
             return 1;
         }
+        if (n_tokens == 0) {
+            fprintf(stderr, "Token data validation failed: token file is empty\n");
+            close(data_fd);
+            return 1;
+        }
+        uint16_t *token_data = (uint16_t*)mmap(NULL, data_len, PROT_READ, MAP_PRIVATE, data_fd, 0);
+        if (token_data == MAP_FAILED) { perror("mmap"); close(data_fd); return 1; }
+        close(data_fd); // mapping remains valid; avoid fd leaks across exec() restarts
         printf("Token data: %zu tokens (%.1f MB)\n", n_tokens, data_len/1e6);
 
         TokenDataValidationError data_err = {0};
@@ -320,23 +357,23 @@ int main(int argc, char *argv[]) {
         }
 
         // Gradient buffers shared across layers (reused each step)
-        float *dy = (float*)malloc(SEQ*DIM*4);            // gradient flowing backward
-        float *dffn = (float*)malloc(SEQ*DIM*4);
-        float *dh1 = (float*)malloc(SEQ*HIDDEN*4);
-        float *dh3 = (float*)malloc(SEQ*HIDDEN*4);
-        float *dx_ffn = (float*)malloc(SEQ*DIM*4);
-        float *dx2 = (float*)malloc(SEQ*DIM*4);
-        float *do_out_buf = (float*)malloc(SEQ*DIM*4);
-        float *dq = (float*)malloc(SEQ*DIM*4);
-        float *dk = (float*)malloc(SEQ*DIM*4);
-        float *dv = (float*)malloc(SEQ*DIM*4);
-        float *dx_attn = (float*)malloc(SEQ*DIM*4);
+        float *dy = xmf((size_t)SEQ*DIM);            // gradient flowing backward
+        float *dffn = xmf((size_t)SEQ*DIM);
+        float *dh1 = xmf((size_t)SEQ*HIDDEN);
+        float *dh3 = xmf((size_t)SEQ*HIDDEN);
+        float *dx_ffn = xmf((size_t)SEQ*DIM);
+        float *dx2 = xmf((size_t)SEQ*DIM);
+        float *do_out_buf = xmf((size_t)SEQ*DIM);
+        float *dq = xmf((size_t)SEQ*DIM);
+        float *dk = xmf((size_t)SEQ*DIM);
+        float *dv = xmf((size_t)SEQ*DIM);
+        float *dx_attn = xmf((size_t)SEQ*DIM);
 
         // x buffer for input to each layer (channel-first [DIM, SEQ])
-        float *x_cur = (float*)malloc(SEQ*DIM*4);
-        float *x_final = (float*)malloc(SEQ*DIM*4);     // after final rmsnorm
-        float *logits = (float*)malloc(SEQ*VOCAB*4);     // [VOCAB, SEQ] for cross-entropy
-        float *dlogits = (float*)malloc(SEQ*VOCAB*4);
+        float *x_cur = xmf((size_t)SEQ*DIM);
+        float *x_final = xmf((size_t)SEQ*DIM);     // after final rmsnorm
+        float *logits = xmf((size_t)SEQ*VOCAB);     // [VOCAB, SEQ] for cross-entropy
+        float *dlogits = xmf((size_t)SEQ*VOCAB);
 
         // Compile static sdpaBwd2 kernels (no weights, one per layer)
         Kern *sdpaBwd2[NLAYERS];
@@ -358,16 +395,20 @@ int main(int argc, char *argv[]) {
         int step = start_step;
         while (step < total_steps) {
             // Check compile budget
-            if (g_compile_count + TOTAL_WEIGHT_KERNELS > MAX_COMPILES) {
+            if (g_compile_count + TOTAL_WEIGHT_KERNELS > max_compiles) {
                 for (int L=0; L<NLAYERS; L++) { free_layer_kernels(&kern[L]); free_kern(sdpaBwd2[L]); }
                 double wall = tb_ms(mach_absolute_time() - t_wall_start);
                 save_checkpoint(ckpt_path, step, total_steps, lr, last_loss,
                     total_compile_ms+cum_compile, total_train_ms+cum_train, wall+cum_wall,
                     total_steps_done+cum_steps, total_batches+cum_batches, adam_t,
                     lw, la, rms_final, &arms_final, embed, &aembed);
-                printf("[exec() restart step %d, %d compiles, loss=%.4f]\n", step, g_compile_count, last_loss);
+                char rp_exec[PATH_MAX];
+                if (!realpath(argv[0], rp_exec)) { perror("cannot resolve argv[0]"); return 1; }
+                printf("[exec() restart step %d, %d compiles, loss=%.4f -> %s]\n",
+                       step, g_compile_count, last_loss, rp_exec);
                 fflush(stdout);
-                execl(argv[0], argv[0], "--resume", "--ckpt", ckpt_path, "--data", data_path, NULL);
+                munmap(token_data, data_len);  // HIGH-03: release mmap before exec
+                execl(rp_exec, rp_exec, "--resume", "--ckpt", ckpt_path, "--data", data_path, NULL);
                 perror("execl"); return 1;
             }
 
@@ -384,7 +425,7 @@ int main(int argc, char *argv[]) {
                     compile_ok = false; break;
                 }
             }
-            if (!compile_ok) { g_compile_count = MAX_COMPILES; continue; }
+            if (!compile_ok) { g_compile_count = max_compiles; continue; }
 
             // Re-compile sdpaBwd2 if needed (after exec restart)
             for (int L=0; L<NLAYERS; L++) {
@@ -407,7 +448,8 @@ int main(int argc, char *argv[]) {
             uint64_t tt = mach_absolute_time();
             double t_ane=0,t_io=0,t_elem=0,t_rms=0,t_cblas_wait=0,t_cls=0;
 
-            for (int a=0; a<ACCUM_STEPS && step<total_steps; a++, step++) {
+            bool step_ok = true;  // HIGH-05: track ANE eval success across all acc steps
+            for (int a=0; a<accum_steps && step<total_steps; a++, step++) {
                 uint64_t t0,t1;
                 // Sample random position in token data
                 size_t max_pos = n_tokens - SEQ - 1;
@@ -432,7 +474,7 @@ int main(int argc, char *argv[]) {
                     t1=mach_absolute_time(); t_cblas_wait+=tb_ms(t1-t0); t0=t1;
                     io_write_fp16(kern[L].fwdAttn->ioIn, x_cur, DIM, SEQ);
                     t1=mach_absolute_time(); t_io+=tb_ms(t1-t0); t0=t1;
-                    ane_eval(kern[L].fwdAttn);
+                    step_ok &= ane_eval(kern[L].fwdAttn);
                     t1=mach_absolute_time(); t_ane+=tb_ms(t1-t0); t0=t1;
                     io_read_fp16(kern[L].fwdAttn->ioOut, ac->o_out,    0,     DIM, SEQ);
                     io_read_fp16(kern[L].fwdAttn->ioOut, ac->attn_out, 4*DIM, DIM, SEQ);
@@ -445,7 +487,7 @@ int main(int argc, char *argv[]) {
                     // FFN forward
                     io_write_fp16(kern[L].fwdFFN->ioIn, ac->x2, DIM, SEQ);
                     t1=mach_absolute_time(); t_io+=tb_ms(t1-t0); t0=t1;
-                    ane_eval(kern[L].fwdFFN);
+                    step_ok &= ane_eval(kern[L].fwdFFN);
                     t1=mach_absolute_time(); t_ane+=tb_ms(t1-t0); t0=t1;
                     io_read_fp16(kern[L].fwdFFN->ioOut, ac->ffn_out,  0,              DIM,    SEQ);
                     io_read_fp16(kern[L].fwdFFN->ioOut, ac->h1,       DIM,            HIDDEN, SEQ);
@@ -491,7 +533,7 @@ int main(int argc, char *argv[]) {
                 });
 
                 // Final RMSNorm backward
-                float *dx_rms_final = (float*)calloc(SEQ*DIM, 4);
+                float *dx_rms_final = xcf((size_t)SEQ*DIM);
                 rmsnorm_bwd(dx_rms_final, grms_final, dy, x_cur, rms_final, DIM, SEQ);
                 memcpy(dy, dx_rms_final, SEQ*DIM*4);
                 free(dx_rms_final);
@@ -508,17 +550,17 @@ int main(int argc, char *argv[]) {
                     // FFN backward (ANE)
                     io_write_fp16_at(kern[L].ffnBwd->ioIn, 0, dffn, DIM, SEQ);
                     io_copy(kern[L].ffnBwd->ioIn, DIM, kern[L].fwdFFN->ioOut, DIM, 2*HIDDEN, SEQ);
-                    ane_eval(kern[L].ffnBwd);
+                    step_ok &= ane_eval(kern[L].ffnBwd);
                     io_read_fp16(kern[L].ffnBwd->ioOut, dx_ffn, 0,           DIM,    SEQ);
                     io_read_fp16(kern[L].ffnBwd->ioOut, dh1,    DIM,         HIDDEN, SEQ);
                     io_read_fp16(kern[L].ffnBwd->ioOut, dh3,    DIM+HIDDEN,  HIDDEN, SEQ);
 
                     // dW FFN async
-                    float *capt_dffn = (float*)malloc(SEQ*DIM*4); memcpy(capt_dffn, dffn, SEQ*DIM*4);
-                    float *capt_silu = (float*)malloc(SEQ*HIDDEN*4); memcpy(capt_silu, ac->silu_out, SEQ*HIDDEN*4);
-                    float *capt_dh1 = (float*)malloc(SEQ*HIDDEN*4); memcpy(capt_dh1, dh1, SEQ*HIDDEN*4);
-                    float *capt_dh3 = (float*)malloc(SEQ*HIDDEN*4); memcpy(capt_dh3, dh3, SEQ*HIDDEN*4);
-                    float *capt_x2n = (float*)malloc(SEQ*DIM*4); memcpy(capt_x2n, ac->x2norm, SEQ*DIM*4);
+                    float *capt_dffn = xmf((size_t)SEQ*DIM); memcpy(capt_dffn, dffn, SEQ*DIM*4);
+                    float *capt_silu = xmf((size_t)SEQ*HIDDEN); memcpy(capt_silu, ac->silu_out, SEQ*HIDDEN*4);
+                    float *capt_dh1 = xmf((size_t)SEQ*HIDDEN); memcpy(capt_dh1, dh1, SEQ*HIDDEN*4);
+                    float *capt_dh3 = xmf((size_t)SEQ*HIDDEN); memcpy(capt_dh3, dh3, SEQ*HIDDEN*4);
+                    float *capt_x2n = xmf((size_t)SEQ*DIM); memcpy(capt_x2n, ac->x2norm, SEQ*DIM*4);
                     dispatch_group_async(dw_grp, dw_q, ^{
                         cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasTrans, DIM, HIDDEN, SEQ,
                                     1.0f, capt_dffn, SEQ, capt_silu, SEQ, 1.0f, gr->W2, HIDDEN);
@@ -537,8 +579,8 @@ int main(int argc, char *argv[]) {
 
                     // dWo async
                     memcpy(do_out_buf, dx2, SEQ*DIM*4);
-                    float *capt_do = (float*)malloc(SEQ*DIM*4); memcpy(capt_do, do_out_buf, SEQ*DIM*4);
-                    float *capt_attn = (float*)malloc(SEQ*DIM*4); memcpy(capt_attn, ac->attn_out, SEQ*DIM*4);
+                    float *capt_do = xmf((size_t)SEQ*DIM); memcpy(capt_do, do_out_buf, SEQ*DIM*4);
+                    float *capt_attn = xmf((size_t)SEQ*DIM); memcpy(capt_attn, ac->attn_out, SEQ*DIM*4);
                     dispatch_group_async(dw_grp, dw_q, ^{
                         cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasTrans, DIM, DIM, SEQ,
                                     1.0f, capt_do, SEQ, capt_attn, SEQ, 1.0f, gr->Wo, DIM);
@@ -548,20 +590,20 @@ int main(int argc, char *argv[]) {
                     // SDPA backward (ANE)
                     io_copy(kern[L].sdpaBwd1->ioIn, 0, kern[L].fwdAttn->ioOut, DIM, 3*DIM, SEQ);
                     io_write_fp16_at(kern[L].sdpaBwd1->ioIn, 3*DIM, dx2, DIM, SEQ);
-                    ane_eval(kern[L].sdpaBwd1);
+                    step_ok &= ane_eval(kern[L].sdpaBwd1);
                     io_copy(sdpaBwd2[L]->ioIn, 0, kern[L].sdpaBwd1->ioOut, DIM, 2*SCORE_CH, SEQ);
                     io_copy(sdpaBwd2[L]->ioIn, 2*SCORE_CH, kern[L].fwdAttn->ioOut, DIM, 2*DIM, SEQ);
-                    ane_eval(sdpaBwd2[L]);
+                    step_ok &= ane_eval(sdpaBwd2[L]);
 
                     io_read_fp16(sdpaBwd2[L]->ioOut, dq, 0,   DIM, SEQ);
                     io_read_fp16(sdpaBwd2[L]->ioOut, dk, DIM,  DIM, SEQ);
                     io_read_fp16(kern[L].sdpaBwd1->ioOut, dv, 0, DIM, SEQ);
 
                     // dWq/dWk/dWv async
-                    float *capt_dq = (float*)malloc(SEQ*DIM*4); memcpy(capt_dq, dq, SEQ*DIM*4);
-                    float *capt_dk = (float*)malloc(SEQ*DIM*4); memcpy(capt_dk, dk, SEQ*DIM*4);
-                    float *capt_dv = (float*)malloc(SEQ*DIM*4); memcpy(capt_dv, dv, SEQ*DIM*4);
-                    float *capt_xn = (float*)malloc(SEQ*DIM*4); memcpy(capt_xn, ac->xnorm, SEQ*DIM*4);
+                    float *capt_dq = xmf((size_t)SEQ*DIM); memcpy(capt_dq, dq, SEQ*DIM*4);
+                    float *capt_dk = xmf((size_t)SEQ*DIM); memcpy(capt_dk, dk, SEQ*DIM*4);
+                    float *capt_dv = xmf((size_t)SEQ*DIM); memcpy(capt_dv, dv, SEQ*DIM*4);
+                    float *capt_xn = xmf((size_t)SEQ*DIM); memcpy(capt_xn, ac->xnorm, SEQ*DIM*4);
                     dispatch_group_async(dw_grp, dw_q, ^{
                         cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasTrans, DIM, DIM, SEQ,
                                     1.0f, capt_dq, SEQ, capt_xn, SEQ, 1.0f, gr->Wq, DIM);
@@ -575,11 +617,11 @@ int main(int argc, char *argv[]) {
                     // QKV backward (ANE)
                     io_copy(kern[L].qkvBwd->ioIn, 0, sdpaBwd2[L]->ioOut, 0, 2*DIM, SEQ);
                     io_copy(kern[L].qkvBwd->ioIn, 2*DIM, kern[L].sdpaBwd1->ioOut, 0, DIM, SEQ);
-                    ane_eval(kern[L].qkvBwd);
+                    step_ok &= ane_eval(kern[L].qkvBwd);
                     io_read_fp16(kern[L].qkvBwd->ioOut, dx_attn, 0, DIM, SEQ);
 
                     // RMSNorm1 backward (using saved layer input)
-                    float *dx_rms1 = (float*)calloc(SEQ*DIM, 4);
+                    float *dx_rms1 = xcf((size_t)SEQ*DIM);
                     rmsnorm_bwd(dx_rms1, gr->rms_att, dx_attn, ac->layer_in, lw[L].rms_att, DIM, SEQ);
 
                     // dy for next layer (going backward) = dx_rms1 + dx2 residual
@@ -630,6 +672,10 @@ int main(int argc, char *argv[]) {
                     "\"t_elem\":%.3f,\"t_rms\":%.3f,\"t_cblas_wait\":%.3f,"
                     "\"compiles\":%d}\n",
                     step, loss, step_ane, step_io, step_cls, step_elem, step_rms, step_cbw, g_compile_count);
+            }
+            if (!step_ok) {  // HIGH-05: skip gradient update if any ANE eval failed
+                fprintf(stderr, "  Step %d: ANE eval error — gradient update skipped\n", step);
+                continue;  // skip to next iteration of outer while (step < total_steps)
             }
             double tms = tb_ms(mach_absolute_time() - tt);
             total_train_ms += tms;
@@ -715,7 +761,6 @@ int main(int argc, char *argv[]) {
             layer_grads_free(&grads[L]);
         }
         munmap(token_data, data_len);
-        close(data_fd);
         free(rms_final); free(embed); free(grms_final); free(gembed);
         adam_free(&arms_final); adam_free(&aembed);
         free(dy); free(dffn); free(dh1); free(dh3); free(dx_ffn); free(dx2);
