@@ -3,6 +3,7 @@ CC = xcrun clang
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 CFLAGS = -O2 -Wall -DACCELERATE_NEW_LAPACK -fobjc-arc
 =======
 =======
@@ -36,6 +37,9 @@ CFLAGS = -O2 -Wall -DACCELERATE_NEW_LAPACK $(ANE_COMPAT) -fobjc-arc $(SEC_FLAGS)
 CFLAGS_C = -O2 -Wall -Wextra -Werror -std=c11
 CFLAGS_DEBUG = -O0 -g -Wall $(ANE_COMPAT) -fobjc-arc -fsanitize=address,undefined
 >>>>>>> d49c1256c6392064ec2cfbd18464a54609b735d5
+=======
+CFLAGS = -O2 -Wall -DACCELERATE_NEW_LAPACK -Wno-deprecated-declarations -fobjc-arc
+>>>>>>> 625975449090f5a3cc576a440ac804f1b5d05a05
 FRAMEWORKS = -framework Foundation -framework CoreML -framework IOSurface
 LDFLAGS = $(FRAMEWORKS) -ldl
 
@@ -77,7 +81,10 @@ train_opt: train_opt.m $(HEADERS_OPT)
 train_double_buffer: train_double_buffer.m $(HEADERS_LARGE)
 	$(CC) $(CFLAGS) -o $@ train_double_buffer.m $(LDFLAGS) -framework Accelerate
 
+<<<<<<< HEAD
 >>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
+=======
+>>>>>>> 625975449090f5a3cc576a440ac804f1b5d05a05
 PROBES = test_weight_reload test_perf_stats test_qos_sweep test_ane_advanced
 =======
 benchmark_ane: benchmark_ane.m
@@ -205,10 +212,14 @@ check-deprecated:
 clean:
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 	rm -f train train_large train_large_ane train_opt $(PROBES) test_rmsnorm_bwd test_classifier
 =======
 	rm -f train train_large train_large_ane $(PROBES) test_rmsnorm_bwd test_classifier m5_performance_suite m5_pipeline_suite
 >>>>>>> 6f398781d734ae1cc53139358829082c0f83000c
+=======
+	rm -f train train_large train_large_ane train_opt train_double_buffer $(PROBES) test_rmsnorm_bwd test_classifier
+>>>>>>> 625975449090f5a3cc576a440ac804f1b5d05a05
 
 <<<<<<< HEAD
 .PHONY: clean tokenize probes
