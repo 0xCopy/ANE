@@ -78,19 +78,6 @@ typedef struct {
 static int model_load_weights(Model *m, const char *path) {
     FILE *f = fopen(path, "rb");
     if (!f) { fprintf(stderr, "Cannot open %s\n", path); return -1; }
-<<<<<<< HEAD
-=======
-
-    #define FREAD_CHECK(buf, count, file, label) do { \
-        size_t _n = fread(buf, sizeof(float), count, file); \
-        if (_n != (size_t)(count)) { \
-            fprintf(stderr, "ERROR: short read on %s: got %zu, expected %zu (file truncated?)\n", \
-                    label, _n, (size_t)(count)); \
-            fclose(file); return -1; \
-        } \
-    } while(0)
-
->>>>>>> b012c0ab05863e4bd6ee82e77e7b34d0b7871e0b
     if (fread(&m->cfg, sizeof(Config), 1, f) != 1) {
         fprintf(stderr, "ERROR: failed to read config from %s\n", path);
         fclose(f); return -1;
@@ -122,7 +109,6 @@ static int model_load_weights(Model *m, const char *path) {
     size_t d = (size_t)m->cfg.dim, hd = (size_t)m->cfg.hidden_dim, nl = (size_t)m->cfg.n_layers, vs = (size_t)m->cfg.vocab_size;
 
     m->token_embedding = (float*)malloc(vs * d * sizeof(float));
-<<<<<<< HEAD
     if (!m->token_embedding) {
         fprintf(stderr, "ERROR: OOM allocating token_embedding\n");
         fclose(f); return -1;
@@ -131,9 +117,6 @@ static int model_load_weights(Model *m, const char *path) {
         fprintf(stderr, "ERROR: short read on token_embedding (file truncated?)\n");
         fclose(f); return -1;
     }
-=======
-    FREAD_CHECK(m->token_embedding, vs * d, f, "token_embedding");
->>>>>>> b012c0ab05863e4bd6ee82e77e7b34d0b7871e0b
 
     float *rms_att_all = (float*)malloc(nl * d * sizeof(float));
     float *wq_all      = (float*)malloc(nl * d * d * sizeof(float));
@@ -151,7 +134,6 @@ static int model_load_weights(Model *m, const char *path) {
         fclose(f); return -1;
     }
 
-<<<<<<< HEAD
     #define FREAD_CHECK(buf, count, file, label) do { \
         size_t _n = fread(buf, sizeof(float), count, file); \
         if (_n != (size_t)(count)) { \
@@ -161,8 +143,6 @@ static int model_load_weights(Model *m, const char *path) {
         } \
     } while(0)
 
-=======
->>>>>>> b012c0ab05863e4bd6ee82e77e7b34d0b7871e0b
     FREAD_CHECK(rms_att_all, nl * d, f, "rms_att");
     FREAD_CHECK(wq_all, nl * d * d, f, "wq");
     FREAD_CHECK(wk_all, nl * d * d, f, "wk");

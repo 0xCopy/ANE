@@ -7,7 +7,6 @@
 #include <limits.h>  // PATH_MAX for realpath() (HIGH-02)
 #include "data_validation.h"
 
-<<<<<<< HEAD
 #define CKPT_PATH_DEFAULT "ane_stories110M_ckpt.bin"
 #define MODEL_PATH_DEFAULT "stories110M.bin"
 #define DATA_PATH_DEFAULT "tinystories_data00.bin"
@@ -16,11 +15,6 @@ static const char *get_path(const char *env_var, const char *default_val) {
     const char *v = getenv(env_var);
     return (v && v[0]) ? v : default_val;
 }
-=======
-#define CKPT_PATH_DEFAULT "ane_stories110M_ckpt.bin"
-#define MODEL_PATH_DEFAULT "stories110M.bin"
-#define DATA_PATH_DEFAULT "tinystories_data00.bin"
->>>>>>> b012c0ab05863e4bd6ee82e77e7b34d0b7871e0b
 
 // ===== Weight loading from llama2.c format =====
 static bool load_pretrained(LayerWeights *lw, float *rms_final, float *embed, const char *path) {
@@ -226,7 +220,6 @@ int main(int argc, char *argv[]) {
         int accum_steps = get_accum_steps();
         int max_compiles = get_max_compiles();
 
-<<<<<<< HEAD
         // Parse args
         const char *ckpt_path = CKPT_PATH_DEFAULT;
         const char *model_path = MODEL_PATH_DEFAULT;
@@ -245,26 +238,6 @@ int main(int argc, char *argv[]) {
                 else if (pos == 1) { /* seq - compile-time constant */ }
                 else if (pos == 2) total_steps = atoi(argv[i]);
                 else if (pos == 3) lr = atof(argv[i]);
-=======
-        // Parse args
-        const char *ckpt_path = CKPT_PATH_DEFAULT;
-        const char *model_path = MODEL_PATH_DEFAULT;
-        const char *data_path = DATA_PATH_DEFAULT;
-        bool do_resume = false;
-        int pos = 0;
-        for (int i=1; i<argc; i++) {
-            if (strcmp(argv[i], "--resume") == 0) do_resume = true;
-            else if (strcmp(argv[i], "--steps") == 0 && i+1<argc) total_steps = atoi(argv[++i]);
-            else if (strcmp(argv[i], "--lr") == 0 && i+1<argc) lr = atof(argv[++i]);
-            else if (strcmp(argv[i], "--ckpt") == 0 && i+1<argc) ckpt_path = argv[++i];
-            else if (strcmp(argv[i], "--model") == 0 && i+1<argc) model_path = argv[++i];
-            else if (strcmp(argv[i], "--data") == 0 && i+1<argc) data_path = argv[++i];
-            else if (argv[i][0] != '-') {
-                if (pos == 0) model_path = argv[i];
-                else if (pos == 1) { /* seq - compile-time constant */ }
-                else if (pos == 2) total_steps = atoi(argv[i]);
-                else if (pos == 3) lr = atof(argv[i]);
->>>>>>> b012c0ab05863e4bd6ee82e77e7b34d0b7871e0b
                 pos++;
             }
         }
@@ -341,9 +314,12 @@ int main(int argc, char *argv[]) {
         }
 
         // mmap token data
-<<<<<<< HEAD
         int data_fd = open(data_path, O_RDONLY);
-        if (data_fd < 0) { printf("Cannot open %s\n", data_path); return 1; }
+        if (data_fd < 0) {
+            printf("Cannot open token data: %s\n", data_path);
+            printf("Hint: run `bash download_data.sh` in training/ or pass --data /path/to/tinystories_data00.bin\n");
+            return 1;
+        }
         struct stat st;
         if (fstat(data_fd, &st) != 0) { perror("fstat"); close(data_fd); return 1; }
         size_t data_len = (size_t)st.st_size;
@@ -379,26 +355,6 @@ int main(int argc, char *argv[]) {
             munmap(token_data, data_len);
             return 1;
         }
-=======
-        int data_fd = open(data_path, O_RDONLY);
-        if (data_fd < 0) {
-            printf("Cannot open token data: %s\n", data_path);
-            printf("Hint: run `bash download_data.sh` in training/ or pass --data /path/to/tinystories_data00.bin\n");
-            return 1;
-        }
-        struct stat st; fstat(data_fd, &st);
-        size_t data_len = st.st_size;
-        uint16_t *token_data = (uint16_t*)mmap(NULL, data_len, PROT_READ, MAP_PRIVATE, data_fd, 0);
-        if (token_data == MAP_FAILED) { printf("mmap failed\n"); return 1; }
-        size_t n_tokens = data_len / 2;
-        if (n_tokens <= (size_t)(SEQ + 1)) {
-            printf("Token data too short: need at least %d tokens, got %zu\n", SEQ + 2, n_tokens);
-            munmap(token_data, data_len);
-            close(data_fd);
-            return 1;
-        }
-        printf("Token data: %zu tokens (%.1f MB)\n", n_tokens, data_len/1e6);
->>>>>>> b012c0ab05863e4bd6ee82e77e7b34d0b7871e0b
 
         // Gradient buffers shared across layers (reused each step)
         float *dy = xmf((size_t)SEQ*DIM);            // gradient flowing backward
@@ -451,16 +407,10 @@ int main(int argc, char *argv[]) {
                 printf("[exec() restart step %d, %d compiles, loss=%.4f -> %s]\n",
                        step, g_compile_count, last_loss, rp_exec);
                 fflush(stdout);
-<<<<<<< HEAD
                 munmap(token_data, data_len);  // HIGH-03: release mmap before exec
                 execl(rp_exec, rp_exec, "--resume", "--ckpt", ckpt_path, "--data", data_path, NULL);
                 perror("execl"); return 1;
             }
-=======
-                execl(argv[0], argv[0], "--resume", "--ckpt", ckpt_path, "--data", data_path, NULL);
-                perror("execl"); return 1;
-            }
->>>>>>> b012c0ab05863e4bd6ee82e77e7b34d0b7871e0b
 
             // Compile all layers' weight-bearing kernels
             uint64_t tc = mach_absolute_time();

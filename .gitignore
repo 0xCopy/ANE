@@ -11,6 +11,7 @@
 build/
 .gradle/
 *.rej
+*.rej.*
 *.orig
 
 # Root-level compiled binaries
@@ -94,7 +95,6 @@ training/*.bin
 *.log
 firebase-debug.log
 
-<<<<<<< HEAD
 # Worktrees
 .worktrees/
 worktrees/
@@ -102,14 +102,3 @@ worktrees/
 # Secrets / env
 .env
 inference/.env
-=======
-# macOS
-.DS_Store
-*.so
-*.exe
-train_large
-*.rej
-*.rej.*
-*.orig
-*.dSYM/
->>>>>>> b012c0ab05863e4bd6ee82e77e7b34d0b7871e0b
