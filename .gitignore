@@ -1,6 +1,7 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 # Build artifacts
 *.o
 *.dSYM/
@@ -119,3 +120,12 @@ inference/qwen05b.bin
 inference/qwen_ane
 *.bin
 >>>>>>> b4764567366bbca753ff2a791e9ae81c7f19d548
+=======
+*.o
+ane_probe
+api_explore
+inmem_basic
+tiny_train
+tiny_train_m1
+train_large
+>>>>>>> 2d2adacf09ec6352cf8fea53c7a916bd5257144f
