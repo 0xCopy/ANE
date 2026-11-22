@@ -3,10 +3,14 @@
 #pragma once
 #include "stories_config.h"
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 =======
 #include <assert.h>
 >>>>>>> 89380a26ab7dcb2cd524c9fb5d77c954f843c01f
+=======
+#include <assert.h>
+>>>>>>> 17dd08025ca563883a5af9a483f7ae8c4895c649
 
 static void rmsnorm(float *out, const float *x, const float *w, int d, int S) {
     float *rms_tmp = (float*)malloc(S * sizeof(float));

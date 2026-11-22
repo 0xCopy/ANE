@@ -8,6 +8,7 @@
 #include "data_validation.h"
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 #define CKPT_PATH_DEFAULT "ane_stories110M_ckpt.bin"
 #define MODEL_PATH_DEFAULT "stories110M.bin"
 #define DATA_PATH_DEFAULT "tinystories_data00.bin"
@@ -21,6 +22,11 @@ static const char *get_path(const char *env_var, const char *default_val) {
     const char *v = getenv(env_var);
     return (v && v[0]) ? v : default_val;
 }
+=======
+#define CKPT_PATH "ane_stories110M_ckpt.bin"
+#define MODEL_PATH "../../assets/models/stories110M.bin"
+#define DATA_PATH_DEFAULT "tinystories_data00.bin"
+>>>>>>> 17dd08025ca563883a5af9a483f7ae8c4895c649
 
 // ===== Weight loading from llama2.c format =====
 static bool load_pretrained(LayerWeights *lw, float *rms_final, float *embed, const char *path) {
@@ -243,6 +249,7 @@ int main(int argc, char *argv[]) {
         int accum_steps = get_accum_steps();
         int max_compiles = get_max_compiles();
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
         // Parse args
@@ -486,12 +493,17 @@ int main(int argc, char *argv[]) {
         // Parse args (env vars set defaults, CLI flags override)
         const char *ckpt_path = get_path("ANE_CKPT_PATH", CKPT_PATH_DEFAULT);
         const char *model_path = get_path("ANE_MODEL_PATH", MODEL_PATH_DEFAULT);
+=======
+        // Parse args
+        const char *data_path = DATA_PATH_DEFAULT;
+>>>>>>> 17dd08025ca563883a5af9a483f7ae8c4895c649
         bool do_resume = false;
         int pos = 0;
         for (int i=1; i<argc; i++) {
             if (strcmp(argv[i], "--resume") == 0) do_resume = true;
             else if (strcmp(argv[i], "--steps") == 0 && i+1<argc) total_steps = atoi(argv[++i]);
             else if (strcmp(argv[i], "--lr") == 0 && i+1<argc) lr = atof(argv[++i]);
+<<<<<<< HEAD
             else if (strcmp(argv[i], "--ckpt") == 0 && i+1<argc) ckpt_path = argv[++i];
             else if (strcmp(argv[i], "--model") == 0 && i+1<argc) model_path = argv[++i];
             else if (argv[i][0] != '-') {
@@ -511,6 +523,9 @@ int main(int argc, char *argv[]) {
             else if (strcmp(argv[i], "--steps") == 0 && i+1<argc) cli_steps = atoi(argv[++i]);
             else if (strcmp(argv[i], "--lr") == 0 && i+1<argc) cli_lr = atof(argv[++i]);
 >>>>>>> e113fae6832b497b79e1b32f0861b1797e007f53
+=======
+            else if (strcmp(argv[i], "--data") == 0 && i+1<argc) data_path = argv[++i];
+>>>>>>> 17dd08025ca563883a5af9a483f7ae8c4895c649
         }
         if (cli_steps > 0) total_steps = cli_steps;
         if (cli_lr > 0) lr = cli_lr;
@@ -592,12 +607,21 @@ int main(int argc, char *argv[]) {
 
 <<<<<<< HEAD
         // mmap token data
+<<<<<<< HEAD
         int data_fd = open(data_path, O_RDONLY);
         if (data_fd < 0) {
             printf("Cannot open token data: %s\n", data_path);
             printf("Hint: run `bash download_data.sh` in training/ or pass --data /path/to/tinystories_data00.bin\n");
             return 1;
         }
+=======
+        int data_fd = open(data_path, O_RDONLY);
+        if (data_fd < 0) {
+            printf("Cannot open token data: %s\n", data_path);
+            printf("Hint: run `bash download_data.sh` in training/ or pass --data /path/to/tinystories_data00.bin\n");
+            return 1;
+        }
+>>>>>>> 17dd08025ca563883a5af9a483f7ae8c4895c649
         struct stat st; fstat(data_fd, &st);
 <<<<<<< HEAD
 =======
@@ -814,9 +838,15 @@ int main(int argc, char *argv[]) {
                     lw, la, rms_final, &arms_final, embed, &aembed);
                 printf("[exec() restart step %d, %d compiles, loss=%.4f]\n", step, g_compile_count, last_loss);
                 fflush(stdout);
+<<<<<<< HEAD
                 execl(argv[0], argv[0], "--resume", "--ckpt", ckpt_path, "--data", data_path, NULL);
                 perror("execl"); return 1;
             }
+=======
+                execl(argv[0], argv[0], "--resume", "--data", data_path, NULL);
+                perror("execl"); return 1;
+            }
+>>>>>>> 17dd08025ca563883a5af9a483f7ae8c4895c649
 
             // Compile all layers' weight-bearing kernels
             uint64_t tc = mach_absolute_time();

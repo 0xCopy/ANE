@@ -23,10 +23,13 @@ static bool ane_conv_eval(ANEKernel *kernel, const float *x, float *y,
         free(x_t);
         return false;
     }
+<<<<<<< HEAD
 =======
         ane_write_input(kernel, 0, x_t, S * in_dim * sizeof(_Float16));
         ane_eval(kernel);
 >>>>>>> 2d2adacf09ec6352cf8fea53c7a916bd5257144f
+=======
+>>>>>>> 17dd08025ca563883a5af9a483f7ae8c4895c649
 
         _Float16 *y_t = (_Float16*)malloc(S * out_dim * sizeof(_Float16));
         ane_read_output(kernel, 0, y_t, S * out_dim * sizeof(_Float16));
@@ -38,6 +41,7 @@ static bool ane_conv_eval(ANEKernel *kernel, const float *x, float *y,
 <<<<<<< HEAD
     free(x_t); free(y_t);
     return true;
+<<<<<<< HEAD
 =======
         free(x_t); free(y_t);
     } else {
@@ -60,6 +64,8 @@ static bool ane_conv_eval(ANEKernel *kernel, const float *x, float *y,
         free(x_t); free(y_t);
     }
 >>>>>>> 2d2adacf09ec6352cf8fea53c7a916bd5257144f
+=======
+>>>>>>> 17dd08025ca563883a5af9a483f7ae8c4895c649
 }
 
 // CPU matmul fallback: y = W @ x, W[out_dim, in_dim], x[S, in_dim] → y[S, out_dim]

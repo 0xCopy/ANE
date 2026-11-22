@@ -82,12 +82,26 @@ static int model_load_weights(Model *m, const char *path) {
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> 89380a26ab7dcb2cd524c9fb5d77c954f843c01f
+=======
+
+    #define FREAD_CHECK(buf, count, file, label) do { \
+        size_t _n = fread(buf, sizeof(float), count, file); \
+        if (_n != (size_t)(count)) { \
+            fprintf(stderr, "ERROR: short read on %s: got %zu, expected %zu (file truncated?)\n", \
+                    label, _n, (size_t)(count)); \
+            fclose(file); return -1; \
+        } \
+    } while(0)
+
+>>>>>>> 17dd08025ca563883a5af9a483f7ae8c4895c649
     if (fread(&m->cfg, sizeof(Config), 1, f) != 1) {
         fprintf(stderr, "ERROR: failed to read config from %s\n", path);
         fclose(f); return -1;
     }
+<<<<<<< HEAD
 <<<<<<< HEAD
 
     if (m->cfg.n_layers < 1 || m->cfg.n_layers > N_LAYERS) {
@@ -123,6 +137,8 @@ static int model_load_weights(Model *m, const char *path) {
 >>>>>>> e2e0c8332aca99dde38764e8a4a14f82b04ec84d
 =======
 >>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
+=======
+>>>>>>> 17dd08025ca563883a5af9a483f7ae8c4895c649
     bool shared = m->cfg.vocab_size > 0;
     if (m->cfg.vocab_size < 0) m->cfg.vocab_size = -m->cfg.vocab_size;
 
@@ -142,6 +158,7 @@ static int model_load_weights(Model *m, const char *path) {
 <<<<<<< HEAD
     m->token_embedding = (float*)malloc(vs * d * sizeof(float));
 <<<<<<< HEAD
+<<<<<<< HEAD
     if (!m->token_embedding) {
         fprintf(stderr, "ERROR: OOM allocating token_embedding\n");
         fclose(f); return -1;
@@ -153,6 +170,9 @@ static int model_load_weights(Model *m, const char *path) {
         fprintf(stderr, "ERROR: short read on token_embedding (file truncated?)\n");
         fclose(f); return -1;
     }
+=======
+    FREAD_CHECK(m->token_embedding, vs * d, f, "token_embedding");
+>>>>>>> 17dd08025ca563883a5af9a483f7ae8c4895c649
 
     float *rms_att_all = (float*)malloc(nl * d * sizeof(float));
     float *wq_all      = (float*)malloc(nl * d * d * sizeof(float));
@@ -173,6 +193,7 @@ static int model_load_weights(Model *m, const char *path) {
     m->token_embedding = (float*)malloc((size_t)vs * d * sizeof(float));  // (size_t) prevents int overflow (CRIT-04)
     fread(m->token_embedding, sizeof(float), vs * d, f);
 
+<<<<<<< HEAD
     float *rms_att_all = (float*)malloc((size_t)nl * d * sizeof(float));
     float *wq_all = (float*)malloc((size_t)nl * d * d * sizeof(float));
     float *wk_all = (float*)malloc((size_t)nl * d * d * sizeof(float));
@@ -224,6 +245,8 @@ static int model_load_weights(Model *m, const char *path) {
         } \
     } while(0)
 
+=======
+>>>>>>> 17dd08025ca563883a5af9a483f7ae8c4895c649
     FREAD_CHECK(rms_att_all, nl * d, f, "rms_att");
     FREAD_CHECK(wq_all, nl * d * d, f, "wq");
     FREAD_CHECK(wk_all, nl * d * d, f, "wk");
@@ -233,6 +256,7 @@ static int model_load_weights(Model *m, const char *path) {
     FREAD_CHECK(w1_all, nl * hd * d, f, "w1");
     FREAD_CHECK(w2_all, nl * d * hd, f, "w2");
     FREAD_CHECK(w3_all, nl * hd * d, f, "w3");
+<<<<<<< HEAD
 <<<<<<< HEAD
 
     #define SAFE_MALLOC_MEMCPY(dest, src, size) do { \
@@ -245,6 +269,8 @@ static int model_load_weights(Model *m, const char *path) {
     } while(0)
 =======
 >>>>>>> 89380a26ab7dcb2cd524c9fb5d77c954f843c01f
+=======
+>>>>>>> 17dd08025ca563883a5af9a483f7ae8c4895c649
 
     for (int l = 0; l < nl; l++) {
         SAFE_MALLOC_MEMCPY(m->rms_att_w[l], rms_att_all + l*d, d * sizeof(float));
@@ -274,6 +300,7 @@ static int model_load_weights(Model *m, const char *path) {
         m->wcls = (float*)malloc(vs * d * sizeof(float));
         FREAD_CHECK(m->wcls, vs * d, f, "wcls");
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 =======
 >>>>>>> e2e0c8332aca99dde38764e8a4a14f82b04ec84d
@@ -284,6 +311,8 @@ static int model_load_weights(Model *m, const char *path) {
 >>>>>>> 357576698277b5ba88ed30f279a5f390baaf5937
 =======
 >>>>>>> 89380a26ab7dcb2cd524c9fb5d77c954f843c01f
+=======
+>>>>>>> 17dd08025ca563883a5af9a483f7ae8c4895c649
     }
     #undef FREAD_CHECK
     fclose(f);

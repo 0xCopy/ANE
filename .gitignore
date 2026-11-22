@@ -3,6 +3,7 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
 # Build artifacts
@@ -184,3 +185,17 @@ train_large
 >>>>>>> 2d2adacf09ec6352cf8fea53c7a916bd5257144f
 =======
 >>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
+=======
+*.o
+*.a
+*.dylib
+*.so
+*.exe
+train_large
+train_large.*
+*.rej
+*.rej.*
+*.orig
+.DS_Store
+*.dSYM/
+>>>>>>> 17dd08025ca563883a5af9a483f7ae8c4895c649
