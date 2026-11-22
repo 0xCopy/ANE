@@ -1,0 +1,3 @@
+Recorded on macOS 15.8.3 (M3 Pro): four conv programs, their inputs and weights, and the output surface the device wrote.
+V1 fp16 weights, fp32 I/O (x_f32.bin) | V2 fp16 weights, fp16 I/O (x_f16.bin) | N1 int8 weights as cast + mul | N2 uint8 as cast, sub, mul.
+tools/ane_limits.py replays them (tools/ane_try.m) and compares the output bytes; on macOS 27.2.1 all four are byte-identical.

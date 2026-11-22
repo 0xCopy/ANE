@@ -1,6 +1,6 @@
 {
-  "report_date": "2026-03-04",
-  "source": "https://github.com/maderix/ANE/issues/3",
+  "report_date": "2026-06-05",
+  "source": "https://github.com/maderix/ANE/issues/3 plus benchmarks/local_m2_results.md",
   "model": "Stories110M (12-layer transformer, 109M params)",
   "config": {"dim": 768, "hidden": 2048, "heads": 12, "seq": 256, "vocab": 32000, "layers": 12},
   "training_results": [
@@ -31,6 +31,22 @@
       "benchmarks_pass": false,
       "notes": "Same MIL compat issue as M1 Pro.",
       "contributor": "andyg5000"
+    },
+    {
+      "chip": "M2",
+      "cores": "8-core CPU (4P+4E)",
+      "ram_gb": 8,
+      "macos": "26.5",
+      "pipeline": "dynamic weight (Stories110M)",
+      "dynamic_ms_per_step": [1554.0, 1554.0],
+      "dynamic_compile_ms": 1196,
+      "dynamic_wall_s": 68.0,
+      "peak_tflops_inmem": 7.99,
+      "peak_reference_tflops": 15.8,
+      "int8_w8a8_ratio_range": [1.01, 1.11],
+      "benchmarks_pass": true,
+      "notes": "Measured on Mac mini (Mac14,3), M2, 8GB. inmem benchmarks run sequentially from a clean origin/main worktree. Static pipeline not submitted; Qwen3-0.6B not run due expected memory pressure.",
+      "contributor": "kimhyoyeol"
     },
     {
       "chip": "M3 Pro",
@@ -94,6 +110,39 @@
       "peak_tflops_inmem": 12.17,
       "notes": "inmem_peak only, no training data submitted.",
       "contributor": "elijah-pelton"
+    },
+    {
+      "chip": "M5",
+      "cores": "10-core (4P+6E)",
+      "ram_gb": 24,
+      "macos": "26.3",
+      "ms_per_step": [125, 128],
+      "ane_ms": [9.1, 9.2],
+      "compile_ms": [3554, 3633],
+      "ane_tflops": [0.72, 0.74],
+      "ane_util_pct": [4.57, 4.70],
+      "notes": "MacBook Pro, static pipeline train_large, 20 steps, random init.",
+      "contributor": "log-wade"
+    },
+    {
+      "chip": "M5 Max",
+      "cores": "18-core (6P+12E)",
+      "ram_gb": 128,
+      "macos": "26.4.1",
+      "ane_subtype": "h17",
+      "ms_per_step": [89.7, 90.2],
+      "ane_ms": [7.8, 8.1],
+      "compile_ms": [3335, 3384],
+      "ane_tflops": 1.03,
+      "ane_util_pct": 5.4,
+      "peak_tflops_inmem": 13.80,
+      "peak_tflops_int8_w8a8": 35.61,
+      "peak_tflops_fp16_64x64": 19.27,
+      "ms_per_step_dynamic_stories110m": 73.5,
+      "ms_per_step_dynamic_qwen3_06b": 320.0,
+      "compile_ms_dynamic": 421,
+      "notes": "First H17 ANE on record — distinct subtype from M4/M5 base (both H16). FP16/INT8 peak compute matches M4 within 4%; training gains over M5 base are CPU-driven (12P cores + Accelerate). See benchmarks/m5max_result.md for the full probe report.",
+      "contributor": "lixiang.ict@gmail.com"
     }
   ],
   "neural_engine_specs": {
@@ -108,6 +157,7 @@
     "M3_Ultra": {"ne_cores": 32, "rated_tops": 31.6},
     "M4":       {"ne_cores": 16, "rated_tops": 38, "note": "INT8/mixed-precision spec"},
     "M4_Max":   {"ne_cores": 16, "rated_tops": 38, "note": "INT8/mixed-precision spec"},
-    "M5":       {"ne_cores": 16, "rated_tops": null, "estimated_tops": 19}
+    "M5":       {"ne_cores": 16, "rated_tops": null, "estimated_tops": 19, "ane_subtype": "h16"},
+    "M5_Max":   {"ne_cores": 16, "rated_tops": null, "measured_fp16_tflops": 19.27, "measured_int8_tops": 35.61, "ane_subtype": "h17", "note": "First chip on record reporting H17 ANE subtype; peak math matches M4 H16."}
   }
 }

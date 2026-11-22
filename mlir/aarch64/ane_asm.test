@@ -1,0 +1,34 @@
+// What one ane.matmul (test/small/ane_matmul.mlir, [32, 64] x [64, 96] in fp16) becomes on AArch64.
+//
+// The MIL types say fp16 throughout.  Read that way, the 64 products of an output element vectorize (fmul.8h) but
+// the sum does not: IEEE addition is not associative, so the sum keeps its written order and becomes a chain of
+// scalar `fadd h`.  Without FEAT_FP16 every operation also goes through f32 and back.  Accumulating in f32
+// (--wide, the reading that matches the device better) has the same scalar chain, in `fadd s`.
+//
+// RUN: %S/../tools/ane_to_ll.sh %S/../test/small/ane_matmul.mlir > %t.ll
+// RUN: opt -O3 -mtriple=arm64-apple-macosx -mattr=+fullfp16 %t.ll | llc -O3 -mtriple=arm64-apple-macosx -mattr=+fullfp16 -o - \
+// RUN:   | FileCheck %s --check-prefix=FP16
+// RUN: opt -O3 -mtriple=arm64-apple-macosx -mattr=-fullfp16 %t.ll | llc -O3 -mtriple=arm64-apple-macosx -mattr=-fullfp16 -o - \
+// RUN:   | FileCheck %s --check-prefix=NOFP16
+// RUN: %S/../tools/ane_to_ll.sh --wide %S/../test/small/ane_matmul.mlir > %t.w.ll
+// RUN: opt -O3 -mtriple=arm64-apple-macosx -mattr=+fullfp16 %t.w.ll | llc -O3 -mtriple=arm64-apple-macosx -mattr=+fullfp16 -o - \
+// RUN:   | FileCheck %s --check-prefix=WIDE
+
+// FP16-LABEL: _mm:
+// FP16: fmul.8h
+// FP16: fadd h0, h0, h{{[0-9]+}}
+// FP16-NOT: fcvt
+// FP16-NOT: fmla
+// FP16: ret
+
+// NOFP16-LABEL: _mm:
+// NOFP16-DAG: fcvtl
+// NOFP16-DAG: fadd s
+// NOFP16-DAG: fcvt h{{[0-9]+}}, s{{[0-9]+}}
+// NOFP16-NOT: fmul.8h
+
+// WIDE-LABEL: _mm:
+// WIDE-DAG: fcvtl
+// WIDE-DAG: fmul.4s
+// WIDE-DAG: fadd s0, s0, s{{[0-9]+}}
+// WIDE-NOT: fadd h

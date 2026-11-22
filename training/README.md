@@ -58,6 +58,41 @@ Weights passed via IOSurface spatial dimension — compile 10 kernels once at st
 - PR#19 has the best per-step throughput (92ms) but compile overhead dominates short runs
 - Static restarts every 10 steps, so dynamic's zero-recompile advantage compounds
 
+## ANE SDK (`layers/`)
+
+The SDK builds, chains and runs arbitrary layer graphs on the Neural Engine without hand-written MIL strings (`layers/anesdk.h`, `layers/core.h`, `layers/cnn.h`, `layers/types.h`; tests `test_sdk_layers.m`, `test_sdk_model.m`; plan in `ANESDK_roadmap.md`).
+
+- **Modular layer library**: builders for NLP and vision layers (`Linear`, `Conv2D`, `LayerNorm`, `Softmax`, ...).
+- **Graph orchestration**: automatic activation chaining and IOSurface management through a `Sequential` model container.
+- **Weights as tensors**: every layer takes its weights as function parameters, so they can be rewritten between steps without recompiling.
+
+| Specialized pipelines (`stories_mil.h`) | ANE SDK (`layers/`) |
+|----------------------|---------------------------|
+| Fixed topology: transformer only | Arbitrary layer graphs |
+| Manual surface pointers | Chaining by the `Sequential` runner |
+| Hardcoded MIL | Modular MIL: `layers/core.h`, `layers/cnn.h` |
+| Hand-tuned SDPA | Higher-level API |
+
+### Using the SDK
+
+```objectivec
+#import "layers/anesdk.h"
+
+// Define layers
+ANESDKLayer l1 = anesdk_linear_create("fc1", 768, 2048, 256);
+ANESDKLayer l2 = anesdk_relu_create("relu1", 2048, 1, 256);
+ANESDKLayer l3 = anesdk_layernorm_create("ln1", 2048, 256);
+
+// Assemble into a Sequential model
+ANESDKLayer layers[] = { l1, l2, l3 };
+ANESDKModel model = anesdk_model_sequential_create(layers, 3);
+
+// Write the input, run the whole graph on the ANE, read the result
+io_write_fp16(model.layers[0].kern->inputs[0], input_data, 768, 256);
+anesdk_model_forward(&model);
+io_read_fp16(model.layers[2].kern->ioOut, output_data, 0, 2048, 256);
+```
+
 ## Files
 
 | File | Description |
@@ -78,6 +113,7 @@ Weights passed via IOSurface spatial dimension — compile 10 kernels once at st
 | `ane_rmsnorm_bwd.h` | ANE rmsnorm backward kernel |
 | `dashboard.py` | TUI dashboard — loss curve, power/CPU/memory graphs |
 | `Makefile` | Build targets |
+| `training_dynamic/generate.m` | Text generation (inference) — forward-only, 3 kernels |
 
 ## Usage
 
@@ -115,7 +151,7 @@ make MODEL=qwen3_06b           # default — Qwen3-0.6B (28L, GQA, 596M)
 make MODEL=stories110m         # Stories110M (12L, MHA, 109M)
 ./train --scratch              # train from random init
 ./train --resume               # resume from checkpoint
-./train --steps 200 --lr 1e-4  # custom steps/lr
+./train --scratch --steps 200 --lr 1e-4  # custom steps/lr from random init
 ```
 
 **CLI flags (`train_large` / `train_large_ane`):**
@@ -127,7 +163,47 @@ make MODEL=stories110m         # Stories110M (12L, MHA, 109M)
 - `--resume` — resume from checkpoint
 - `--no-ane-extras` — (train_large_ane only) disable ANE classifier/softmax/rmsnorm_bwd
 
-### 3. Monitor with Dashboard
+**CLI flags (`training_dynamic/train`):**
+- `--scratch` — start from random initialization
+- `--resume` — resume from the model-specific checkpoint, if present
+- `--steps N`, `--lr F`, `--accum N`, `--warmup N`, `--clip F`
+- `--data PATH` — tokenized TinyStories `.bin` file
+- `--help` — print usage
+
+The dynamic pipeline does not load pretrained weights directly yet; use `--scratch` for a new run or `--resume` after a checkpoint exists.
+
+### 3. Generate Text (Inference)
+
+After training, generate text from a checkpoint using the dynamic pipeline's forward kernels:
+
+```bash
+cd training_dynamic
+make MODEL=stories110m generate    # build for Stories110M
+make MODEL=qwen3_06b generate      # build for Qwen3-0.6B
+
+# Greedy decoding (deterministic)
+./generate --ckpt ane_stories110M_dyn_ckpt.bin --tokens 100
+
+# Temperature sampling with top-k
+./generate --ckpt ane_stories110M_dyn_ckpt.bin --tokens 200 --temp 0.8 --topk 40
+
+# Use a different data file for prompt context
+./generate --ckpt ane_stories110M_dyn_ckpt.bin --data ../tinystories_data00.bin --tokens 100
+```
+
+**CLI flags (`training_dynamic/generate`):**
+- `--ckpt PATH` — checkpoint file (required, from `train --resume`)
+- `--tokens N` — number of tokens to generate (default: 100)
+- `--temp F` — sampling temperature, 0 = greedy (default: 0.0)
+- `--topk K` — top-K sampling, 0 = disabled (default: 0)
+- `--data PATH` — tokenized data for prompt context (default: `../tinystories_data00.bin`)
+- `--seed N` — random seed for sampling (default: 42)
+
+The generator loads checkpoint weights (skipping Adam state), compiles only the 3 forward kernels (sdpaFwd, woFwd, ffnFused), and runs a sliding-window forward pass. Prompt context is taken from the first `SEQ` tokens of the data file. A llama2.c tokenizer (`tokenizer.bin`) placed in the working directory enables text output; without it, token IDs are printed.
+
+For detokenization, place a llama2.c format `tokenizer.bin` in the working directory. It can be obtained from the [llama2.c tokenizer.bin](https://github.com/karpathy/llama2.c/raw/master/tokenizer.bin) (Llama 2, 32K vocab) or the Qwen3 tokenizer for the 152K vocab model.
+
+### 4. Monitor with Dashboard
 
 ```bash
 pip install blessed psutil numpy
@@ -135,7 +211,7 @@ sudo python3 dashboard.py          # static pipeline
 sudo python3 dashboard.py --dynamic # dynamic pipeline
 ```
 
-### 4. Benchmarking
+### 5. Benchmarking
 
 All programs print an **Efficiency Report** at completion:
 
