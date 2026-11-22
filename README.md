@@ -12,33 +12,54 @@ This is a **research project**, not a production framework.
 
 The goal was to demonstrate that **training on the Apple Neural Engine — and potentially other NPUs — is possible**, and that the barrier has always been software support, not hardware capability. The ANE is a remarkably capable piece of silicon that Apple restricts to inference-only use through CoreML. This project bypasses that restriction using reverse-engineered private APIs to show what's possible when you give the hardware a chance.
 
+<<<<<<< HEAD
 ### What This Project Is
+=======
+### What this project is
+>>>>>>> b4764567366bbca753ff2a791e9ae81c7f19d548
 
 - A proof of concept for ANE training via `_ANEClient` and `_ANECompiler` private APIs
 - A set of benchmarks documenting real ANE performance characteristics (throughput, power, SRAM behavior)
 - A reference for anyone exploring direct ANE access outside CoreML
 - Research code that I update when I find something interesting
 
+<<<<<<< HEAD
 ### What This Project Is Not
+=======
+### What this project is not
+>>>>>>> b4764567366bbca753ff2a791e9ae81c7f19d548
 
 - A maintained framework or library
 - A replacement for CoreML, MLX, llama.cpp, or any production inference stack
 - A path to training large models on consumer hardware (yet)
 
+<<<<<<< HEAD
 ### On The Hype
 
 Some coverage of this project has overstated its implications. To be clear:
 
 - Training works, but utilization is low (~5-9% of peak) with significant engineering challenges remaining
+=======
+### On the hype
+
+Some coverage of this project has overstated its implications. To be clear:
+
+- Training works, but utilization is low (~2-3% of peak) with significant engineering challenges remaining
+>>>>>>> b4764567366bbca753ff2a791e9ae81c7f19d548
 - Many element-wise operations still fall back to CPU
 - This does **not** replace GPU training for anything beyond small research models today
 
 The honest results — including all limitations — are documented in the accompanying articles:
 - [Part 1: Reverse Engineering](https://maderix.substack.com/p/inside-the-m4-apple-neural-engine)
 - [Part 2: Benchmarks](https://maderix.substack.com/p/inside-the-m4-apple-neural-engine-615)
+<<<<<<< HEAD
 - [Part 3: Training](https://maderix.substack.com/p/inside-the-m4-apple-neural-engine-c8b)
 
 ### On Maintenance
+=======
+
+### On maintenance
+>>>>>>> b4764567366bbca753ff2a791e9ae81c7f19d548
 
 I don't intend to grow this into a large community project. My focus is on original research (compiler infrastructure for edge AI optimization), and maintaining an open-source framework takes time away from that.
 
@@ -46,11 +67,18 @@ That said:
 - I'll keep pushing updates when I discover something interesting
 - Bug fixes and benchmark contributions (especially on hardware I don't own) are welcome
 - Feature requests will likely go unaddressed — but feel free to fork
+<<<<<<< HEAD
 - PRs will be merged at a relatively slow pace, otherwise I become the bottleneck for community growth around this tech
 
 ### Fork it, build on it
 
 This is MIT licensed for a reason. Everyone now has access to AI-assisted development tools that can adapt and extend code in hours. If this project is useful to you — take it, modify it, build something better. If you do something cool with it, I'd love to hear about it.If in future, community decides to maintain one source of truth repo, I'm in full support of that.
+=======
+
+### Fork it, build on it
+
+This is MIT licensed for a reason. Everyone now has access to AI-assisted development tools that can adapt and extend code in hours. If this project is useful to you — take it, modify it, build something better. If you do something cool with it, I'd love to hear about it.
+>>>>>>> b4764567366bbca753ff2a791e9ae81c7f19d548
 
 ---
 
@@ -225,5 +253,8 @@ MIT — see [LICENSE](LICENSE)
 ---
 
 *Built by a human + Claude, one weekend at a time.*
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> b4764567366bbca753ff2a791e9ae81c7f19d548

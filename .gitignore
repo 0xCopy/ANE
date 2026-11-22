@@ -1,5 +1,6 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 # Build artifacts
 *.o
 *.dSYM/
@@ -113,3 +114,8 @@ run.log
 # macOS
 .DS_Store
 >>>>>>> 04b258e3aa818cb64108c66e256cab40ebfd8a18
+=======
+inference/qwen05b.bin
+inference/qwen_ane
+*.bin
+>>>>>>> b4764567366bbca753ff2a791e9ae81c7f19d548
