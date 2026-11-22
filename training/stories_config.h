@@ -149,15 +149,20 @@ typedef struct {
 // Globals
 static Class g_D, g_I, g_AR, g_AIO;
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 static bool g_ane_init_done = false;   // Re-entry guard (ref: CRIT-01)
 >>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
+=======
+static bool g_ane_init_done = false;   // Re-entry guard (ref: CRIT-01)
+>>>>>>> c2347daf9d3370faacad078b5c396e318826e13a
 static bool g_ane_ok_large = false;    // true only when all private classes loaded successfully
 static mach_timebase_info_data_t g_tb;
 static int g_compile_count = 0;
 static int g_compile_seq = 0;  // MED-02: per-call unique index for temp-dir naming
 
 static void ane_init(void) {
+<<<<<<< HEAD
 <<<<<<< HEAD
     // MED-06: dispatch_once provides thread-safe one-time init with full memory barrier.
     // Replaces manual g_ane_init_done bool guard which had a Check-Then-Act race.
@@ -181,6 +186,8 @@ static void ane_init(void) {
         g_ane_ok_large = true;  // dispatch_once guarantees memory barrier before completion
     });
 =======
+=======
+>>>>>>> c2347daf9d3370faacad078b5c396e318826e13a
     if (g_ane_init_done) return;
     g_ane_init_done = true;  // Set first to prevent re-entry (ref: CRIT-01)
     void *handle = dlopen(
@@ -199,7 +206,10 @@ static void ane_init(void) {
         return;
     }
     g_ane_ok_large = true;
+<<<<<<< HEAD
 >>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
+=======
+>>>>>>> c2347daf9d3370faacad078b5c396e318826e13a
 }
 static double tb_ms(uint64_t t) { return (double)t * g_tb.numer / g_tb.denom / 1e6; }
 

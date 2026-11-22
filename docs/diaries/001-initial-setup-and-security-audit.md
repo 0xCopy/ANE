@@ -51,6 +51,9 @@ Alle 4 LOW-Findings behoben:
 **Remote:** `origin=manni07/ANE`, `upstream=maderix/ANE`
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> c2347daf9d3370faacad078b5c396e318826e13a
 ## CRIT-Finding Fixes (2026-03-02)
 
 Branch `fix/crit-security-findings` erstellt. Alle 4 CRIT-Findings behoben:
@@ -65,6 +68,7 @@ Branch `fix/crit-security-findings` erstellt. Alle 4 CRIT-Findings behoben:
 **Simulation:** 3 Iterationsrunden (CRIT-03 benötigte 3 Runs), Gesamtbewertung 96.15% (alle Kriterien ≥ 95%)
 **Branch:** `fix/crit-security-findings` auf `manni07/ANE`
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 ## MED-Finding Fixes (2026-03-02)
 
@@ -84,11 +88,14 @@ Alle 6 MED-Findings behoben. Simulation: 2–3 Iterationsrunden, Gesamtbewertung
 
 =======
 >>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
+=======
+>>>>>>> c2347daf9d3370faacad078b5c396e318826e13a
 ## Status
 
 | Finding-Typ | Anzahl | Status |
 |-------------|--------|--------|
 | KRITISCH (CRIT-01–04) | 4 | ✅ BEHOBEN |
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 | HOCH (HIGH-01–05) | 5 | Offen |
@@ -466,3 +473,8 @@ Alle 19 Sicherheitsbefunde vollstaendig behoben. Branch: `fix/high-security-find
 - Code-Fixes für KRITISCHE Befunde implementieren (CRIT-01 bis CRIT-04)
 - Pull Request von `fix/low-security-findings` nach `main` stellen
 >>>>>>> 1a7a05708bf5e34349150cb6e0805c16027b9fd7
+=======
+| HOCH (HIGH-01–05) | 5 | Offen |
+| MITTEL (MED-01–06) | 6 | Offen |
+| NIEDRIG (LOW-01–04) | 4 | ✅ BEHOBEN |
+>>>>>>> c2347daf9d3370faacad078b5c396e318826e13a

@@ -180,11 +180,15 @@ static void ane_init(void) {
 =======
 static bool g_ane_loaded = false;
 <<<<<<< HEAD
+<<<<<<< HEAD
 static bool g_ane_ok = false;  // true only when all private classes loaded successfully
 =======
 static id g_ane_client = nil;
 static bool g_ane_ok = false;
 >>>>>>> d49c1256c6392064ec2cfbd18464a54609b735d5
+=======
+static bool g_ane_ok = false;  // true only when all private classes loaded successfully
+>>>>>>> c2347daf9d3370faacad078b5c396e318826e13a
 
 static void ane_init(void) {
     if (g_ane_loaded) return;
@@ -206,6 +210,7 @@ static void ane_init(void) {
     }
     g_ane_ok = true;
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
 =======
 
@@ -214,6 +219,8 @@ static void ane_init(void) {
         g_ane_client = [clientCls performSelector:@selector(sharedConnection)];
     }
 >>>>>>> d49c1256c6392064ec2cfbd18464a54609b735d5
+=======
+>>>>>>> c2347daf9d3370faacad078b5c396e318826e13a
 }
 
 static IOSurfaceRef ane_create_surface(size_t bytes) {
