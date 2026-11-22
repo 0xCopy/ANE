@@ -50,6 +50,7 @@ Alle 4 LOW-Findings behoben:
 **Simulation:** 3 Iterationsrunden, Gesamtbewertung 96.35% (alle Kriterien ≥ 95%)
 **Remote:** `origin=manni07/ANE`, `upstream=maderix/ANE`
 
+<<<<<<< HEAD
 ## CRIT-Finding Fixes (2026-03-02)
 
 Branch `fix/crit-security-findings` erstellt. Alle 4 CRIT-Findings behoben:
@@ -460,3 +461,8 @@ Alle 19 Sicherheitsbefunde vollstaendig behoben. Branch: `fix/high-security-find
 | MITTEL (MED-01–06) | 6 | Offen |
 | NIEDRIG (LOW-01–04) | 4 | ✅ BEHOBEN |
 >>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
+=======
+## Nächste Schritte (optional)
+- Code-Fixes für KRITISCHE Befunde implementieren (CRIT-01 bis CRIT-04)
+- Pull Request von `fix/low-security-findings` nach `main` stellen
+>>>>>>> 1a7a05708bf5e34349150cb6e0805c16027b9fd7

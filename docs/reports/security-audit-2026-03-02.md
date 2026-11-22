@@ -27,7 +27,10 @@ Das ANE-Projekt implementiert Neural-Network-Training direkt auf Apples Neural E
 ### [CRIT-01] Keine Fehlerbehandlung bei `dlopen()` für Private Framework
 **Datei:** `training/ane_runtime.h:26`, `api_exploration.m:15`
 **Schweregrad:** KRITISCH
+<<<<<<< HEAD
 **Status: BEHOBEN** (2026-03-02, Branch `fix/crit-security-findings`)
+=======
+>>>>>>> 1a7a05708bf5e34349150cb6e0805c16027b9fd7
 
 ```objc
 // ane_runtime.h:26
@@ -59,7 +62,10 @@ if (!g_ANEDesc || !g_ANEInMem || !g_ANEReq || !g_ANEIO) {
 ### [CRIT-02] Unsichere `objc_msgSend`-Casts ohne Typ-Validierung
 **Dateien:** `training/ane_runtime.h:59-125`, `training/stories_io.h:90-117`
 **Schweregrad:** KRITISCH
+<<<<<<< HEAD
 **Status: BEHOBEN** (2026-03-02, Branch `fix/crit-security-findings`)
+=======
+>>>>>>> 1a7a05708bf5e34349150cb6e0805c16027b9fd7
 
 ```objc
 // ane_runtime.h:59-61
@@ -86,7 +92,10 @@ if (!g_ANEDesc) { fprintf(stderr, "g_ANEDesc is NULL\n"); return NULL; }
 ### [CRIT-03] `fread()`-Rückgabewerte nie geprüft — uninitalisierter Speicher
 **Dateien:** `training/model.h:81-146`, `training/train_large.m:17-55`
 **Schweregrad:** KRITISCH
+<<<<<<< HEAD
 **Status: BEHOBEN** (2026-03-02, Branch `fix/crit-security-findings`)
+=======
+>>>>>>> 1a7a05708bf5e34349150cb6e0805c16027b9fd7
 
 ```c
 // model.h:81
@@ -116,7 +125,10 @@ if (m->cfg.dim <= 0 || m->cfg.dim > 65536 || m->cfg.n_layers <= 0) {
 ### [CRIT-04] Integer Overflow in Speicher-Berechnung
 **Dateien:** `training/stories_io.h:13-14`, `training/ane_mil_gen.h:12-13`
 **Schweregrad:** KRITISCH
+<<<<<<< HEAD
 **Status: BEHOBEN** (2026-03-02, Branch `fix/crit-security-findings`)
+=======
+>>>>>>> 1a7a05708bf5e34349150cb6e0805c16027b9fd7
 
 ```c
 // stories_io.h:13-14
@@ -142,11 +154,14 @@ size_t tot = 128 + ws;
 **Schweregrad:** HOCH
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 **Status: BEHOBEN** (2026-03-02, Branch `fix/high-security-findings`)
 >>>>>>> e2e0c8332aca99dde38764e8a4a14f82b04ec84d
 =======
 >>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
+=======
+>>>>>>> 1a7a05708bf5e34349150cb6e0805c16027b9fd7
 
 ```c
 size_t max_pos = n_tokens - SEQ - 1;
@@ -168,11 +183,14 @@ uint16_t *input_tokens = token_data + pos;
 **Schweregrad:** HOCH
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 **Status: BEHOBEN** (2026-03-02, Branch `fix/high-security-findings`)
 >>>>>>> e2e0c8332aca99dde38764e8a4a14f82b04ec84d
 =======
 >>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
+=======
+>>>>>>> 1a7a05708bf5e34349150cb6e0805c16027b9fd7
 
 ```c
 #define CKPT_PATH "ane_stories110M_ckpt.bin"
@@ -192,11 +210,14 @@ uint16_t *input_tokens = token_data + pos;
 **Schweregrad:** HOCH
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 **Status: BEHOBEN** (2026-03-02, Branch `fix/high-security-findings`)
 >>>>>>> e2e0c8332aca99dde38764e8a4a14f82b04ec84d
 =======
 >>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
+=======
+>>>>>>> 1a7a05708bf5e34349150cb6e0805c16027b9fd7
 
 ```c
 execl(argv[0], argv[0], "--resume", NULL);
@@ -214,11 +235,14 @@ execl(argv[0], argv[0], "--resume", NULL);
 **Schweregrad:** HOCH
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 **Status: BEHOBEN** (2026-03-02, Branch `fix/high-security-findings`)
 >>>>>>> e2e0c8332aca99dde38764e8a4a14f82b04ec84d
 =======
 >>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
+=======
+>>>>>>> 1a7a05708bf5e34349150cb6e0805c16027b9fd7
 
 ```c
 // train_large.m:219
@@ -234,11 +258,14 @@ Keiner der `malloc()`/`calloc()`-Aufrufe prüft den Rückgabewert auf NULL. Bei 
 **Schweregrad:** HOCH
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 **Status: BEHOBEN** (2026-03-02, Branch `fix/high-security-findings`)
 >>>>>>> e2e0c8332aca99dde38764e8a4a14f82b04ec84d
 =======
 >>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
+=======
+>>>>>>> 1a7a05708bf5e34349150cb6e0805c16027b9fd7
 
 ```c
 static void ane_run(Kern *k) {
@@ -259,9 +286,12 @@ static void ane_run(Kern *k) {
 **Datei:** `training/stories_io.h:62-83`
 **Schweregrad:** MITTEL
 <<<<<<< HEAD
+<<<<<<< HEAD
 **Status: BEHOBEN** (2026-03-02, Branch `fix/med-security-findings`)
 =======
 >>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
+=======
+>>>>>>> 1a7a05708bf5e34349150cb6e0805c16027b9fd7
 
 ```c
 IOSurfaceLock(s, 0, NULL);  // Return-Code ignoriert
@@ -275,9 +305,12 @@ IOSurfaceLock(s, 0, NULL);  // Return-Code ignoriert
 **Datei:** `training/ane_runtime.h:68-80`, `training/stories_io.h:94-100`
 **Schweregrad:** MITTEL
 <<<<<<< HEAD
+<<<<<<< HEAD
 **Status: BEHOBEN** (2026-03-02, Branch `fix/med-security-findings`)
 =======
 >>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
+=======
+>>>>>>> 1a7a05708bf5e34349150cb6e0805c16027b9fd7
 
 ```objc
 NSString *td = [NSTemporaryDirectory() stringByAppendingPathComponent:hx];
@@ -292,9 +325,12 @@ TOCTOU-Race zwischen `createDirectoryAtPath` und `writeToFile`. Der `hexStringId
 **Datei:** `training/ane_mil_gen.h:32-52`
 **Schweregrad:** MITTEL
 <<<<<<< HEAD
+<<<<<<< HEAD
 **Status: BEHOBEN** (2026-03-02, Branch `fix/med-security-findings`)
 =======
 >>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
+=======
+>>>>>>> 1a7a05708bf5e34349150cb6e0805c16027b9fd7
 
 ```objc
 return [NSString stringWithFormat:
@@ -309,9 +345,12 @@ Negative oder extrem große `in_ch`/`out_ch`/`spatial`-Werte durch fehlerhafte K
 **Datei:** `training/train_large.m:110-181`
 **Schweregrad:** MITTEL
 <<<<<<< HEAD
+<<<<<<< HEAD
 **Status: BEHOBEN** (2026-03-02, Branch `fix/med-security-findings`)
 =======
 >>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
+=======
+>>>>>>> 1a7a05708bf5e34349150cb6e0805c16027b9fd7
 
 ```c
 h.magic = 0x424C5A54;
@@ -326,9 +365,12 @@ Das `CkptHdr`-Struct wird als binärer Dump ohne Endianness-Marker geschrieben. 
 **Datei:** `training/stories_io.h:41-58`
 **Schweregrad:** MITTEL
 <<<<<<< HEAD
+<<<<<<< HEAD
 **Status: BEHOBEN** (2026-03-02, Branch `fix/med-security-findings`)
 =======
 >>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
+=======
+>>>>>>> 1a7a05708bf5e34349150cb6e0805c16027b9fd7
 
 ```c
 float16x8_t h = vld1q_f16((const __fp16*)(src + i));
@@ -342,9 +384,12 @@ Zeiger-Arithmetik mit `ch_off * sp` könnte das für NEON benötigte Alignment v
 **Datei:** `training/stories_io.h`, `training/stories_config.h`
 **Schweregrad:** MITTEL
 <<<<<<< HEAD
+<<<<<<< HEAD
 **Status: BEHOBEN** (2026-03-02, Branch `fix/med-security-findings`)
 =======
 >>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
+=======
+>>>>>>> 1a7a05708bf5e34349150cb6e0805c16027b9fd7
 
 ```c
 static bool g_ane_loaded = false;
