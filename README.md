@@ -153,7 +153,7 @@ This is MIT licensed for a reason. Everyone now has access to AI-assisted develo
 
 ---
 
-## What This Is
+## What is this?
 
 A from-scratch implementation of transformer training (forward + backward pass) running on the ANE in Apple Silicon. The ANE is a 15.8 TFLOPS FP16 (M4) inference accelerator that Apple does not expose for training. This project reverse-engineers the `_ANEClient` / `_ANECompiler` private APIs and the MIL (Model Intermediate Language) format to run custom compute graphs — including backpropagation — directly on ANE hardware.
 
