@@ -1,5 +1,5 @@
 CLANG  = xcrun clang
-CFLAGS = -O2 -framework Foundation -framework IOSurface -ldl -lobjc
+CFLAGS = -O2 -fobjc-arc -framework Foundation -framework IOSurface -ldl -lobjc
 
 .PHONY: all mnist data run clean
 
