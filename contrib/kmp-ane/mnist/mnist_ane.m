@@ -26,6 +26,9 @@
 #include "../../../training/ane_runtime.h"
 #include "../../../training/ane_mil_gen.h"
 
+int g_fp16_io = 0;  // M1/M2: set to 1 when the cast op is unsupported (declared extern in ane_mil_gen.h)
+
+
 // ─── Configuration ──────────────────────────────────────────────────────────
 #define IN_DIM      784
 #define HID_DIM     128
