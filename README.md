@@ -12,144 +12,45 @@ This is a **research project**, not a production framework.
 
 The goal was to demonstrate that **training on the Apple Neural Engine — and potentially other NPUs — is possible**, and that the barrier has always been software support, not hardware capability. The ANE is a remarkably capable piece of silicon that Apple restricts to inference-only use through CoreML. This project bypasses that restriction using reverse-engineered private APIs to show what's possible when you give the hardware a chance.
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 ### What This Project Is
-=======
-### What this project is
->>>>>>> b4764567366bbca753ff2a791e9ae81c7f19d548
-=======
-### What This Project Is
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
 
 - A proof of concept for ANE training via `_ANEClient` and `_ANECompiler` private APIs
 - A set of benchmarks documenting real ANE performance characteristics (throughput, power, SRAM behavior)
 - A reference for anyone exploring direct ANE access outside CoreML
 - Research code that I update when I find something interesting
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 ### What This Project Is Not
-=======
-### What this project is not
->>>>>>> b4764567366bbca753ff2a791e9ae81c7f19d548
-=======
-### What This Project Is Not
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
 
 - A maintained framework or library
 - A replacement for CoreML, MLX, llama.cpp, or any production inference stack
 - A path to training large models on consumer hardware (yet)
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 ### On The Hype
 
 Some coverage of this project has overstated its implications. To be clear:
 
 - Training works, but utilization is low (~5-9% of peak) with significant engineering challenges remaining
-=======
-### On the hype
-
-Some coverage of this project has overstated its implications. To be clear:
-
-- Training works, but utilization is low (~2-3% of peak) with significant engineering challenges remaining
->>>>>>> b4764567366bbca753ff2a791e9ae81c7f19d548
-=======
-### On The Hype
-
-Some coverage of this project has overstated its implications. To be clear:
-
-- Training works, but utilization is low (~8-11% of peak) with significant engineering challenges remaining
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
 - Many element-wise operations still fall back to CPU
 - This does **not** replace GPU training for anything beyond small research models today
 
 The honest results — including all limitations — are documented in the accompanying articles:
 - [Part 1: Reverse Engineering](https://maderix.substack.com/p/inside-the-m4-apple-neural-engine)
 - [Part 2: Benchmarks](https://maderix.substack.com/p/inside-the-m4-apple-neural-engine-615)
-<<<<<<< HEAD
 - [Part 3: Training](https://maderix.substack.com/p/inside-the-m4-apple-neural-engine-c8b)
 
 ### On Maintenance
-=======
 
-<<<<<<< HEAD
-### On maintenance
->>>>>>> b4764567366bbca753ff2a791e9ae81c7f19d548
-
-I don't intend to grow this into a large community project. My focus is on original research (compiler infrastructure for edge AI optimization), and maintaining an open-source framework takes time away from that.
+---
 
 That said:
 - I'll keep pushing updates when I discover something interesting
 - Bug fixes and benchmark contributions (especially on hardware I don't own) are welcome
 - Feature requests will likely go unaddressed — but feel free to fork
-<<<<<<< HEAD
 - PRs will be merged at a relatively slow pace, otherwise I become the bottleneck for community growth around this tech
-
-### Fork it, build on it
-
-<<<<<<< HEAD
-This is MIT licensed for a reason. Everyone now has access to AI-assisted development tools that can adapt and extend code in hours. If this project is useful to you — take it, modify it, build something better. If you do something cool with it, I'd love to hear about it.If in future, community decides to maintain one source of truth repo, I'm in full support of that.
-=======
-
-=======
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
-### Fork it, build on it
-
-This is MIT licensed for a reason. Everyone now has access to AI-assisted development tools that can adapt and extend code in hours. If this project is useful to you — take it, modify it, build something better. If you do something cool with it, I'd love to hear about it.
->>>>>>> b4764567366bbca753ff2a791e9ae81c7f19d548
-
----
-
-## Community Fork
 
 This fork extends the original project with:
 
-- **M1/M2/M3/M4 compatibility** — MIL syntax fixes for broader Apple Silicon support (from upstream PR #6)
-- **Security hardening** — stack protection, format security, input validation (upstream PRs #5, #7)
-- **Bug fixes** — token sampling underflow fix, dashboard sudo hang fix (upstream PRs #17, #20)
-- **Configurable paths** — training data, model, and checkpoint paths via environment variables
-- **Community benchmarks** — standardized benchmark script + online dashboard for comparing results across chips
-- **12-layer training** — full Stories110M (12 transformer layers, 109M params) already working
-
-### Contributing
-
-We welcome benchmark submissions from any Apple Silicon hardware. See [Community Benchmarks](#community-benchmarks) below for how to run and submit your results.
-
----
-
-## Quick Start
-
-**Requirements:** macOS 15+ on Apple Silicon (M1/M2/M3/M4/M5), Xcode CLI tools.
-
-```bash
-# Install Xcode CLI tools (if not already installed)
-xcode-select --install
-
-# Clone and set up
-git clone https://github.com/dev-erik/ANE.git
-cd ANE/training
-
-# Download training data + model weights
-make setup
-
-# Build and run training (12-layer Stories110M)
-make train_large
-./train_large --steps 100
-```
-
-### Environment Variables
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `ANE_MODEL_PATH` | `../../assets/models/stories110M.bin` | Path to model weights |
-| `ANE_DATA_PATH` | `../../assets/data/tinystories_data00.bin` | Path to tokenized training data |
-| `ANE_CKPT_PATH` | `/tmp/ane_ckpt.bin` | Path for checkpoint files |
-| `ANE_ACCUM_STEPS` | `10` | Gradient accumulation steps before weight update (max 10000) |
-=======
 This is MIT licensed for a reason. Everyone now has access to AI-assisted development tools that can adapt and extend code in hours. If this project is useful to you — take it, modify it, build something better. If you do something cool with it, I'd love to hear about it. If in future, community decides to maintain one source of truth repo, I'm in full support of that.
->>>>>>> 2206c55bd84e57f361faf7a80b002cc0a9d51296
 
 ---
 
@@ -164,7 +65,6 @@ A from-scratch implementation of transformer training (forward + backward pass) 
 | Stories110M (12L, dim=768, MHA 12/12) | 109M | **91 ms** | Dynamic (no recompile) |
 | Qwen3-0.6B (28L, dim=1024, GQA 16/8) | 596M | **412 ms** | Dynamic (no recompile) |
 
-<<<<<<< HEAD
 - All forward and backward dx passes on ANE, dW gradients on CPU (Accelerate cblas)
 - Adam optimizer, gradient accumulation, checkpoint/resume via exec() restart
 - GQA (Grouped-Query Attention) support with per-head tiling/reduction
@@ -189,26 +89,6 @@ Running transformer inference and training directly on Apple's Neural Engine via
 The dynamic pipeline uses shared ANE kernels with weights packed into spatial dimensions (no recompilation when weights change):
 
 **MHA models (Stories110M) — 6 kernels per layer:**
-=======
-**Current results (M4 Max, 12-layer Stories110M, dim=768, seq=256):**
-- 62-72 ms/step, 8-11% ANE utilization (1.3-1.7 TFLOPS sustained)
-- 6 ANE kernel dispatches per layer per training step
-- All forward and backward dx passes on ANE, dW gradients on CPU (Accelerate cblas)
-- Adam optimizer, gradient accumulation, checkpoint/resume via process restart
-
-## Architecture
-
-The training loop uses 6 ANE kernels per step per layer:
-
-| Kernel | Function | Weights |
-|--------|----------|---------|
-| `kFwdAttn` | RMSNorm + QKV projection + SDPA + output projection | Wq, Wk, Wv, Wo, rms1, mask |
-| `kFwdFFN` | RMSNorm + SwiGLU FFN (W1, W3, SiLU, W2) | W1, W2, W3, rms2 |
-| `kFFNBwd` | FFN backward (W2^T + SiLU_bwd + W1^T + W3^T) | W2^T, W1^T, W3^T |
-| `kSdpaBwd1` | Wo^T + SDPA backward part 1 (dV, probs, dp) | Wo^T, mask |
-| `kSdpaBwd2` | SDPA backward part 2 (softmax grad, dQ, dK) | — |
-| `kQKVb` | QKV backward (Wq^T + Wk^T + Wv^T -> dx) | Wq^T, Wk^T, Wv^T |
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
 
 | Kernel | Function |
 |--------|----------|
@@ -223,17 +103,6 @@ Adds separate `woFwd`, `qBwd`, `kvBwd` kernels for grouped-query attention (Q_DI
 CPU handles: RMSNorm forward/backward, residual connections (DeepNet α scaling), loss computation, dW gradient accumulation (cblas_sgemm), Adam optimizer updates.
 Forked from [maderix/ANEtransformers](https://github.com/maderix/ANEtransformers) which demonstrated ANE training (Stories110M, 12-layer forward+backward on ANE). This fork extends the project with GPT-2 inference on ANE, systematic M5 hardware investigation, and fused kernel optimization.
 
-<<<<<<< HEAD
-Key optimizations:
-- **Channel-first CPU layout** — matches ANE IOSurface `[1,C,1,S]` format, eliminates all transpose overhead
-- **vDSP vectorized RMSNorm** — 10x faster than naive (6.7ms to 0.7ms)
-- **GCD async cblas overlap** — dW gradient sgemms run in parallel with ANE evals on a serial dispatch queue
-- **Deferred cblas wait** — wait pushed into next step's forward pass for maximum overlap
-- **ANE RMSNorm fusion** — RMSNorm folded into forward kernels as MIL ops (reduce_sum + pow + mul)
-- **Wo^T fusion** — output projection backward merged into SDPA backward kernel
-- **Forward taps** — Q, K, V, attention scores, hidden states exposed via concat outputs, avoiding CPU recompute
-- **Process restart** — bypasses ~119 ANE compile limit per process via checkpoint and re-launch
-=======
 ## What's Here
 
 ### GPT-2 Inference on ANE (`training/gpt2.m`)
@@ -260,50 +129,31 @@ make gpt2
 
 ### ANE Training (upstream)
 
-The original [maderix](https://github.com/maderix/ANEtransformers) work: training a 109M-parameter Llama2-architecture transformer (Stories110M) directly on ANE. 12-layer forward+backward pass, 6 ANE kernel types per layer (72 kernels/step), 107 ms/step on M4. Adam optimizer, gradient accumulation, checkpoint/resume via `exec()` restart. See `training/train_large.m` and the [training README](training/README.md).
-
-### M5 Hardware Investigation
-
-Systematic probing of ANE behavior on Apple M5 (H16 family, same as M4). Key findings documented in [`training/m5result.md`](training/m5result.md):
-
-| Question | Result |
-|----------|--------|
-| Can weights be swapped without recompile? | **No.** Weights baked at compile time. File overwrite + reload ignored. |
-| Does `weightsBuffer` IOSurface override compiled weights? | **No.** Same output regardless. |
-| Does QoS affect ANE frequency? | **No.** All QoS 0-63 work. Fixed frequency, no latency difference. |
-| Can `_ANEChainingRequest` chain kernels without CPU round-trips? | **Validates but rejected by driver** (Error Code=15). Likely requires entitlements only CoreML holds. |
-| Can `_ANEPerformanceStats` expose hardware counters? | Class exists with `hwExecutionTime` but requires factory construction via model `perfStatsMask`. |
-| Real-time eval path? | `beginRealTimeTask` returns NO (needs entitlement). `evaluateRealTimeWithModel` works but no perf gain. |
-
-### Fused Kernel Benchmarks (`training/bench_fused.m`)
-
-Quantifies the value of operation fusion on ANE:
-
-- **Dispatch overhead**: ~60-80 us per sequential ANE dispatch
-- **Fused vs separate**: 1.5-3x speedup from fusing multiple convolutions into single MIL programs
-- **Conclusion**: Fused MIL is the only viable path to high ANE utilization. Chaining API is inaccessible without Apple-internal entitlements. Intermediates stay in ANE SRAM when fused.
-
-Full investigation: [`training/CHAINING_INVESTIGATION.md`](training/CHAINING_INVESTIGATION.md)
-
-## How It Works
-
-1. **MIL generation** — Objective-C constructs MIL program text at runtime: convolutions (linear layers), matmul (attention), softmax, element-wise ops
-2. **In-memory compilation** — `_ANEInMemoryModelDescriptor` compiles MIL text + fp16 weight blobs directly to ANE programs, no disk `.mlmodelc` needed
-3. **IOSurface I/O** — Tensors via IOSurface shared memory in `[1, C, 1, S]` channel-first fp16 format. Spatial dimension padded to minimum stride of 32. Minimum surface size 49152 bytes.
-4. **Weight baking** — Weights compiled as BLOBFILE constants into MIL programs. No runtime weight update possible — must recompile to change weights.
-5. **NEON fp16** — ARM NEON intrinsics for fast fp32-fp16 conversion at IOSurface boundaries and for CPU-side matmul during decode
->>>>>>> d131001e359572f754fd2269112d3e5a6701db21
+Key optimizations:
+- **Channel-first CPU layout** — matches ANE IOSurface `[1,C,1,S]` format, eliminates all transpose overhead
+- **vDSP vectorized RMSNorm** — 10x faster than naive (6.7ms to 0.7ms)
+- **GCD async cblas overlap** — dW gradient sgemms run in parallel with ANE evals on a serial dispatch queue
+- **Deferred cblas wait** — wait pushed into next step's forward pass for maximum overlap
+- **ANE RMSNorm fusion** — RMSNorm folded into forward kernels as MIL ops (reduce_sum + pow + mul)
+- **Wo^T fusion** — output projection backward merged into SDPA backward kernel
+- **Forward taps** — Q, K, V, attention scores, hidden states exposed via concat outputs, avoiding CPU recompute
+- **Process restart** — bypasses ~119 ANE compile limit per process via checkpoint and re-launch
 
 ## File Structure
 
 ```
-<<<<<<< HEAD
 ├── api_exploration.m           # Initial ANE API discovery
 ├── inmem_basic.m               # In-memory MIL compilation proof-of-concept
 ├── inmem_bench.m               # ANE dispatch latency benchmarks
 ├── inmem_peak.m                # Peak TFLOPS measurement (2048x2048 matmul)
 ├── sram_bench.m                # ANE SRAM bandwidth probing
 ├── sram_probe.m                # SRAM size/layout exploration
+├── quant_probe.m               # Quantization probe: int8/int4 affine, blockwise and LUT weights
+├── inference/                  # LLM inference on the ANE (Qwen), with Metal GPU and Q4 paths
+├── mlir/                       # MLIR translations of the kernels, the `ane` dialect, the device op sweep
+├── contrib/kmp-ane/            # Kotlin Multiplatform ANE scaffold (MNIST demo)
+├── community_benchmarks/       # Standardized community benchmark output
+├── docs/                       # Security audit reports, development diaries, plans
 ├── benchmarks/
 │   ├── ANE_BENCHMARK_REPORT.md # Cross-chip benchmark report
 │   └── community_results.json  # Community-submitted benchmark data
@@ -315,7 +165,6 @@ Full investigation: [`training/CHAINING_INVESTIGATION.md`](training/CHAINING_INV
     ├── Makefile
     ├── README.md               # Training pipeline documentation
     ├── ane_runtime.h           # ANE private API wrapper (compile, eval, IOSurface)
-<<<<<<< HEAD
     ├── ane_mil_gen.h           # MIL program generation helpers
     ├── ane_classifier.h        # ANE-offloaded classifier
     ├── ane_rmsnorm_bwd.h       # ANE RMSNorm backward pass
@@ -341,54 +190,6 @@ Full investigation: [`training/CHAINING_INVESTIGATION.md`](training/CHAINING_INV
         ├── io.h
         ├── mil_dynamic.h
         └── train.m
-=======
-    ├── ane_classifier.h        # Classifier fwd (32K conv), softmax, rmsnorm on ANE
-    ├── train_large.m           # Static pipeline (weights as constants, recompiles)
-    ├── training_dynamic/
-    │   ├── train.m             # Dynamic training loop (model-agnostic)
-    │   ├── config.h            # Derived sizes, structs, alloc helpers
-    │   ├── mil_dynamic.h       # MIL generators for dynamic weight kernels (GQA-aware)
-    │   ├── io.h                # IOSurface I/O, weight staging, GQA tile/reduce
-    │   ├── models/
-    │   │   ├── stories110m.h   # Stories110M config (12L, MHA)
-    │   │   └── qwen3_06b.h    # Qwen3-0.6B config (28L, GQA)
-    │   └── Makefile
-    ├── dashboard.py            # Live training dashboard (blessed TUI)
-├── api_exploration.m               # Initial ANE private API discovery
-├── inmem_basic.m                   # In-memory MIL compilation proof-of-concept
-├── inmem_bench.m                   # ANE dispatch latency benchmarks
-├── inmem_peak.m                    # Peak TFLOPS measurement (2048x2048 matmul)
-├── sram_bench.m                    # ANE SRAM bandwidth probing
-├── sram_probe.m                    # SRAM size/layout exploration
-└── training/
-    ├── gpt2.m                      # GPT-2 124M inference: ANE prefill + CPU KV-cache decode
-    ├── gpt2_convert.py             # HuggingFace → ANE weight converter (no PyTorch)
-    ├── gpt2_tokenizer.h            # Self-contained BPE tokenizer (header-only C)
-    ├── bench_fused.m               # Fused vs separate kernel benchmarks
-    ├── CHAINING_INVESTIGATION.md   # Full chaining API reverse-engineering writeup
-    ├── m5result.md                 # M5 ANE probe results
-    ├── train_large.m               # 12-layer Stories110M ANE training (upstream)
-    ├── stories_config.h            # Training model config and structs
-    ├── stories_io.h                # Training IOSurface I/O and kernel compile/eval
-    ├── stories_mil.h               # Training MIL generators (6 kernel types)
-    ├── stories_cpu_ops.h           # vDSP RMSNorm, cross-entropy, Adam, embeddings
-    ├── dashboard.py                # Training TUI: loss curves, power, text generation
-    ├── ane_runtime.h               # ANE private API wrapper
-    ├── ane_mil_gen.h               # MIL generation helpers
-    ├── test_chaining.m             # Chaining API experiments
-    ├── test_weight_reload.m        # Weight swap without recompile test
-    ├── test_ane_advanced.m         # weightsBuffer, procedureIndex, shared events probe
-    ├── test_qos_sweep.m            # QoS 0-63 latency sweep
-    ├── test_perf_stats.m           # _ANEPerformanceStats introspection
-    ├── test_decode_attn.m          # Multi-input decode attention kernel validation
-    ├── test_multi_input.m          # Multi-input IOSurface size constraints
-    ├── test_ffn_seq1.m             # FFN at seq=1 (decode mode) validation
-    ├── test_lm_head_ane.m          # LM head on ANE feasibility
-    ├── test_lm_head_fast.m         # LM head CPU benchmark (6 approaches)
-    ├── test_lm_head_neon.m         # LM head NEON fp16 benchmark
-    ├── docs/                       # Roadmap: GPT-2 XL, streaming, sampling, interactive
-    └── Makefile
->>>>>>> d131001e359572f754fd2269112d3e5a6701db21
 ```
 
 ## Training Data
@@ -398,110 +199,12 @@ Training requires pretokenized TinyStories data. To download:
 cd training && bash download_data.sh
 ```
 See [training/README.md](training/README.md) for detailed training instructions.
-=======
-├── api_exploration.m       # Initial ANE API discovery
-├── inmem_basic.m           # In-memory MIL compilation proof-of-concept
-├── inmem_bench.m           # ANE dispatch latency benchmarks
-├── inmem_peak.m            # Peak TFLOPS measurement
-├── sram_bench.m            # ANE SRAM bandwidth probing
-├── sram_probe.m            # SRAM size/layout exploration
-├── scripts/
-│   ├── run_benchmarks.sh           # Full benchmark suite runner
-│   ├── run_community_benchmark.sh  # Standardized community benchmark (JSON output)
-│   ├── gen_mlpackages.py           # Generate .mlpackage models for sram/inmem tests
-│   └── aggregate_benchmarks.py     # Aggregate community JSON results
-├── community_benchmarks/           # Community-submitted benchmark results (JSON)
-├── web/                            # Dashboard web app (Next.js + Neon Postgres)
-├── docs/
-│   ├── ARCHITECTURE.md             # System architecture with diagrams
-│   ├── API_REFERENCE.md            # Complete function index
-│   ├── BENCHMARKS.md               # Benchmark guide
-│   └── BENCHMARK_RESULTS.md        # Detailed M4 Max results
-└── training/
-    ├── ane_runtime.h       # ANE private API wrapper (compile, eval, IOSurface)
-    ├── ane_mil_gen.h       # MIL program generation helpers
-    ├── ane_classifier.h    # Classifier forward/backward MIL generators
-    ├── ane_rmsnorm_bwd.h   # RMSNorm backward MIL generator
-    ├── stories_config.h    # Model configuration (dims, structs, macros)
-    ├── stories_io.h        # IOSurface I/O, blob builders, compile/eval helpers
-    ├── stories_mil.h       # MIL generators (SDPA, FFN, QKV backward)
-    ├── stories_cpu_ops.h   # CPU ops (RMSNorm, Adam, cross-entropy, embed)
-    ├── model.h             # Gen1 model weight init and blob builders
-    ├── forward.h           # Gen1 forward pass MIL generators
-    ├── backward.h          # Gen1 backward pass MIL generators
-    ├── train_large.m       # Main: 12-layer training (CPU classifier)
-    ├── train_large_ane.m   # 12-layer training (ANE classifier)
-    ├── train.m             # Minimal training loop (early prototype)
-    ├── tiny_train.m        # 2-layer tiny model training
-    ├── test_*.m            # Unit tests for individual kernels
-    ├── dashboard.py        # Real-time training monitor
-    ├── tokenize.py         # Training data preprocessing
-    ├── download_data.sh    # Download training data + model weights
-    └── Makefile            # Build system (make train_large, make test, etc.)
-```
-
-## Community Benchmarks
-
-We collect community benchmark results across Apple Silicon chips to understand ANE performance characteristics.
-
-### Run Benchmarks
-
-```bash
-# Run the standardized community benchmark
-bash scripts/run_community_benchmark.sh
-
-# Skip training benchmarks (if no training data)
-bash scripts/run_community_benchmark.sh --skip-training
-
-# Custom training steps
-bash scripts/run_community_benchmark.sh --steps 50
-```
-
-The script will:
-1. Detect your hardware (chip, memory, cores)
-2. Run SRAM probe and in-memory peak benchmarks
-3. Optionally run training benchmarks
-4. Save results as JSON to `community_benchmarks/`
-5. Ask if you'd like to submit results to the online dashboard
-
-### Submit Results
-
-**Option A: Automatic submission**
-At the end of the benchmark run, the script will ask if you want to submit. Your results are sent anonymously to our dashboard (IP is hashed, never stored raw).
-
-**Option B: GitHub PR**
-1. Fork this repository
-2. Run the benchmark script
-3. Commit the JSON file from `community_benchmarks/`
-4. Open a Pull Request
-
-**Option C: GitHub Issue**
-Paste the contents of your JSON results file in a new issue.
-
-### View Results
-
-Visit the **[ANE Community Benchmark Dashboard](https://web-lac-sigma-61.vercel.app)** to see aggregated results across all Apple Silicon chips.
-
-### Data Privacy
-
-- Your IP address is hashed (SHA-256) for rate limiting and duplicate detection only
-- No personal information is collected or stored
-- All benchmark data is public
-- Rate limited to 5 submissions per hour per IP
-
----
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
 
 ## Building
 
-<<<<<<< HEAD
 Requires macOS 15+ on Apple Silicon (tested on M1 through M5).
-=======
-Requires macOS 15+ on Apple Silicon (tested on M4, M5). No external dependencies — system frameworks + private ANE APIs resolved at runtime via `objc_msgSend`.
->>>>>>> d131001e359572f754fd2269112d3e5a6701db21
 
 ```bash
-<<<<<<< HEAD
 # Dynamic pipeline (recommended) — model selected at build time
 cd training/training_dynamic
 make MODEL=stories110m    # Stories110M (12L, MHA, 109M params)
@@ -520,26 +223,6 @@ xcrun clang -O2 -fobjc-arc -framework Foundation -framework IOSurface -ldl \
 
 # Bridge library (C-callable ANE API)
 cd bridge && make
-<<<<<<< HEAD
-=======
-cd training
-
-# Build everything
-make all
-
-# Build just the training programs
-make train_large train_large_ane
-
-# Run tests
-make test
-
-# Download training data
-make data
-
-# Full setup (data + dependencies)
-make setup
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
-=======
 cd training
 
 # GPT-2 inference
@@ -553,7 +236,6 @@ make train_large
 # Benchmarks
 make bench_fused
 ./bench_fused
->>>>>>> d131001e359572f754fd2269112d3e5a6701db21
 ```
 
 ## Known ANE Constraints
@@ -569,22 +251,13 @@ make bench_fused
 
 ## Limitations
 
-<<<<<<< HEAD
 - **SDPA causal masking** — ANE hardware ignores `attn_mask` in SDPA ops; causal attention is decomposed into separate Q@K^T (ANE) → mask+softmax (CPU) → scores@V (ANE)
 - **~119 compile limit** — ANE compiler leaks resources; worked around via `exec()` restart with checkpoint
 - **FP16 gradient underflow** — backward matmuls underflow in fp16; fixed with global loss scaling (`256 * NLAYERS`)
 - **Single-input constraint** — multi-input ANE requests cause 0x1d error; inputs packed into spatial dimension instead
-=======
-- **SDPA causal masking** — ANE hardware ignores `attn_mask` in SDPA ops; causal attention is decomposed into separate Q@K^T (ANE) then mask+softmax (ANE via add+softmax) then scores@V (ANE)
-- **~119 compile limit** — ANE compiler leaks resources; worked around via process restart with checkpoint
-- **Compilation overhead** — Weights baked at compile time mean recompilation every ACCUM_STEPS. Compilation is 80-85% of wall time. Investigating `_ANEChainingRequest` for potential pipeline without recompile.
-- **Classifier backward regression** — ANE classifier backward is ~3x slower than CPU cblas due to matmul (not conv) being used to work around ANE's 8192 input channel limit
-- **SRAM capacity** — ANE SRAM is ~24-32 MB (M4 Max). Models with weight matrices exceeding this threshold spill to DRAM with significant performance cliffs. Current Stories110M weights (~1.2 MB each) stay within SRAM.
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
 
 ## Performance
 
-<<<<<<< HEAD
 **Training throughput (M4):**
 
 | Model | Params | ms/step | Layers | Kernels/layer |
@@ -605,44 +278,21 @@ make bench_fused
 |-------|------------|------------|-------|
 | Stories110M | 6.7ms | 1.9ms | 8.8ms |
 | Qwen3-0.6B | 9.7ms | 2.3ms | 12.0ms |
-<<<<<<< HEAD
-=======
-| Optimization | ms/step | ANE util |
-|---|---|---|
-| Baseline (vDSP transpose) | 33.5 | 3.1% |
-| Channel-first layout | 20.3 | 5.2% |
-| vDSP vectorized RMSNorm | 14.2 | 7.4% |
-| GCD async cblas overlap | 11.4 | 9.2% |
-| ANE RMSNorm fusion | 11.4 | 9.2% |
-| Wo^T fusion (7 to 6 kernels) | 11.4 | 9.2% |
-| Deferred cblas wait | **9.3** | **11.2%** |
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
-=======
 - **Weights are immutable after compile** — no hot-swap, no `weightsBuffer` override, no file-swap reload
 - **SDPA causal masking ignored by hardware** — must decompose into Q@K^T + mask add + softmax + scores@V
 - **~119 compile limit per process** — ANE compiler leaks resources; training uses `exec()` restart
 - **IOSurface minimum 49152 bytes** — even for tiny tensors (seq=1 decode)
 - **Spatial stride padded to 32** — `[1, C, 1, W]` surfaces have stride `max(W, 32)`
 - **Chaining API inaccessible** — `_ANEChainingRequest` validates but driver rejects (Error Code=15)
->>>>>>> d131001e359572f754fd2269112d3e5a6701db21
 
 *Note: Above numbers are for single-layer training. Full 12-layer training runs at 62-72 ms/step.*
-
-| Optimization | ms/step | ANE util |
-|---|---|---|
-| Baseline (vDSP transpose) | 33.5 | 3.1% |
-| Channel-first layout | 20.3 | 5.2% |
-| vDSP vectorized RMSNorm | 14.2 | 7.4% |
-| GCD async cblas overlap | 11.4 | 9.2% |
-| ANE RMSNorm fusion | 11.4 | 9.2% |
-| Wo^T fusion (7→6 kernels) | 11.4 | 9.2% |
-| Deferred cblas wait | **9.3** | **11.2%** |
 
 ## Community Benchmarks
 
 Community hardware benchmark submissions live in [`benchmarks/submissions/`](benchmarks/submissions/).
 
 - [Mac Studio (Apple M3 Ultra, 256 GB) — 2026-03-03](benchmarks/submissions/m3-ultra-mac-studio-2026-03-03/README.md)
+
 
 ## Disclaimer
 
@@ -746,13 +396,6 @@ MIT — see [LICENSE](LICENSE)
 
 ---
 
-<<<<<<< HEAD
 *Built by a human + Claude, one weekend at a time.*
-<<<<<<< HEAD
 
 
-=======
->>>>>>> b4764567366bbca753ff2a791e9ae81c7f19d548
-=======
-*Originally built by [maderix](https://github.com/maderix). Community fork maintained with contributions from the ANE research community.*
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf

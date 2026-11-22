@@ -151,8 +151,8 @@ typedef struct {
 } ANEKernel;
 
 static Class g_ANEDesc, g_ANEInMem, g_ANEReq, g_ANEIO;
-<<<<<<< HEAD
 static bool g_ane_ok = false;  // true only when all private classes loaded successfully
+static id g_ane_client = nil;
 
 static void ane_init(void) {
     // MED-06: dispatch_once is Apple's canonical thread-safe one-time init pattern.
@@ -176,51 +176,12 @@ static void ane_init(void) {
             return;
         }
         g_ane_ok = true;  // dispatch_once guarantees memory barrier before completion
+
+        Class clientCls = NSClassFromString(@"_ANEClient");
+        if (clientCls) {
+            g_ane_client = [clientCls performSelector:@selector(sharedConnection)];
+        }
     });
-=======
-static bool g_ane_loaded = false;
-<<<<<<< HEAD
-<<<<<<< HEAD
-static bool g_ane_ok = false;  // true only when all private classes loaded successfully
-=======
-static id g_ane_client = nil;
-static bool g_ane_ok = false;
->>>>>>> d49c1256c6392064ec2cfbd18464a54609b735d5
-=======
-static bool g_ane_ok = false;  // true only when all private classes loaded successfully
->>>>>>> c2347daf9d3370faacad078b5c396e318826e13a
-
-static void ane_init(void) {
-    if (g_ane_loaded) return;
-    g_ane_loaded = true;  // Set first to prevent re-entry (ref: CRIT-01)
-    void *handle = dlopen(
-        "/System/Library/PrivateFrameworks/AppleNeuralEngine.framework/AppleNeuralEngine",
-        RTLD_NOW);
-    if (!handle) {
-        fprintf(stderr, "ANE: dlopen failed: %s\n", dlerror());
-        return;
-    }
-    g_ANEDesc  = NSClassFromString(@"_ANEInMemoryModelDescriptor");
-    g_ANEInMem = NSClassFromString(@"_ANEInMemoryModel");
-    g_ANEReq   = NSClassFromString(@"_ANERequest");
-    g_ANEIO    = NSClassFromString(@"_ANEIOSurfaceObject");
-    if (!g_ANEDesc || !g_ANEInMem || !g_ANEReq || !g_ANEIO) {
-        fprintf(stderr, "ANE: Private classes not found (macOS version mismatch?)\n");
-        return;
-    }
-    g_ane_ok = true;
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
-=======
-
-    Class clientCls = NSClassFromString(@"_ANEClient");
-    if (clientCls) {
-        g_ane_client = [clientCls performSelector:@selector(sharedConnection)];
-    }
->>>>>>> d49c1256c6392064ec2cfbd18464a54609b735d5
-=======
->>>>>>> c2347daf9d3370faacad078b5c396e318826e13a
 }
 
 static IOSurfaceRef ane_create_surface(size_t bytes) {
@@ -418,26 +379,16 @@ static void ane_read_output(ANEKernel *k, int idx, void *data, size_t bytes) {
 
 static bool ane_eval(ANEKernel *k) {
     NSError *e = nil;
-<<<<<<< HEAD
     BOOL result = ((BOOL(*)(id,SEL,unsigned int,id,id,NSError**))objc_msgSend)(
         k->model, @selector(evaluateWithQoS:options:request:error:),
         21, @{}, k->request, &e);
-    
-    if (!result && e) {
-        fprintf(stderr, "ANE evaluation failed: %s\n", [[e localizedDescription] UTF8String]);
+
+    if (!result) {
+        fprintf(stderr, "ANE evaluation failed: %s\n",
+                e ? [[e localizedDescription] UTF8String] : "unknown error");
     }
-    
+
     return result;
-=======
-    BOOL ok = ((BOOL(*)(id,SEL,unsigned int,id,id,NSError**))objc_msgSend)(
-        k->model, @selector(evaluateWithQoS:options:request:error:),
-        21, @{}, k->request, &e);
-    if (!ok) {
-        fprintf(stderr, "ANE eval failed: %s\n",
-                e ? [[e description] UTF8String] : "unknown error");
-    }
-    return ok;
->>>>>>> 17dd08025ca563883a5af9a483f7ae8c4895c649
 }
 
 static bool ane_eval_rt(ANEKernel *k) {

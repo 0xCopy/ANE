@@ -1,14 +1,17 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
 # Build artifacts
 *.o
+*.a
+*.dylib
+*.so
+*.exe
 *.dSYM/
+*.mlmodelc/
+*.mlpackage/
+*.metallib
+build/
+.gradle/
+*.rej
+*.orig
 
 # Root-level compiled binaries
 ane_probe
@@ -27,132 +30,46 @@ training/train_large
 training/train_large_ane
 training/train_opt
 training/train_double_buffer
-<<<<<<< HEAD
 training/train
+training/probe_*
 training/test_*
 !training/test_*.m
 
-=======
-training/test_*
-!training/test_*.m
-
-# Inference binaries and runtime data
-inference/qwen_ane
-inference/qwen05b.bin
-inference/qwen05b_f32.bin
-inference/qwen05b_f16.bin
-inference/qwen05b_q8.bin
-inference/.venv/
-inference/benchmark_results.json
-
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
 # Dynamic training binaries
 training/training_dynamic/train
 
 # Test/research binaries
 test_chaining
 
-# Generated mlpackage files
-/tmp/ane_*.mlpackage
-
-<<<<<<< HEAD
-# Benchmark results
-benchmark_results_*.txt
-=======
-# Benchmark results (keep community_benchmarks/ submissions)
-benchmark_results_*.txt
-community_benchmarks/SUMMARY.json
-community_benchmarks/SUMMARY.md
-community_benchmarks/apple_m4_max_20260303_*.json
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
-
-# Python
-__pycache__/
-*.pyc
-*.egg-info/
-<<<<<<< HEAD
-
-# Training data (downloaded separately)
-training/tinystories_data00.bin
-training/ane_stories110M_ckpt.bin
-=======
-/tmp/ane_venv/
-
-# Training data (downloaded separately)
-assets/
-
-# Web dashboard (lives in separate private repo)
-web/
-
-# Training data binaries (downloaded via make setup)
-training/tinystories_data00.bin
-training/ane_stories110M_ckpt.bin
-*.bin
-*.metallib
-!training/download_data.sh
-
-# Secrets / env
-.env
-inference/.env
-
-# Internal / private
-.cursor/
-docs/launch/
-comm
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
-
-# macOS
-.DS_Store
-
-# Editor
-*.swp
-*.swo
-*~
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-# macOS metadata
-.DS_Store
-**/.DS_Store
-
-# Worktrees
-.worktrees/
-worktrees/
-
-# Log files
-*.log
-firebase-debug.log
-
-# Compiled binaries
-training/train
-training/train_large
-training/probe_*
-training/*.dSYM/
-
-# Training data (large binary files)
-training/*.bin
-
-# ANE compiled artifacts
-**/*.mlmodelc/
-**/*.mlpackage/
-
-# External assets (models, datasets)
-assets/
->>>>>>> 357576698277b5ba88ed30f279a5f390baaf5937
-=======
-# Build artifacts
-*.o
-*.a
-*.dylib
-build/
-.gradle/
-
-# Compiled binaries (ObjC demos)
+# KMP-ANE demos
 contrib/kmp-ane/mnist/mnist_ane
 contrib/kmp-ane/tmp/mnist_demo
 tmp/mnist_demo
 tmp/test_matmul
 tmp/test_mil_parse
+
+# Inference binaries and runtime data
+inference/qwen_ane
+inference/*.bin
+inference/.venv/
+inference/benchmark_results.json
+/tmp/ane_venv/
+
+# Generated mlpackage files
+/tmp/ane_*.mlpackage
+
+# Benchmark results
+benchmark_results_*.txt
+
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+
+# Training data and checkpoints (downloaded or generated, not for git)
+training/tinystories_data00.bin
+training/ane_stories110M_ckpt.bin
+training/*.bin
 
 # MNIST data (downloadable)
 **/data/train-images-idx3-ubyte
@@ -160,69 +77,24 @@ tmp/test_mil_parse
 **/data/t10k-images-idx3-ubyte
 **/data/t10k-labels-idx1-ubyte
 
-# Gradle wrapper jar (optional - uncomment to track)
-# gradle/wrapper/gradle-wrapper.jar
-
-# Logs
-run.log
-*.log
-
-# macOS
+# macOS metadata
 .DS_Store
->>>>>>> 04b258e3aa818cb64108c66e256cab40ebfd8a18
-=======
-inference/qwen05b.bin
-inference/qwen_ane
-*.bin
->>>>>>> b4764567366bbca753ff2a791e9ae81c7f19d548
-=======
-*.o
-ane_probe
-api_explore
-inmem_basic
-tiny_train
-tiny_train_m1
-train_large
->>>>>>> 2d2adacf09ec6352cf8fea53c7a916bd5257144f
-=======
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
-=======
-*.o
-*.a
-*.dylib
-*.so
-*.exe
-train_large
-train_large.*
-*.rej
-*.rej.*
-*.orig
-.DS_Store
-*.dSYM/
->>>>>>> 17dd08025ca563883a5af9a483f7ae8c4895c649
-=======
-
-# macOS Metadaten
-.DS_Store
+**/.DS_Store
 ._*
 
-# Debug- und Log-Dateien (ref: docs/reports/security-audit-2026-03-02.md LOW-04)
+# Editor
+*.swp
+*.swo
+*~
+
+# Logs
 *.log
+firebase-debug.log
 
-# Kompilierte Binaries (Makefile-Outputs: make train, make train_large, make probes)
-training/train
-training/train_large
-training/test_weight_reload
-training/test_perf_stats
-training/test_qos_sweep
-training/test_ane_advanced
+# Worktrees
+.worktrees/
+worktrees/
 
-# Grosse Trainingsdaten und Checkpoints (binary, nicht fuer Git geeignet)
-# Erzeugt durch: make tokenize / Trainingslaeufe
-training/*.bin
-training/*.mlmodelc/
-training/*.mlpackage/
-
-# Asset-Modelle und externe Ressourcen
-assets/
->>>>>>> 1a7a05708bf5e34349150cb6e0805c16027b9fd7
+# Secrets / env
+.env
+inference/.env

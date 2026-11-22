@@ -18,13 +18,8 @@
 #include "ane_classifier.h"
 
 #define CKPT_PATH_DEFAULT "ane_stories110M_ckpt.bin"
-<<<<<<< HEAD
 #define MODEL_PATH_DEFAULT "stories110M.bin"
 #define DATA_PATH_DEFAULT "tinystories_data00.bin"
-=======
-#define MODEL_PATH_DEFAULT "../../assets/models/stories110M.bin"
-#define DATA_PATH "tinystories_data00.bin"
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
 
 static const char *get_path(const char *env_var, const char *default_val) {
     const char *v = getenv(env_var);
@@ -214,14 +209,9 @@ int main(int argc, char *argv[]) {
         float lr = 3e-4f;
         float adam_b1=0.9f, adam_b2=0.999f, adam_eps=1e-8f;
         int adam_t = 0, start_step = 0;
-<<<<<<< HEAD
         const char *ckpt_path = CKPT_PATH_DEFAULT;
         const char *model_path = MODEL_PATH_DEFAULT;
         const char *data_path = DATA_PATH_DEFAULT;
-=======
-        const char *ckpt_path = get_path("ANE_CKPT_PATH", CKPT_PATH_DEFAULT);
-        const char *model_path = get_path("ANE_MODEL_PATH", MODEL_PATH_DEFAULT);
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
         bool do_resume = false;
         bool ane_extras = true;
         int pos = 0;
@@ -292,29 +282,12 @@ int main(int argc, char *argv[]) {
         }
 
         // mmap token data
-<<<<<<< HEAD
         int data_fd = open(data_path, O_RDONLY);
         if (data_fd < 0) {
             printf("Cannot open token data: %s\n", data_path);
             printf("Hint: run `bash download_data.sh` in training/ or pass --data /path/to/tinystories_data00.bin\n");
             return 1;
         }
-        struct stat st; fstat(data_fd, &st);
-        size_t data_len = st.st_size;
-        uint16_t *token_data = (uint16_t*)mmap(NULL, data_len, PROT_READ, MAP_PRIVATE, data_fd, 0);
-        if (token_data == MAP_FAILED) { printf("mmap failed\n"); return 1; }
-        size_t n_tokens = data_len / 2;
-        if (n_tokens <= (size_t)(SEQ + 1)) {
-            printf("Token data too short: need at least %d tokens, got %zu\n", SEQ + 2, n_tokens);
-            munmap(token_data, data_len);
-            close(data_fd);
-            return 1;
-        }
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-        int data_fd = open(DATA_PATH, O_RDONLY);
-        if (data_fd < 0) { printf("Cannot open %s\n", DATA_PATH); return 1; }
         struct stat st;
         if (fstat(data_fd, &st) != 0) { perror("fstat"); close(data_fd); return 1; }
         size_t data_len = (size_t)st.st_size;
@@ -334,11 +307,6 @@ int main(int argc, char *argv[]) {
         uint16_t *token_data = (uint16_t*)mmap(NULL, data_len, PROT_READ, MAP_PRIVATE, data_fd, 0);
         if (token_data == MAP_FAILED) { perror("mmap"); close(data_fd); return 1; }
         close(data_fd); // mapping remains valid; avoid fd leaks across exec() restarts
->>>>>>> 60b0512be32bf88f096481ac105f5558c0afa631
-=======
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
-=======
->>>>>>> e030ffb2137ed4b0423c5285cb367f3809197b7c
         printf("Token data: %zu tokens (%.1f MB)\n", n_tokens, data_len/1e6);
 
         TokenDataValidationError data_err = {0};

@@ -78,31 +78,10 @@ typedef struct {
 static int model_load_weights(Model *m, const char *path) {
     FILE *f = fopen(path, "rb");
     if (!f) { fprintf(stderr, "Cannot open %s\n", path); return -1; }
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 89380a26ab7dcb2cd524c9fb5d77c954f843c01f
-=======
-
-    #define FREAD_CHECK(buf, count, file, label) do { \
-        size_t _n = fread(buf, sizeof(float), count, file); \
-        if (_n != (size_t)(count)) { \
-            fprintf(stderr, "ERROR: short read on %s: got %zu, expected %zu (file truncated?)\n", \
-                    label, _n, (size_t)(count)); \
-            fclose(file); return -1; \
-        } \
-    } while(0)
-
->>>>>>> 17dd08025ca563883a5af9a483f7ae8c4895c649
     if (fread(&m->cfg, sizeof(Config), 1, f) != 1) {
         fprintf(stderr, "ERROR: failed to read config from %s\n", path);
         fclose(f); return -1;
     }
-<<<<<<< HEAD
-<<<<<<< HEAD
 
     if (m->cfg.n_layers < 1 || m->cfg.n_layers > N_LAYERS) {
         fprintf(stderr, "ERROR: n_layers (%d) exceeds maximum allowed (%d)\n", m->cfg.n_layers, N_LAYERS);
@@ -115,30 +94,6 @@ static int model_load_weights(Model *m, const char *path) {
         fclose(f); return -1;
     }
 
-=======
-=======
->>>>>>> e2e0c8332aca99dde38764e8a4a14f82b04ec84d
-=======
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
-    // Validate config read — gatekeeper for all subsequent malloc() sizes (CRIT-03)
-    if (fread(&m->cfg, sizeof(Config), 1, f) != 1) {
-        fprintf(stderr, "model: config read failed (truncated file?)\n");
-        fclose(f); return -1;
-    }
-    // Note: Subsequent fread() calls for weight tensors are not individually checked.
-    // In this research context, a truncated weight file causes incorrect model behavior
-    // (detectable via training loss divergence). The config read above is the gatekeeper.
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> 357576698277b5ba88ed30f279a5f390baaf5937
-=======
->>>>>>> 89380a26ab7dcb2cd524c9fb5d77c954f843c01f
-=======
->>>>>>> e2e0c8332aca99dde38764e8a4a14f82b04ec84d
-=======
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
-=======
->>>>>>> 17dd08025ca563883a5af9a483f7ae8c4895c649
     bool shared = m->cfg.vocab_size > 0;
     if (m->cfg.vocab_size < 0) m->cfg.vocab_size = -m->cfg.vocab_size;
 
@@ -153,26 +108,15 @@ static int model_load_weights(Model *m, const char *path) {
 
     size_t d = (size_t)m->cfg.dim, hd = (size_t)m->cfg.hidden_dim, nl = (size_t)m->cfg.n_layers, vs = (size_t)m->cfg.vocab_size;
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
     m->token_embedding = (float*)malloc(vs * d * sizeof(float));
-<<<<<<< HEAD
-<<<<<<< HEAD
     if (!m->token_embedding) {
         fprintf(stderr, "ERROR: OOM allocating token_embedding\n");
         fclose(f); return -1;
     }
     if (fread(m->token_embedding, sizeof(float), vs * d, f) != (vs * d)) {
-=======
-    if (fread(m->token_embedding, sizeof(float), vs * d, f) != (size_t)(vs * d)) {
->>>>>>> 89380a26ab7dcb2cd524c9fb5d77c954f843c01f
         fprintf(stderr, "ERROR: short read on token_embedding (file truncated?)\n");
         fclose(f); return -1;
     }
-=======
-    FREAD_CHECK(m->token_embedding, vs * d, f, "token_embedding");
->>>>>>> 17dd08025ca563883a5af9a483f7ae8c4895c649
 
     float *rms_att_all = (float*)malloc(nl * d * sizeof(float));
     float *wq_all      = (float*)malloc(nl * d * d * sizeof(float));
@@ -183,50 +127,6 @@ static int model_load_weights(Model *m, const char *path) {
     float *w1_all      = (float*)malloc(nl * hd * d * sizeof(float));
     float *w2_all      = (float*)malloc(nl * d * hd * sizeof(float));
     float *w3_all      = (float*)malloc(nl * hd * d * sizeof(float));
-=======
-    m->token_embedding = (float*)malloc((size_t)vs * d * sizeof(float));  // (size_t) prevents int overflow (CRIT-04)
-    fread(m->token_embedding, sizeof(float), vs * d, f);
-=======
-    m->token_embedding = (float*)malloc((size_t)vs * d * sizeof(float));  // (size_t) prevents int overflow (CRIT-04)
-    fread(m->token_embedding, sizeof(float), vs * d, f);
-=======
-    m->token_embedding = (float*)malloc((size_t)vs * d * sizeof(float));  // (size_t) prevents int overflow (CRIT-04)
-    fread(m->token_embedding, sizeof(float), vs * d, f);
-
-<<<<<<< HEAD
-    float *rms_att_all = (float*)malloc((size_t)nl * d * sizeof(float));
-    float *wq_all = (float*)malloc((size_t)nl * d * d * sizeof(float));
-    float *wk_all = (float*)malloc((size_t)nl * d * d * sizeof(float));
-    float *wv_all = (float*)malloc((size_t)nl * d * d * sizeof(float));
-    float *wo_all = (float*)malloc((size_t)nl * d * d * sizeof(float));
-    float *rms_ffn_all = (float*)malloc((size_t)nl * d * sizeof(float));
-    float *w1_all = (float*)malloc((size_t)nl * hd * d * sizeof(float));
-    float *w2_all = (float*)malloc((size_t)nl * d * hd * sizeof(float));
-    float *w3_all = (float*)malloc((size_t)nl * hd * d * sizeof(float));
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
-
-    float *rms_att_all = (float*)malloc((size_t)nl * d * sizeof(float));
-    float *wq_all = (float*)malloc((size_t)nl * d * d * sizeof(float));
-    float *wk_all = (float*)malloc((size_t)nl * d * d * sizeof(float));
-    float *wv_all = (float*)malloc((size_t)nl * d * d * sizeof(float));
-    float *wo_all = (float*)malloc((size_t)nl * d * d * sizeof(float));
-    float *rms_ffn_all = (float*)malloc((size_t)nl * d * sizeof(float));
-    float *w1_all = (float*)malloc((size_t)nl * hd * d * sizeof(float));
-    float *w2_all = (float*)malloc((size_t)nl * d * hd * sizeof(float));
-    float *w3_all = (float*)malloc((size_t)nl * hd * d * sizeof(float));
->>>>>>> e2e0c8332aca99dde38764e8a4a14f82b04ec84d
-
-<<<<<<< HEAD
-    float *rms_att_all = (float*)malloc((size_t)nl * d * sizeof(float));
-    float *wq_all = (float*)malloc((size_t)nl * d * d * sizeof(float));
-    float *wk_all = (float*)malloc((size_t)nl * d * d * sizeof(float));
-    float *wv_all = (float*)malloc((size_t)nl * d * d * sizeof(float));
-    float *wo_all = (float*)malloc((size_t)nl * d * d * sizeof(float));
-    float *rms_ffn_all = (float*)malloc((size_t)nl * d * sizeof(float));
-    float *w1_all = (float*)malloc((size_t)nl * hd * d * sizeof(float));
-    float *w2_all = (float*)malloc((size_t)nl * d * hd * sizeof(float));
-    float *w3_all = (float*)malloc((size_t)nl * hd * d * sizeof(float));
->>>>>>> 357576698277b5ba88ed30f279a5f390baaf5937
 
     if (!rms_att_all || !wq_all || !wk_all || !wv_all || !wo_all ||
         !rms_ffn_all || !w1_all || !w2_all || !w3_all) {
@@ -234,8 +134,6 @@ static int model_load_weights(Model *m, const char *path) {
         fclose(f); return -1;
     }
 
-=======
->>>>>>> 89380a26ab7dcb2cd524c9fb5d77c954f843c01f
     #define FREAD_CHECK(buf, count, file, label) do { \
         size_t _n = fread(buf, sizeof(float), count, file); \
         if (_n != (size_t)(count)) { \
@@ -245,8 +143,6 @@ static int model_load_weights(Model *m, const char *path) {
         } \
     } while(0)
 
-=======
->>>>>>> 17dd08025ca563883a5af9a483f7ae8c4895c649
     FREAD_CHECK(rms_att_all, nl * d, f, "rms_att");
     FREAD_CHECK(wq_all, nl * d * d, f, "wq");
     FREAD_CHECK(wk_all, nl * d * d, f, "wk");
@@ -256,8 +152,6 @@ static int model_load_weights(Model *m, const char *path) {
     FREAD_CHECK(w1_all, nl * hd * d, f, "w1");
     FREAD_CHECK(w2_all, nl * d * hd, f, "w2");
     FREAD_CHECK(w3_all, nl * hd * d, f, "w3");
-<<<<<<< HEAD
-<<<<<<< HEAD
 
     #define SAFE_MALLOC_MEMCPY(dest, src, size) do { \
         dest = (float*)malloc(size); \
@@ -267,10 +161,6 @@ static int model_load_weights(Model *m, const char *path) {
         } \
         memcpy(dest, src, size); \
     } while(0)
-=======
->>>>>>> 89380a26ab7dcb2cd524c9fb5d77c954f843c01f
-=======
->>>>>>> 17dd08025ca563883a5af9a483f7ae8c4895c649
 
     for (int l = 0; l < nl; l++) {
         SAFE_MALLOC_MEMCPY(m->rms_att_w[l], rms_att_all + l*d, d * sizeof(float));
@@ -294,25 +184,8 @@ static int model_load_weights(Model *m, const char *path) {
     if (shared) {
         m->wcls = m->token_embedding;
     } else {
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
         m->wcls = (float*)malloc(vs * d * sizeof(float));
         FREAD_CHECK(m->wcls, vs * d, f, "wcls");
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> e2e0c8332aca99dde38764e8a4a14f82b04ec84d
-=======
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
-        m->wcls = (float*)malloc((size_t)vs * d * sizeof(float));  // (size_t) prevents int overflow (CRIT-04)
-        fread(m->wcls, sizeof(float), vs * d, f);
->>>>>>> 357576698277b5ba88ed30f279a5f390baaf5937
-=======
->>>>>>> 89380a26ab7dcb2cd524c9fb5d77c954f843c01f
-=======
->>>>>>> 17dd08025ca563883a5af9a483f7ae8c4895c649
     }
     #undef FREAD_CHECK
     fclose(f);
@@ -323,9 +196,8 @@ static int model_load_weights(Model *m, const char *path) {
 static ANEKernel *compile_conv_kernel(const float *weights, int in_ch, int out_ch, int spatial) {
     NSData *wb = mil_build_weight_blob(weights, out_ch, in_ch);
     NSString *mil = mil_gen_conv(in_ch, out_ch, spatial);
-    size_t bpe = g_fp16_io ? 2 : 4;
-    size_t inBytes = (size_t)in_ch * spatial * bpe;
-    size_t outBytes = (size_t)out_ch * spatial * bpe;
+    size_t inBytes = (size_t)in_ch * spatial * 4;
+    size_t outBytes = (size_t)out_ch * spatial * 4;
     return ane_compile([mil dataUsingEncoding:NSUTF8StringEncoding], wb, 1, &inBytes, 1, &outBytes);
 }
 
@@ -334,31 +206,9 @@ static int model_compile_kernels(Model *m, int seq_len) {
     m->seq_len = seq_len;
     int d = m->cfg.dim, hd = m->cfg.hidden_dim, vs = m->cfg.vocab_size;
     int S = seq_len;
-    printf("Compiling %d ANE conv kernels (S=%d, %s I/O)...\n",
-           N_LAYERS * 7 + 1, S, g_fp16_io ? "fp16" : "fp32");
+    printf("Compiling %d ANE conv kernels (S=%d)...\n", N_LAYERS * 7 + 1, S);
 
-    // Try first layer as canary — if cast op fails, retry with fp16 I/O
-    m->kern_q[0] = compile_conv_kernel(m->wq[0], d, d, S);
-    if (!m->kern_q[0] && !g_fp16_io) {
-        printf("  Compile failed, retrying with fp16 I/O (M1/M2 fallback)...\n");
-        g_fp16_io = 1;
-        m->kern_q[0] = compile_conv_kernel(m->wq[0], d, d, S);
-    }
-    if (!m->kern_q[0]) { fprintf(stderr, "L0 kern_q fail\n"); return -1; }
-
-    m->kern_k[0] = compile_conv_kernel(m->wk[0], d, d, S);
-    m->kern_v[0] = compile_conv_kernel(m->wv[0], d, d, S);
-    m->kern_o[0] = compile_conv_kernel(m->wo[0], d, d, S);
-    m->kern_w1[0] = compile_conv_kernel(m->w1[0], d, hd, S);
-    m->kern_w2[0] = compile_conv_kernel(m->w2[0], hd, d, S);
-    m->kern_w3[0] = compile_conv_kernel(m->w3[0], d, hd, S);
-    if (!m->kern_k[0] || !m->kern_v[0] || !m->kern_o[0] ||
-        !m->kern_w1[0] || !m->kern_w2[0] || !m->kern_w3[0]) {
-        fprintf(stderr, "L0 compile fail\n"); return -1;
-    }
-    printf("  Layer 0 OK\n");
-
-    for (int l = 1; l < N_LAYERS; l++) {
+    for (int l = 0; l < N_LAYERS; l++) {
         m->kern_q[l] = compile_conv_kernel(m->wq[l], d, d, S);
         m->kern_k[l] = compile_conv_kernel(m->wk[l], d, d, S);
         m->kern_v[l] = compile_conv_kernel(m->wv[l], d, d, S);
@@ -366,18 +216,20 @@ static int model_compile_kernels(Model *m, int seq_len) {
         m->kern_w1[l] = compile_conv_kernel(m->w1[l], d, hd, S);
         m->kern_w2[l] = compile_conv_kernel(m->w2[l], hd, d, S);
         m->kern_w3[l] = compile_conv_kernel(m->w3[l], d, hd, S);
-        if (!m->kern_q[l] || !m->kern_k[l] || !m->kern_v[l] || !m->kern_o[l] ||
-            !m->kern_w1[l] || !m->kern_w2[l] || !m->kern_w3[l]) {
-            fprintf(stderr, "L%d compile fail\n", l); return -1;
-        }
+        if (!m->kern_q[l]) { fprintf(stderr, "L%d kern_q fail\n",l); return -1; }
+        if (!m->kern_k[l]) { fprintf(stderr, "L%d kern_k fail\n",l); return -1; }
+        if (!m->kern_v[l]) { fprintf(stderr, "L%d kern_v fail\n",l); return -1; }
+        if (!m->kern_o[l]) { fprintf(stderr, "L%d kern_o fail\n",l); return -1; }
+        if (!m->kern_w1[l]) { fprintf(stderr, "L%d kern_w1 fail\n",l); return -1; }
+        if (!m->kern_w2[l]) { fprintf(stderr, "L%d kern_w2 fail\n",l); return -1; }
+        if (!m->kern_w3[l]) { fprintf(stderr, "L%d kern_w3 fail\n",l); return -1; }
         printf("  Layer %d OK\n", l);
     }
     m->kern_cls = compile_conv_kernel(m->wcls, d, vs, S);
     if (!m->kern_cls) {
         fprintf(stderr, "Classifier kernel compile failed (dim=%d→vocab=%d too large?), using CPU for cls\n", d, vs);
     }
-    printf("  All kernels compiled (%d conv + %s, %s I/O)\n",
-           N_LAYERS * 7, m->kern_cls ? "cls" : "cls=CPU", g_fp16_io ? "fp16" : "fp32");
+    printf("  All kernels compiled (%d conv + %s)\n", N_LAYERS * 7, m->kern_cls ? "cls" : "cls=CPU");
     return 0;
 }
 

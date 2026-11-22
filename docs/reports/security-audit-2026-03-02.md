@@ -27,14 +27,7 @@ Das ANE-Projekt implementiert Neural-Network-Training direkt auf Apples Neural E
 ### [CRIT-01] Keine Fehlerbehandlung bei `dlopen()` für Private Framework
 **Datei:** `training/ane_runtime.h:26`, `api_exploration.m:15`
 **Schweregrad:** KRITISCH
-<<<<<<< HEAD
-<<<<<<< HEAD
 **Status: BEHOBEN** (2026-03-02, Branch `fix/crit-security-findings`)
-=======
->>>>>>> 1a7a05708bf5e34349150cb6e0805c16027b9fd7
-=======
-**Status: BEHOBEN** (2026-03-02, Branch `fix/crit-security-findings`)
->>>>>>> c2347daf9d3370faacad078b5c396e318826e13a
 
 ```objc
 // ane_runtime.h:26
@@ -66,14 +59,7 @@ if (!g_ANEDesc || !g_ANEInMem || !g_ANEReq || !g_ANEIO) {
 ### [CRIT-02] Unsichere `objc_msgSend`-Casts ohne Typ-Validierung
 **Dateien:** `training/ane_runtime.h:59-125`, `training/stories_io.h:90-117`
 **Schweregrad:** KRITISCH
-<<<<<<< HEAD
-<<<<<<< HEAD
 **Status: BEHOBEN** (2026-03-02, Branch `fix/crit-security-findings`)
-=======
->>>>>>> 1a7a05708bf5e34349150cb6e0805c16027b9fd7
-=======
-**Status: BEHOBEN** (2026-03-02, Branch `fix/crit-security-findings`)
->>>>>>> c2347daf9d3370faacad078b5c396e318826e13a
 
 ```objc
 // ane_runtime.h:59-61
@@ -100,14 +86,7 @@ if (!g_ANEDesc) { fprintf(stderr, "g_ANEDesc is NULL\n"); return NULL; }
 ### [CRIT-03] `fread()`-Rückgabewerte nie geprüft — uninitalisierter Speicher
 **Dateien:** `training/model.h:81-146`, `training/train_large.m:17-55`
 **Schweregrad:** KRITISCH
-<<<<<<< HEAD
-<<<<<<< HEAD
 **Status: BEHOBEN** (2026-03-02, Branch `fix/crit-security-findings`)
-=======
->>>>>>> 1a7a05708bf5e34349150cb6e0805c16027b9fd7
-=======
-**Status: BEHOBEN** (2026-03-02, Branch `fix/crit-security-findings`)
->>>>>>> c2347daf9d3370faacad078b5c396e318826e13a
 
 ```c
 // model.h:81
@@ -137,14 +116,7 @@ if (m->cfg.dim <= 0 || m->cfg.dim > 65536 || m->cfg.n_layers <= 0) {
 ### [CRIT-04] Integer Overflow in Speicher-Berechnung
 **Dateien:** `training/stories_io.h:13-14`, `training/ane_mil_gen.h:12-13`
 **Schweregrad:** KRITISCH
-<<<<<<< HEAD
-<<<<<<< HEAD
 **Status: BEHOBEN** (2026-03-02, Branch `fix/crit-security-findings`)
-=======
->>>>>>> 1a7a05708bf5e34349150cb6e0805c16027b9fd7
-=======
-**Status: BEHOBEN** (2026-03-02, Branch `fix/crit-security-findings`)
->>>>>>> c2347daf9d3370faacad078b5c396e318826e13a
 
 ```c
 // stories_io.h:13-14
@@ -168,19 +140,7 @@ size_t tot = 128 + ws;
 ### [HIGH-01] Keine Eingabevalidierung für Token-Indizes
 **Datei:** `training/train_large.m:375-376`
 **Schweregrad:** HOCH
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
 **Status: BEHOBEN** (2026-03-02, Branch `fix/high-security-findings`)
->>>>>>> e2e0c8332aca99dde38764e8a4a14f82b04ec84d
-=======
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
-=======
->>>>>>> 1a7a05708bf5e34349150cb6e0805c16027b9fd7
-=======
->>>>>>> c2347daf9d3370faacad078b5c396e318826e13a
 
 ```c
 size_t max_pos = n_tokens - SEQ - 1;
@@ -200,19 +160,7 @@ uint16_t *input_tokens = token_data + pos;
 ### [HIGH-02] Checkpoint-Pfad mit relativer Verzeichnis-Navigation
 **Datei:** `training/train_large.m:8-10`
 **Schweregrad:** HOCH
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
 **Status: BEHOBEN** (2026-03-02, Branch `fix/high-security-findings`)
->>>>>>> e2e0c8332aca99dde38764e8a4a14f82b04ec84d
-=======
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
-=======
->>>>>>> 1a7a05708bf5e34349150cb6e0805c16027b9fd7
-=======
->>>>>>> c2347daf9d3370faacad078b5c396e318826e13a
 
 ```c
 #define CKPT_PATH "ane_stories110M_ckpt.bin"
@@ -230,19 +178,7 @@ uint16_t *input_tokens = token_data + pos;
 ### [HIGH-03] `execl()` zur Prozessneustart ohne Argument-Validierung
 **Datei:** `training/train_large.m:331`
 **Schweregrad:** HOCH
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
 **Status: BEHOBEN** (2026-03-02, Branch `fix/high-security-findings`)
->>>>>>> e2e0c8332aca99dde38764e8a4a14f82b04ec84d
-=======
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
-=======
->>>>>>> 1a7a05708bf5e34349150cb6e0805c16027b9fd7
-=======
->>>>>>> c2347daf9d3370faacad078b5c396e318826e13a
 
 ```c
 execl(argv[0], argv[0], "--resume", NULL);
@@ -258,19 +194,7 @@ execl(argv[0], argv[0], "--resume", NULL);
 ### [HIGH-04] Fehlende `malloc()`/`calloc()`-Rückgabewert-Prüfungen
 **Dateien:** Alle `.m` und `.h` Dateien
 **Schweregrad:** HOCH
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
 **Status: BEHOBEN** (2026-03-02, Branch `fix/high-security-findings`)
->>>>>>> e2e0c8332aca99dde38764e8a4a14f82b04ec84d
-=======
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
-=======
->>>>>>> 1a7a05708bf5e34349150cb6e0805c16027b9fd7
-=======
->>>>>>> c2347daf9d3370faacad078b5c396e318826e13a
 
 ```c
 // train_large.m:219
@@ -284,19 +208,7 @@ Keiner der `malloc()`/`calloc()`-Aufrufe prüft den Rückgabewert auf NULL. Bei 
 ### [HIGH-05] ANE-Inferenz ohne Fehlerprüfung im Trainings-Hot-Path
 **Datei:** `training/stories_io.h:131-134`
 **Schweregrad:** HOCH
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
 **Status: BEHOBEN** (2026-03-02, Branch `fix/high-security-findings`)
->>>>>>> e2e0c8332aca99dde38764e8a4a14f82b04ec84d
-=======
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
-=======
->>>>>>> 1a7a05708bf5e34349150cb6e0805c16027b9fd7
-=======
->>>>>>> c2347daf9d3370faacad078b5c396e318826e13a
 
 ```c
 static void ane_run(Kern *k) {
@@ -316,16 +228,7 @@ static void ane_run(Kern *k) {
 ### [MED-01] IOSurface Lock ohne Fehlerbehandlung
 **Datei:** `training/stories_io.h:62-83`
 **Schweregrad:** MITTEL
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 **Status: BEHOBEN** (2026-03-02, Branch `fix/med-security-findings`)
-=======
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
-=======
->>>>>>> 1a7a05708bf5e34349150cb6e0805c16027b9fd7
-=======
->>>>>>> c2347daf9d3370faacad078b5c396e318826e13a
 
 ```c
 IOSurfaceLock(s, 0, NULL);  // Return-Code ignoriert
@@ -338,16 +241,7 @@ IOSurfaceLock(s, 0, NULL);  // Return-Code ignoriert
 ### [MED-02] Temporäres Verzeichnis nicht sicher erstellt (TOCTOU-Risiko)
 **Datei:** `training/ane_runtime.h:68-80`, `training/stories_io.h:94-100`
 **Schweregrad:** MITTEL
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 **Status: BEHOBEN** (2026-03-02, Branch `fix/med-security-findings`)
-=======
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
-=======
->>>>>>> 1a7a05708bf5e34349150cb6e0805c16027b9fd7
-=======
->>>>>>> c2347daf9d3370faacad078b5c396e318826e13a
 
 ```objc
 NSString *td = [NSTemporaryDirectory() stringByAppendingPathComponent:hx];
@@ -361,16 +255,7 @@ TOCTOU-Race zwischen `createDirectoryAtPath` und `writeToFile`. Der `hexStringId
 ### [MED-03] MIL-Text-Generierung ohne Parameter-Validierung
 **Datei:** `training/ane_mil_gen.h:32-52`
 **Schweregrad:** MITTEL
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 **Status: BEHOBEN** (2026-03-02, Branch `fix/med-security-findings`)
-=======
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
-=======
->>>>>>> 1a7a05708bf5e34349150cb6e0805c16027b9fd7
-=======
->>>>>>> c2347daf9d3370faacad078b5c396e318826e13a
 
 ```objc
 return [NSString stringWithFormat:
@@ -384,16 +269,7 @@ Negative oder extrem große `in_ch`/`out_ch`/`spatial`-Werte durch fehlerhafte K
 ### [MED-04] Keine Endianness-Prüfung bei Checkpoint-Serialisierung
 **Datei:** `training/train_large.m:110-181`
 **Schweregrad:** MITTEL
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 **Status: BEHOBEN** (2026-03-02, Branch `fix/med-security-findings`)
-=======
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
-=======
->>>>>>> 1a7a05708bf5e34349150cb6e0805c16027b9fd7
-=======
->>>>>>> c2347daf9d3370faacad078b5c396e318826e13a
 
 ```c
 h.magic = 0x424C5A54;
@@ -407,16 +283,7 @@ Das `CkptHdr`-Struct wird als binärer Dump ohne Endianness-Marker geschrieben. 
 ### [MED-05] NEON-Vektorisierung ohne Alignment-Garantie
 **Datei:** `training/stories_io.h:41-58`
 **Schweregrad:** MITTEL
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 **Status: BEHOBEN** (2026-03-02, Branch `fix/med-security-findings`)
-=======
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
-=======
->>>>>>> 1a7a05708bf5e34349150cb6e0805c16027b9fd7
-=======
->>>>>>> c2347daf9d3370faacad078b5c396e318826e13a
 
 ```c
 float16x8_t h = vld1q_f16((const __fp16*)(src + i));
@@ -429,16 +296,7 @@ Zeiger-Arithmetik mit `ch_off * sp` könnte das für NEON benötigte Alignment v
 ### [MED-06] Globale Variablen ohne Thread-Safety
 **Datei:** `training/stories_io.h`, `training/stories_config.h`
 **Schweregrad:** MITTEL
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 **Status: BEHOBEN** (2026-03-02, Branch `fix/med-security-findings`)
-=======
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
-=======
->>>>>>> 1a7a05708bf5e34349150cb6e0805c16027b9fd7
-=======
->>>>>>> c2347daf9d3370faacad078b5c396e318826e13a
 
 ```c
 static bool g_ane_loaded = false;

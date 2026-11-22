@@ -23,11 +23,6 @@ static ANEKernel *compile_conv_kernel(const float *weights, int in_ch, int out_c
     size_t outBytes = (size_t)out_ch * spatial * 4;
     return ane_compile([mil dataUsingEncoding:NSUTF8StringEncoding], wb, 1, &inBytes, 1, &outBytes);
 }
-<<<<<<< HEAD
-#include <math.h>
-#include <string.h>
-#include <time.h>
-=======
 
 // Compile baked-weight conv with FP16 IOSurfaces (for fused ANE path)
 static ANEKernel *compile_conv_kernel_fp16io(const float *weights, int in_ch, int out_ch, int spatial) {
@@ -100,7 +95,6 @@ static MetalContext g_metal = {0};
 #ifndef QWEN_DEBUG
 #define QWEN_DEBUG 0
 #endif
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
 
 // Qwen2.5-0.5B-Instruct architecture
 #define QWEN_DIM         896
@@ -122,23 +116,6 @@ static MetalContext g_metal = {0};
 #define QWEN_KV_DIM      (QWEN_KV_HEADS * QWEN_HEAD_DIM)   // 128
 
 typedef struct {
-<<<<<<< HEAD
-    // Weights (f32)
-    float *embed;                          // [vocab, dim]
-    float *rms_att[QWEN_LAYERS];          // [dim]
-    float *wq[QWEN_LAYERS];              // [q_dim, dim]
-    float *wk[QWEN_LAYERS];              // [kv_dim, dim]
-    float *wv[QWEN_LAYERS];              // [kv_dim, dim]
-    float *wo[QWEN_LAYERS];              // [dim, q_dim]
-    float *rms_ffn[QWEN_LAYERS];         // [dim]
-    float *w_gate[QWEN_LAYERS];          // [hidden, dim]
-    float *w_up[QWEN_LAYERS];            // [hidden, dim]
-    float *w_down[QWEN_LAYERS];          // [dim, hidden]
-    float *rms_final;                      // [dim]
-    // wcls = embed (tied)
-
-    // ANE kernels (one per linear projection per layer)
-=======
     // Weight format: 0 = F32 everywhere, 1 = F16 projections
     int weight_fmt;
 
@@ -195,7 +172,6 @@ typedef struct {
     // wcls = embed (tied, always F32)
 
     // ANE kernels -- unfused (one per linear projection per layer)
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
     ANEKernel *k_q[QWEN_LAYERS];
     ANEKernel *k_k[QWEN_LAYERS];
     ANEKernel *k_v[QWEN_LAYERS];
@@ -208,14 +184,11 @@ typedef struct {
     #define QWEN_LM_CHUNK_SIZE 9496  // 151936 / 16
     ANEKernel *k_lmhead[QWEN_LM_CHUNKS];
 
-<<<<<<< HEAD
-=======
     // ANE kernels -- fused (reduces 184 → 112 kernels, under 119 limit)
     ANEKernel *k_qkv[QWEN_LAYERS];     // fused Q+K+V → 3 outputs
     ANEKernel *k_ffn_up[QWEN_LAYERS];  // fused Gate+Up → 2 outputs
     int use_ane;  // 1 = fused ANE matmuls + CPU element-wise
 
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
     // Q/K/V biases per layer
     float *q_bias[QWEN_LAYERS];   // [q_dim]
     float *k_bias[QWEN_LAYERS];   // [kv_dim]
@@ -238,53 +211,6 @@ typedef struct {
     float *logits;  // [vocab]
 } QwenModel;
 
-<<<<<<< HEAD
-// ── CPU ops ──────────────────────────────────────────────────────────
-
-static void qwen_rmsnorm(float *out, const float *x, const float *w, int D) {
-    float ss = 0;
-    for (int i = 0; i < D; i++) ss += x[i] * x[i];
-    ss = 1.0f / sqrtf(ss / D + QWEN_RMS_EPS);
-    for (int i = 0; i < D; i++) out[i] = x[i] * ss * w[i];
-}
-
-static void qwen_rope(float *q, float *k, int pos, int n_q_heads, int n_kv_heads, int head_dim) {
-    // Qwen uses rotate_half RoPE (NOT interleaved pairs):
-    //   rotate_half(x) = [-x[dim/2:], x[:dim/2]]
-    //   q_embed = q * cos + rotate_half(q) * sin
-    // cos/sin have shape [head_dim/2] and are applied to both halves
-    int half = head_dim / 2;
-
-    // Precompute cos/sin for this position (head_dim/2 frequencies)
-    float cos_v[half], sin_v[half];
-    for (int i = 0; i < half; i++) {
-        float freq = 1.0f / powf(QWEN_ROPE_THETA, (float)(2 * i) / head_dim);
-        float angle = pos * freq;
-        cos_v[i] = cosf(angle);
-        sin_v[i] = sinf(angle);
-    }
-
-    // Apply to Q heads
-    for (int h = 0; h < n_q_heads; h++) {
-        float *qh = q + h * head_dim;
-        for (int i = 0; i < half; i++) {
-            float q_first = qh[i];
-            float q_second = qh[i + half];
-            // rotate_half: [-q_second, q_first]
-            qh[i]        = q_first * cos_v[i] + (-q_second) * sin_v[i];
-            qh[i + half]  = q_second * cos_v[i] + q_first * sin_v[i];
-        }
-    }
-
-    // Apply to K heads
-    for (int h = 0; h < n_kv_heads; h++) {
-        float *kh = k + h * head_dim;
-        for (int i = 0; i < half; i++) {
-            float k_first = kh[i];
-            float k_second = kh[i + half];
-            kh[i]        = k_first * cos_v[i] + (-k_second) * sin_v[i];
-            kh[i + half]  = k_second * cos_v[i] + k_first * sin_v[i];
-=======
 // ── Precomputed RoPE table ───────────────────────────────────────────
 
 static float g_rope_cos[QWEN_MAX_SEQ][QWEN_HEAD_DIM / 2];
@@ -353,34 +279,11 @@ static void qwen_rope(float *q, float *k, int pos, int n_q_heads, int n_kv_heads
             float f = kh[i], se = kh[i + half];
             kh[i]        = f * cv[i] - se * sv[i];
             kh[i + half] = se * cv[i] + f * sv[i];
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
         }
     }
 }
 
 static void qwen_silu(float *x, int n) {
-<<<<<<< HEAD
-    for (int i = 0; i < n; i++)
-        x[i] = x[i] / (1.0f + expf(-x[i]));
-}
-
-// ── ANE projection helper (single token: spatial=1) ─────────────────
-
-static void ane_project(ANEKernel *kernel, const float *in, float *out,
-                        int in_dim, int out_dim) {
-    // For single-token inference: spatial=1
-    ane_write_input(kernel, 0, in, in_dim * sizeof(float));
-    ane_eval(kernel);
-    ane_read_output(kernel, 0, out, out_dim * sizeof(float));
-}
-
-// CPU matmul via Accelerate BLAS: y = W @ x, W[out_dim, in_dim]
-#include <Accelerate/Accelerate.h>
-
-static void cpu_project(const float *W, const float *x, float *y, int in_dim, int out_dim) {
-    // y = W @ x where W is [out_dim, in_dim] row-major
-    // cblas_sgemv: y = alpha * A * x + beta * y
-=======
     int i = 0;
     float32x4_t one = vdupq_n_f32(1.0f);
     for (; i + 3 < n; i += 4) {
@@ -482,7 +385,6 @@ static ANEKernel *compile_ffn_up_kernel(const float *w_gate, const float *w_up,
 
 // CPU matmul via Accelerate BLAS: y = W @ x, W[out_dim, in_dim]
 static void cpu_project(const float *W, const float *x, float *y, int in_dim, int out_dim) {
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
     cblas_sgemv(CblasRowMajor, CblasNoTrans,
                 out_dim, in_dim,
                 1.0f, W, in_dim,
@@ -490,11 +392,6 @@ static void cpu_project(const float *W, const float *x, float *y, int in_dim, in
                 0.0f, y, 1);
 }
 
-<<<<<<< HEAD
-// Toggle: 1 = use ANE for projections, 0 = CPU fallback
-#define USE_ANE_PROJECTIONS 0
-
-=======
 // Bulk F16→F32 conversion using NEON vcvt
 static void convert_f16_to_f32(const _Float16 *src, float *dst, size_t n) {
     size_t i = 0;
@@ -798,7 +695,6 @@ static void gpu_project_f16(id<MTLBuffer> w_buf, const float *x, float *y,
 
 #endif // __OBJC__
 
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
 // ── Forward one token ────────────────────────────────────────────────
 
 static int qwen_forward(QwenModel *m, int token) {
@@ -812,49 +708,21 @@ static int qwen_forward(QwenModel *m, int token) {
         // Attention RMSNorm
         qwen_rmsnorm(m->xb, m->x, m->rms_att[l], D);
 
-<<<<<<< HEAD
-        // Debug: print first layer input/output norms
-        if (l == 0 && pos == 0) {
-            float xnorm = 0, qnorm = 0;
-=======
 #if QWEN_DEBUG
         if (l == 0 && pos == 0) {
             float xnorm = 0;
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
             for (int i = 0; i < D; i++) xnorm += m->xb[i] * m->xb[i];
             printf("  L0 RMSNorm out norm=%.4f (first 4: %.4f %.4f %.4f %.4f)\n",
                    sqrtf(xnorm), m->xb[0], m->xb[1], m->xb[2], m->xb[3]);
         }
-<<<<<<< HEAD
-
-        // QKV projections (ANE) + bias
-=======
 #endif
 
         // QKV projections + bias (CPU path -- GPU overhead too high for small matmuls)
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
         #if USE_ANE_PROJECTIONS
         ane_project(m->k_q[l], m->xb, m->q, D, QWEN_Q_DIM);
         ane_project(m->k_k[l], m->xb, m->k, D, QWEN_KV_DIM);
         ane_project(m->k_v[l], m->xb, m->v, D, QWEN_KV_DIM);
         #else
-<<<<<<< HEAD
-        cpu_project(m->wq[l], m->xb, m->q, D, QWEN_Q_DIM);
-        cpu_project(m->wk[l], m->xb, m->k, D, QWEN_KV_DIM);
-        cpu_project(m->wv[l], m->xb, m->v, D, QWEN_KV_DIM);
-        #endif
-        // Apply Q/K biases
-        if (m->q_bias[l]) {
-            for (int i = 0; i < QWEN_Q_DIM; i++) m->q[i] += m->q_bias[l][i];
-        }
-        if (m->k_bias[l]) {
-            for (int i = 0; i < QWEN_KV_DIM; i++) m->k[i] += m->k_bias[l][i];
-        }
-        if (m->v_bias[l]) {
-            for (int i = 0; i < QWEN_KV_DIM; i++) m->v[i] += m->v_bias[l][i];
-        }
-
-=======
         if (m->weight_fmt == 3) {
             cpu_project_q4_amx(m->wq_q8[l], m->xb, m->q, D, QWEN_Q_DIM);
             cpu_project_q4_amx(m->wk_q8[l], m->xb, m->k, D, QWEN_KV_DIM);
@@ -878,16 +746,11 @@ static int qwen_forward(QwenModel *m, int token) {
             vDSP_vadd(m->v, 1, m->v_bias[l], 1, m->v, 1, (vDSP_Length)QWEN_KV_DIM);
 
 #if QWEN_DEBUG
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
         if (l == 0 && pos == 0) {
             float qn = 0;
             for (int i = 0; i < QWEN_Q_DIM; i++) qn += m->q[i] * m->q[i];
             printf("  L0 ANE Q norm=%.4f (first 4: %.4f %.4f %.4f %.4f)\n",
                    sqrtf(qn), m->q[0], m->q[1], m->q[2], m->q[3]);
-<<<<<<< HEAD
-            // CPU reference
-=======
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
             float cpu_q[4] = {0};
             for (int i = 0; i < 4; i++) {
                 for (int j = 0; j < D; j++)
@@ -897,10 +760,7 @@ static int qwen_forward(QwenModel *m, int token) {
             printf("  L0 CPU Q first 4: %.4f %.4f %.4f %.4f\n",
                    cpu_q[0], cpu_q[1], cpu_q[2], cpu_q[3]);
         }
-<<<<<<< HEAD
-=======
 #endif
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
 
         // RoPE
         qwen_rope(m->q, m->k, pos, QWEN_HEADS, QWEN_KV_HEADS, QWEN_HEAD_DIM);
@@ -919,31 +779,6 @@ static int qwen_forward(QwenModel *m, int token) {
         for (int h = 0; h < QWEN_HEADS; h++) {
             int kv_h = h / QWEN_GQA_FACTOR;
             float *qh = m->q + h * QWEN_HEAD_DIM;
-<<<<<<< HEAD
-
-            // Attention scores: Q @ K^T for all positions up to pos
-            float max_score = -1e9f;
-            for (int t = 0; t <= pos; t++) {
-                float *kt = m->kv_cache_k[l] + t * QWEN_KV_DIM + kv_h * QWEN_HEAD_DIM;
-                // Use BLAS dot product for precision
-                float score = cblas_sdot(QWEN_HEAD_DIM, qh, 1, kt, 1);
-                m->att[h * QWEN_MAX_SEQ + t] = score * scale;
-                if (score * scale > max_score) max_score = score * scale;
-            }
-            // Softmax (double accumulation for precision)
-            double sum = 0;
-            for (int t = 0; t <= pos; t++) {
-                m->att[h * QWEN_MAX_SEQ + t] = expf(m->att[h * QWEN_MAX_SEQ + t] - max_score);
-                sum += (double)m->att[h * QWEN_MAX_SEQ + t];
-            }
-            float inv_sum = (float)(1.0 / sum);
-            for (int t = 0; t <= pos; t++)
-                m->att[h * QWEN_MAX_SEQ + t] *= inv_sum;
-
-            // Weighted sum of V: attn_out[h] += att[t] * V[t] for each t
-            for (int t = 0; t <= pos; t++) {
-                float a = m->att[h * QWEN_MAX_SEQ + t];
-=======
             float *att_h = m->att + h * QWEN_MAX_SEQ;
             int seq_len = pos + 1;
 
@@ -968,7 +803,6 @@ static int qwen_forward(QwenModel *m, int token) {
             // Weighted sum of V
             for (int t = 0; t <= pos; t++) {
                 float a = att_h[t];
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
                 float *vt = m->kv_cache_v[l] + t * QWEN_KV_DIM + kv_h * QWEN_HEAD_DIM;
                 cblas_saxpy(QWEN_HEAD_DIM, a, vt, 1,
                            attn_out + h * QWEN_HEAD_DIM, 1);
@@ -979,14 +813,6 @@ static int qwen_forward(QwenModel *m, int token) {
         #if USE_ANE_PROJECTIONS
         ane_project(m->k_o[l], attn_out, o_out, QWEN_Q_DIM, D);
         #else
-<<<<<<< HEAD
-        cpu_project(m->wo[l], attn_out, o_out, QWEN_Q_DIM, D);
-        #endif
-
-        // Residual
-        for (int i = 0; i < D; i++) m->x[i] += o_out[i];
-
-=======
         if (m->weight_fmt == 3)
             cpu_project_q4_amx(m->wo_q8[l], attn_out, o_out, QWEN_Q_DIM, D);
         else if (m->weight_fmt == 2)
@@ -999,7 +825,6 @@ static int qwen_forward(QwenModel *m, int token) {
         vDSP_vadd(m->x, 1, o_out, 1, m->x, 1, (vDSP_Length)D);
 
 #if QWEN_DEBUG
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
         if (l == 0 && pos == 0) {
             float pan = 0;
             for (int i = 0; i < D; i++) pan += m->x[i] * m->x[i];
@@ -1010,10 +835,7 @@ static int qwen_forward(QwenModel *m, int token) {
             printf("  L0 o_proj out norm=%.4f first4=[%.6f, %.6f, %.6f, %.6f]\n",
                    sqrtf(on), o_out[0], o_out[1], o_out[2], o_out[3]);
         }
-<<<<<<< HEAD
-=======
 #endif
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
 
         // FFN RMSNorm
         qwen_rmsnorm(m->xb, m->x, m->rms_ffn[l], D);
@@ -1023,12 +845,6 @@ static int qwen_forward(QwenModel *m, int token) {
         ane_project(m->k_gate[l], m->xb, m->hb, D, HD);
         ane_project(m->k_up[l], m->xb, m->hb2, D, HD);
         #else
-<<<<<<< HEAD
-        cpu_project(m->w_gate[l], m->xb, m->hb, D, HD);
-        cpu_project(m->w_up[l], m->xb, m->hb2, D, HD);
-        #endif
-
-=======
         if (m->weight_fmt == 3) {
             cpu_project_q4_amx(m->wgate_q8[l], m->xb, m->hb, D, HD);
             cpu_project_q4_amx(m->wup_q8[l], m->xb, m->hb2, D, HD);
@@ -1042,7 +858,6 @@ static int qwen_forward(QwenModel *m, int token) {
         #endif
 
 #if QWEN_DEBUG
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
         if (l == 0 && pos == 0) {
             float gn = 0, un = 0;
             for (int i = 0; i < HD; i++) { gn += m->hb[i]*m->hb[i]; un += m->hb2[i]*m->hb2[i]; }
@@ -1050,31 +865,16 @@ static int qwen_forward(QwenModel *m, int token) {
             printf("  L0 gate first4=[%.6f, %.6f, %.6f, %.6f]\n",
                    m->hb[0], m->hb[1], m->hb[2], m->hb[3]);
         }
-<<<<<<< HEAD
-
-        qwen_silu(m->hb, HD);
-        for (int i = 0; i < HD; i++) m->hb[i] *= m->hb2[i];
-=======
 #endif
 
         qwen_silu(m->hb, HD);
         // SiLU(gate) * up (vectorized element-wise multiply)
         vDSP_vmul(m->hb, 1, m->hb2, 1, m->hb, 1, (vDSP_Length)HD);
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
 
         float ffn_out[QWEN_DIM];
         #if USE_ANE_PROJECTIONS
         ane_project(m->k_down[l], m->hb, ffn_out, HD, D);
         #else
-<<<<<<< HEAD
-        cpu_project(m->w_down[l], m->hb, ffn_out, HD, D);
-        #endif
-
-        // Residual
-        for (int i = 0; i < D; i++) m->x[i] += ffn_out[i];
-
-        // Debug: hidden state after each layer (first 3 layers, first token only)
-=======
         if (m->weight_fmt == 3)
             cpu_project_q4_amx(m->wdown_q8[l], m->hb, ffn_out, HD, D);
         else if (m->weight_fmt == 2)
@@ -1087,53 +887,35 @@ static int qwen_forward(QwenModel *m, int token) {
         vDSP_vadd(m->x, 1, ffn_out, 1, m->x, 1, (vDSP_Length)D);
 
 #if QWEN_DEBUG
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
         if (l < 3 && pos == 0) {
             float hn = 0;
             for (int i = 0; i < D; i++) hn += m->x[i] * m->x[i];
             printf("  C hidden[%d] norm=%.4f first4=[%.4f, %.4f, %.4f, %.4f]\n",
                    l+1, sqrtf(hn), m->x[0], m->x[1], m->x[2], m->x[3]);
         }
-<<<<<<< HEAD
-=======
 #endif
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
     }
 
     // Final RMSNorm
     qwen_rmsnorm(m->xb, m->x, m->rms_final, D);
 
-<<<<<<< HEAD
-    // Debug: check final hidden state before LM head
-=======
 #if QWEN_DEBUG
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
     if (m->pos < 2) {
         float fn = 0;
         for (int i = 0; i < D; i++) fn += m->xb[i] * m->xb[i];
         printf("  Final hidden norm=%.4f (first 4: %.6f %.6f %.6f %.6f)\n",
                sqrtf(fn), m->xb[0], m->xb[1], m->xb[2], m->xb[3]);
     }
-<<<<<<< HEAD
-
-    // LM head via Accelerate BLAS: logits = embed @ xb
-    // embed is [vocab, dim] row-major
-=======
 #endif
 
     // LM head via Accelerate BLAS (AMX, fastest for dim<=896)
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
     cblas_sgemv(CblasRowMajor, CblasNoTrans,
                 QWEN_VOCAB, D,
                 1.0f, m->embed, D,
                 m->xb, 1,
                 0.0f, m->logits, 1);
 
-<<<<<<< HEAD
-    // Debug: check logits
-=======
 #if QWEN_DEBUG
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
     if (m->pos < 2) {
         float lmax = m->logits[0], lmin = m->logits[0];
         int nonzero = 0;
@@ -1144,26 +926,6 @@ static int qwen_forward(QwenModel *m, int token) {
         }
         printf("  Logits: min=%.4f max=%.4f nonzero=%d/%d\n", lmin, lmax, nonzero, QWEN_VOCAB);
     }
-<<<<<<< HEAD
-
-    m->pos++;
-
-    // Argmax
-    int max_idx = 0;
-    float max_val = m->logits[0];
-    for (int i = 1; i < QWEN_VOCAB; i++) {
-        if (m->logits[i] > max_val) {
-            max_val = m->logits[i];
-            max_idx = i;
-        }
-    }
-    return max_idx;
-}
-
-// ── Compile all ANE kernels ──────────────────────────────────────────
-
-static void qwen_compile_kernels(QwenModel *m) {
-=======
 #endif
 
     m->pos++;
@@ -2160,7 +1922,6 @@ static int qwen_prefill_gpu(QwenModel *m, const int *tokens, int n_tokens) {
 
 static void qwen_compile_kernels(QwenModel *m) {
 #if USE_ANE_PROJECTIONS
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
     int D = QWEN_DIM, HD = QWEN_HIDDEN;
     printf("Compiling %d ANE kernels...\n", QWEN_LAYERS * 7 + 1);
     for (int l = 0; l < QWEN_LAYERS; l++) {
@@ -2174,10 +1935,6 @@ static void qwen_compile_kernels(QwenModel *m) {
         printf("  Layer %d/%d compiled\r", l+1, QWEN_LAYERS);
         fflush(stdout);
     }
-<<<<<<< HEAD
-    // LM head (tied = embedding, chunked into 16 pieces)
-=======
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
     for (int c = 0; c < QWEN_LM_CHUNKS; c++) {
         float *chunk_weights = m->embed + c * QWEN_LM_CHUNK_SIZE * D;
         m->k_lmhead[c] = compile_conv_kernel(chunk_weights, D, QWEN_LM_CHUNK_SIZE, 1);
@@ -2186,8 +1943,6 @@ static void qwen_compile_kernels(QwenModel *m) {
         }
     }
     printf("\nAll kernels compiled.\n");
-<<<<<<< HEAD
-=======
 #else
     printf("CPU-only mode (ANE kernel compilation skipped).\n");
     (void)m;
@@ -2230,26 +1985,11 @@ static void qwen_compile_kernels_fused(QwenModel *m) {
     printf("\nFused ANE: %d/%d compiled, %d failed\n", compiled, total, failed);
     if (failed > 0)
         printf("WARNING: some kernels failed — ANE inference will fall back to CPU for those projections\n");
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
 }
 
 // ── Allocate buffers ─────────────────────────────────────────────────
 
 static void qwen_alloc(QwenModel *m) {
-<<<<<<< HEAD
-    m->x      = (float*)calloc(QWEN_DIM, sizeof(float));
-    m->xb     = (float*)calloc(QWEN_DIM, sizeof(float));
-    m->q      = (float*)calloc(QWEN_Q_DIM, sizeof(float));
-    m->k      = (float*)calloc(QWEN_KV_DIM, sizeof(float));
-    m->v      = (float*)calloc(QWEN_KV_DIM, sizeof(float));
-    m->att    = (float*)calloc(QWEN_HEADS * QWEN_MAX_SEQ, sizeof(float));
-    m->hb     = (float*)calloc(QWEN_HIDDEN, sizeof(float));
-    m->hb2    = (float*)calloc(QWEN_HIDDEN, sizeof(float));
-    m->logits = (float*)calloc(QWEN_VOCAB, sizeof(float));
-    for (int l = 0; l < QWEN_LAYERS; l++) {
-        m->kv_cache_k[l] = (float*)calloc(QWEN_MAX_SEQ * QWEN_KV_DIM, sizeof(float));
-        m->kv_cache_v[l] = (float*)calloc(QWEN_MAX_SEQ * QWEN_KV_DIM, sizeof(float));
-=======
     m->x      = (float*)qwen_calloc(QWEN_DIM, sizeof(float), "x");
     m->xb     = (float*)qwen_calloc(QWEN_DIM, sizeof(float), "xb");
     m->q      = (float*)qwen_calloc(QWEN_Q_DIM, sizeof(float), "q");
@@ -2270,7 +2010,6 @@ static void qwen_reset(QwenModel *m) {
     for (int l = 0; l < QWEN_LAYERS; l++) {
         memset(m->kv_cache_k[l], 0, QWEN_MAX_SEQ * QWEN_KV_DIM * sizeof(float));
         memset(m->kv_cache_v[l], 0, QWEN_MAX_SEQ * QWEN_KV_DIM * sizeof(float));
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
     }
     m->pos = 0;
 }

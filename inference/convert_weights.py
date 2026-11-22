@@ -1,13 +1,6 @@
 #!/usr/bin/env python3
 """Convert Qwen2.5-0.5B-Instruct safetensors → flat binary for ANE inference.
 
-<<<<<<< HEAD
-Output format: config header (7 ints) + all weights in f32, layer by layer.
-Matches the layout expected by qwen_ane_infer.h.
-
-Usage:
-    python3 convert_weights.py /path/to/Qwen2.5-0.5B-Instruct /path/to/output.bin
-=======
 Output format (F32): config header (8 ints) + all weights in f32
 Output format (F16): config header (8 ints) + embeddings f32 + projection weights f16
 Output format (Q8):  config header (8 ints) + embeddings f32 + projection weights q8_0
@@ -19,7 +12,6 @@ Q4_0 format: blocks of 32 values, each block = 1 f16 scale + 1 f16 zero + 16 uin
 
 Usage:
     python3 convert_weights.py <model_dir> <output.bin> [--f16|--q8|--q4]
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
 """
 
 import struct
@@ -28,12 +20,6 @@ import numpy as np
 from pathlib import Path
 from safetensors import safe_open
 
-<<<<<<< HEAD
-def convert(model_dir: str, output_path: str):
-    model_dir = Path(model_dir)
-
-    # Load safetensors
-=======
 Q8_BLOCK_SIZE = 32
 Q4_BLOCK_SIZE = 32
 
@@ -102,7 +88,6 @@ def quantize_q8_0(weights_f32):
 def convert(model_dir: str, output_path: str, fmt: str = "f32"):
     model_dir = Path(model_dir)
 
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
     st_files = list(model_dir.glob("*.safetensors"))
     if not st_files:
         print(f"No safetensors files in {model_dir}")
@@ -115,13 +100,8 @@ def convert(model_dir: str, output_path: str, fmt: str = "f32"):
                 tensors[key] = sf.get_tensor(key).float().numpy()
 
     print(f"Loaded {len(tensors)} tensors from {len(st_files)} files")
-<<<<<<< HEAD
-
-    # Qwen2.5-0.5B config
-=======
     print(f"Mode: {fmt.upper()} projections (embeddings + norms + biases stay F32)")
 
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
     dim = 896
     hidden = 4864
     n_layers = 24
@@ -129,28 +109,6 @@ def convert(model_dir: str, output_path: str, fmt: str = "f32"):
     n_kv_heads = 2
     vocab_size = 151936
     max_seq = 512
-<<<<<<< HEAD
-
-    with open(output_path, "wb") as f:
-        # Config header: 7 x int32
-        f.write(struct.pack("iiiiiii",
-            dim, hidden, n_layers, n_heads, n_kv_heads, vocab_size, max_seq))
-
-        # Embedding [vocab, dim]
-        emb = tensors["model.embed_tokens.weight"].astype(np.float32)
-        print(f"embed: {emb.shape}")
-        f.write(emb.tobytes())
-
-        # Per-layer weights
-        for l in range(n_layers):
-            prefix = f"model.layers.{l}"
-
-            # Attention norm
-            rms_att = tensors[f"{prefix}.input_layernorm.weight"].astype(np.float32)
-            f.write(rms_att.tobytes())
-
-            # Q, K, V projections
-=======
     fmt_flag = {"f32": 0, "f16": 1, "q8": 2, "q4": 3}[fmt]
 
     def write_proj(f_out, tensor_f32):
@@ -177,26 +135,15 @@ def convert(model_dir: str, output_path: str, fmt: str = "f32"):
             rms_att = tensors[f"{prefix}.input_layernorm.weight"].astype(np.float32)
             f.write(rms_att.tobytes())
 
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
             wq = tensors[f"{prefix}.self_attn.q_proj.weight"].astype(np.float32)
             wk = tensors[f"{prefix}.self_attn.k_proj.weight"].astype(np.float32)
             wv = tensors[f"{prefix}.self_attn.v_proj.weight"].astype(np.float32)
             wo = tensors[f"{prefix}.self_attn.o_proj.weight"].astype(np.float32)
-<<<<<<< HEAD
-            f.write(wq.tobytes())
-            f.write(wk.tobytes())
-            f.write(wv.tobytes())
-            f.write(wo.tobytes())
-
-            # Q/K biases (Qwen has them)
-            # Q/K/V biases
-=======
             write_proj(f, wq)
             write_proj(f, wk)
             write_proj(f, wv)
             write_proj(f, wo)
 
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
             qb = tensors.get(f"{prefix}.self_attn.q_proj.bias")
             kb = tensors.get(f"{prefix}.self_attn.k_proj.bias")
             vb = tensors.get(f"{prefix}.self_attn.v_proj.bias")
@@ -204,24 +151,6 @@ def convert(model_dir: str, output_path: str, fmt: str = "f32"):
             f.write((kb if kb is not None else np.zeros(wk.shape[0])).astype(np.float32).tobytes())
             f.write((vb if vb is not None else np.zeros(wv.shape[0])).astype(np.float32).tobytes())
 
-<<<<<<< HEAD
-            # FFN norm
-            rms_ffn = tensors[f"{prefix}.post_attention_layernorm.weight"].astype(np.float32)
-            f.write(rms_ffn.tobytes())
-
-            # FFN: gate, up, down
-            w_gate = tensors[f"{prefix}.mlp.gate_proj.weight"].astype(np.float32)
-            w_up = tensors[f"{prefix}.mlp.up_proj.weight"].astype(np.float32)
-            w_down = tensors[f"{prefix}.mlp.down_proj.weight"].astype(np.float32)
-            f.write(w_gate.tobytes())
-            f.write(w_up.tobytes())
-            f.write(w_down.tobytes())
-
-            print(f"  Layer {l}: Q{wq.shape} K{wk.shape} V{wv.shape} O{wo.shape} "
-                  f"gate{w_gate.shape} up{w_up.shape} down{w_down.shape}")
-
-        # Final norm
-=======
             rms_ffn = tensors[f"{prefix}.post_attention_layernorm.weight"].astype(np.float32)
             f.write(rms_ffn.tobytes())
 
@@ -235,7 +164,6 @@ def convert(model_dir: str, output_path: str, fmt: str = "f32"):
             print(f"  Layer {l}: Q{wq.shape} K{wk.shape} V{wv.shape} O{wo.shape} "
                   f"gate{w_gate.shape} up{w_up.shape} down{w_down.shape} [{fmt}]")
 
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
         rms_final = tensors["model.norm.weight"].astype(np.float32)
         f.write(rms_final.tobytes())
 
@@ -244,12 +172,6 @@ def convert(model_dir: str, output_path: str, fmt: str = "f32"):
 
 
 if __name__ == "__main__":
-<<<<<<< HEAD
-    if len(sys.argv) != 3:
-        print("Usage: python3 convert_weights.py <model_dir> <output.bin>")
-        sys.exit(1)
-    convert(sys.argv[1], sys.argv[2])
-=======
     if len(sys.argv) < 3:
         print("Usage: python3 convert_weights.py <model_dir> <output.bin> [--f16|--q8|--q4]")
         sys.exit(1)
@@ -261,4 +183,3 @@ if __name__ == "__main__":
     elif "--q4" in sys.argv:
         fmt = "q4"
     convert(sys.argv[1], sys.argv[2], fmt)
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf

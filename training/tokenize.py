@@ -14,15 +14,7 @@ if not os.path.exists(ZIP_PATH):
     ZIP_PATH = 'tiny_stories_data_pretokenized.zip'
 OUTPUT_PATH = str(Path(__file__).resolve().parent / 'tinystories_data00.bin')
 VOCAB_SIZE = 32000
-<<<<<<< HEAD
 MAX_ZIP_SIZE = int(os.environ.get('MAX_ZIP_BYTES', str(10 * 1024 * 1024 * 1024)))
-=======
-
-# Configurable upper size limit for the source ZIP (default 10 GB).
-# Override via environment variable: MAX_ZIP_BYTES=<bytes> python3 tokenize.py
-MAX_ZIP_SIZE = int(os.environ.get('MAX_ZIP_BYTES', str(10 * 1024 * 1024 * 1024)))
-
->>>>>>> 1a7a05708bf5e34349150cb6e0805c16027b9fd7
 
 def main():
     # --- Input validation (ref: docs/reports/security-audit-2026-03-02.md LOW-03) ---
@@ -46,7 +38,6 @@ def main():
         print(f"{OUTPUT_PATH} already exists ({n} tokens, {os.path.getsize(OUTPUT_PATH)/1e6:.1f} MB)")
         return
 
-<<<<<<< HEAD
     if not os.path.exists(ZIP_PATH):
         print(f"ERROR: ZIP file not found: {ZIP_PATH}", file=sys.stderr)
         print(f"  Expected: ~/tiny_stories_data_pretokenized.zip", file=sys.stderr)
@@ -65,16 +56,6 @@ def main():
             print(f"ERROR: data00.bin not found in ZIP. Contents: {names[:10]}", file=sys.stderr)
             sys.exit(1)
 
-=======
-    # 3. Validate ZIP contains the expected entry before extracting
-    with zipfile.ZipFile(ZIP_PATH, 'r') as z:
-        if 'data00.bin' not in z.namelist():
-            print(f"ERROR: 'data00.bin' nicht in ZIP gefunden.", file=sys.stderr)
-            print(f"  ZIP-Inhalt: {z.namelist()}", file=sys.stderr)
-            sys.exit(1)
-
-        print(f"Extracting data00.bin from {ZIP_PATH}...")
->>>>>>> 1a7a05708bf5e34349150cb6e0805c16027b9fd7
         with z.open('data00.bin') as src, open(OUTPUT_PATH, 'wb') as dst:
             while True:
                 chunk = src.read(1 << 20)
@@ -85,31 +66,17 @@ def main():
     n = os.path.getsize(OUTPUT_PATH) // 2
     print(f"Written {OUTPUT_PATH} ({n} tokens, {os.path.getsize(OUTPUT_PATH)/1e6:.1f} MB)")
 
-<<<<<<< HEAD
-    with open(OUTPUT_PATH, 'rb') as f:
-        tokens = struct.unpack('<10H', f.read(20))
-        print(f"First 10 tokens: {tokens}")
-        oob = [t for t in tokens if t >= VOCAB_SIZE]
-        if oob:
-            print(f"WARNING: out-of-vocab tokens found: {oob} (vocab_size={VOCAB_SIZE})",
-                  file=sys.stderr)
-=======
-    # 4+5. Sanity check: validate output size and token ID range
     with open(OUTPUT_PATH, 'rb') as f:
         raw = f.read(20)
         if len(raw) < 20:
-            print(f"WARNING: Output-Datei sehr klein ({len(raw)} Bytes) — moeglicherweise leer.",
-                  file=sys.stderr)
+            print(f"WARNING: output file is very small ({len(raw)} bytes), possibly empty.", file=sys.stderr)
         else:
             tokens = struct.unpack('<10H', raw)
-            invalid = [t for t in tokens if t >= VOCAB_SIZE]
-            if invalid:
-                print(f"WARNING: Ungueltige Token-IDs in ersten 10 Tokens: {invalid} "
-                      f"(erwartet < {VOCAB_SIZE})", file=sys.stderr)
-            else:
-                print(f"First 10 tokens: {tokens} (alle < {VOCAB_SIZE} OK)")
-
->>>>>>> 1a7a05708bf5e34349150cb6e0805c16027b9fd7
+            print(f"First 10 tokens: {tokens}")
+            oob = [t for t in tokens if t >= VOCAB_SIZE]
+            if oob:
+                print(f"WARNING: out-of-vocab tokens found: {oob} (vocab_size={VOCAB_SIZE})",
+                      file=sys.stderr)
 
 if __name__ == '__main__':
     main()

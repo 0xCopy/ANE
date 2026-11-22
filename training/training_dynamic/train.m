@@ -1,15 +1,9 @@
 // train.m — Dynamic weight ANE training (model-agnostic GQA support)
 // Model selected at compile time via: make MODEL=qwen3_06b (or stories110m)
 // Compile kernels ONCE at startup, update weights via IOSurface every step.
-<<<<<<< HEAD
-#include "mil_dynamic.h"
-#include "cpu_ops.h"
-=======
-// No exec() restart needed — eliminates 76% compile overhead.
 #include "mil_dynamic.h"
 #include "cpu_ops.h"
 #include "../data_validation.h"
->>>>>>> 60b0512be32bf88f096481ac105f5558c0afa631
 
 // Dynamic kernel set per layer
 typedef struct {
@@ -293,46 +287,9 @@ int main(int argc, char *argv[]) {
             transpose_weight(W3t_buf[L], lw[L].W3, HIDDEN, DIM);
         }
 
-<<<<<<< HEAD
         // mmap token data
-<<<<<<< HEAD
         int data_fd = open(data_path, O_RDONLY);
         if (data_fd < 0) { printf("Cannot open %s\n", data_path); return 1; }
-        struct stat st; fstat(data_fd, &st);
-        size_t data_len = st.st_size;
-        uint16_t *token_data = (uint16_t*)mmap(NULL, data_len, PROT_READ, MAP_PRIVATE, data_fd, 0);
-        if (token_data == MAP_FAILED) { printf("mmap failed\n"); return 1; }
-        size_t n_tokens = data_len / 2;
-        if (n_tokens <= (size_t)(SEQ + 1)) {
-            printf("Token data too short: need at least %d tokens, got %zu\n", SEQ + 2, n_tokens);
-            munmap(token_data, data_len);
-            close(data_fd);
-            return 1;
-        }
-        printf("Token data: %zu tokens (%.1f MB)\n", n_tokens, data_len/1e6);
-=======
-        int data_fd = open(DATA_PATH, O_RDONLY);
-        if (data_fd < 0) { printf("Cannot open %s\n", DATA_PATH); return 1; }
-        struct stat st; fstat(data_fd, &st);
-        size_t data_len = st.st_size;
-        uint16_t *token_data = (uint16_t*)mmap(NULL, data_len, PROT_READ, MAP_PRIVATE, data_fd, 0);
-        if (token_data == MAP_FAILED) { printf("mmap failed\n"); return 1; }
-        size_t n_tokens = data_len / 2;
-        if (n_tokens <= (size_t)(SEQ + 1)) {
-            printf("Token data too short: need at least %d tokens, got %zu\n", SEQ + 2, n_tokens);
-            munmap(token_data, data_len);
-            close(data_fd);
-            return 1;
-        }
-        printf("Token data: %zu tokens (%.1f MB)\n", n_tokens, data_len/1e6);
->>>>>>> e030ffb2137ed4b0423c5285cb367f3809197b7c
-
-        // Vocab compaction
-        VocabMap vm = vocab_map_build(token_data, n_tokens, VOCAB);
-=======
-        // mmap token data
-        int data_fd = open(DATA_PATH, O_RDONLY);
-        if (data_fd < 0) { printf("Cannot open %s\n", DATA_PATH); return 1; }
         struct stat st;
         if (fstat(data_fd, &st) != 0) { perror("fstat"); close(data_fd); return 1; }
         size_t data_len = (size_t)st.st_size;
@@ -369,9 +326,8 @@ int main(int argc, char *argv[]) {
             return 1;
         }
 
-        // Vocab compaction: map 32K sparse vocab → ~9K compact
+        // Vocab compaction
         VocabMap vm = vocab_map_build(token_data, n_tokens, VOCAB);
->>>>>>> 60b0512be32bf88f096481ac105f5558c0afa631
         int CV = vm.compact_vocab;
         printf("Vocab compaction: %d → %d active tokens (%.1fx reduction)\n", VOCAB, CV, (float)VOCAB/CV);
 
@@ -977,7 +933,6 @@ int main(int argc, char *argv[]) {
             free(Wqt_buf[L]); free(Wkt_buf[L]); free(Wvt_buf[L]); free(Wot_buf[L]);
             free(W1t_buf[L]); free(W2t_buf[L]); free(W3t_buf[L]);
         }
-<<<<<<< HEAD
         free_per_layer(pls, plr);
         free_kern(dk.sdpaFwd); free_kern(dk.woFwd); free_kern(dk.ffnFused);
         free_kern(dk.ffnBwdW2t); free_kern(dk.ffnBwdW13t); free_kern(dk.wotBwd);
@@ -986,16 +941,7 @@ int main(int argc, char *argv[]) {
         free(da_buf); free(k_tiled); free(v_tiled);
         free(dq_full); free(dk_full); free(dv_full);
         free(dq); free(dk_buf); free(dv);
-        munmap(token_data, data_len); close(data_fd);
+        munmap(token_data, data_len);   // the descriptor was closed right after mmap
     }
     return 0;
 }
-=======
-        free_kern(dk.sdpaFwd); free_kern(dk.ffnW13); free_kern(dk.ffnW2);
-        free_kern(dk.ffnBwdW2t); free_kern(dk.ffnBwdW13t); free_kern(dk.wotBwd);
-        free_kern(dk.sdpaBwd1); free_kern(dk.sdpaBwd2); free_kern(dk.qkvBwd);
-        munmap(token_data, data_len);
-    }
-    return 0;
-}
->>>>>>> 60b0512be32bf88f096481ac105f5558c0afa631

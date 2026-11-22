@@ -1,60 +1,22 @@
-<<<<<<< HEAD
-CC = xcrun clang
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-CFLAGS = -O2 -Wall -DACCELERATE_NEW_LAPACK -fobjc-arc
-=======
-=======
 CC = xcrun clang
 CC_C = xcrun clang
->>>>>>> d49c1256c6392064ec2cfbd18464a54609b735d5
 
-ANE_COMPAT = -Wno-deprecated-declarations
-SEC_FLAGS = -fstack-protector-strong -Wformat-security
-
-<<<<<<< HEAD
-CFLAGS = -O2 -Wall $(ANE_COMPAT) -fobjc-arc $(SEC_FLAGS)
-CFLAGS_DEBUG = -O0 -g -Wall $(ANE_COMPAT) -fobjc-arc -fsanitize=address,undefined
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
-=======
-
-# Required: Private ANE APIs (_ANEInMemoryModelDescriptor etc.) via objc_msgSend
-# trigger deprecation warnings on newer macOS SDKs. This flag is intentional.
-# Run 'make check-deprecated' to inspect which declarations are currently suppressed.
+# The private ANE APIs (_ANEInMemoryModelDescriptor etc.) are reached through objc_msgSend and trigger deprecation
+# warnings on newer macOS SDKs; suppressing them is intentional. `make check-deprecated` shows what is hidden.
 ANE_COMPAT = -Wno-deprecated-declarations
 
-# Security hardening flags (ref: docs/reports/security-audit-2026-03-02.md LOW-01)
-# Note: -D_FORTIFY_SOURCE=2 is implicitly active at -O2 on macOS (Apple LLVM toolchain).
+# Security hardening flags (docs/reports/security-audit-2026-03-02.md, LOW-01).
+# -D_FORTIFY_SOURCE=2 is implicitly active at -O2 with Apple's LLVM toolchain.
 SEC_FLAGS = -fstack-protector-strong -Wformat-security
 
 CFLAGS = -O2 -Wall -DACCELERATE_NEW_LAPACK $(ANE_COMPAT) -fobjc-arc $(SEC_FLAGS)
-CFLAGS_DEBUG = -O0 -g -Wall $(ANE_COMPAT) -fobjc-arc -fsanitize=address,undefined
->>>>>>> 1a7a05708bf5e34349150cb6e0805c16027b9fd7
-=======
-CFLAGS = -O2 -Wall -DACCELERATE_NEW_LAPACK $(ANE_COMPAT) -fobjc-arc $(SEC_FLAGS)
 CFLAGS_C = -O2 -Wall -Wextra -Werror -std=c11
 CFLAGS_DEBUG = -O0 -g -Wall $(ANE_COMPAT) -fobjc-arc -fsanitize=address,undefined
->>>>>>> d49c1256c6392064ec2cfbd18464a54609b735d5
-=======
-CFLAGS = -O2 -Wall -DACCELERATE_NEW_LAPACK -Wno-deprecated-declarations -fobjc-arc
->>>>>>> 625975449090f5a3cc576a440ac804f1b5d05a05
-FRAMEWORKS = -framework Foundation -framework CoreML -framework IOSurface
-LDFLAGS = $(FRAMEWORKS) -ldl
-
-HEADERS_LARGE = stories_config.h stories_io.h stories_mil.h stories_cpu_ops.h
-HEADERS_OPT = $(HEADERS_LARGE) stories_cpu_ops_opt.h
-=======
-CC = xcrun clang
-CFLAGS = -O2 -Wall -Wno-deprecated-declarations -fobjc-arc
-CC_C = xcrun clang
-CFLAGS_C = -O2 -Wall -Wextra -Werror -std=c11
 FRAMEWORKS = -framework Foundation -framework CoreML -framework IOSurface
 LDFLAGS = $(FRAMEWORKS) -ldl
 
 HEADERS_LARGE = stories_config.h stories_io.h stories_mil.h stories_cpu_ops.h data_validation.h
->>>>>>> 60b0512be32bf88f096481ac105f5558c0afa631
+HEADERS_OPT = $(HEADERS_LARGE) stories_cpu_ops_opt.h
 
 HEADERS_ANE = $(HEADERS_LARGE) ane_rmsnorm_bwd.h ane_classifier.h
 
@@ -64,16 +26,8 @@ train: train.m ane_runtime.h ane_mil_gen.h model.h forward.h backward.h
 train_large: train_large.m $(HEADERS_LARGE)
 	$(CC) $(CFLAGS) -o $@ train_large.m $(LDFLAGS) -framework Accelerate
 
-<<<<<<< HEAD
 train_large_ane: train_large_ane.m $(HEADERS_ANE)
 	$(CC) $(CFLAGS) -o $@ train_large_ane.m $(LDFLAGS) -framework Accelerate
-
-<<<<<<< HEAD
-train_opt: train_opt.m $(HEADERS_OPT)
-	$(CC) $(CFLAGS) -o $@ train_opt.m $(LDFLAGS) -framework Accelerate -framework Metal -framework MetalPerformanceShaders
-
-=======
-HEADERS_OPT = $(HEADERS_LARGE) stories_cpu_ops_opt.h
 
 train_opt: train_opt.m $(HEADERS_OPT)
 	$(CC) $(CFLAGS) -o $@ train_opt.m $(LDFLAGS) -framework Accelerate -framework Metal -framework MetalPerformanceShaders
@@ -81,26 +35,7 @@ train_opt: train_opt.m $(HEADERS_OPT)
 train_double_buffer: train_double_buffer.m $(HEADERS_LARGE)
 	$(CC) $(CFLAGS) -o $@ train_double_buffer.m $(LDFLAGS) -framework Accelerate
 
-<<<<<<< HEAD
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
-=======
->>>>>>> 625975449090f5a3cc576a440ac804f1b5d05a05
-PROBES = test_weight_reload test_perf_stats test_qos_sweep test_ane_advanced
-=======
-benchmark_ane: benchmark_ane.m
-	$(CC) $(CFLAGS) -o benchmark_ane benchmark_ane.m $(LDFLAGS)
-
-test_sdk_layers: test_sdk_layers.m
-	$(CC) $(CFLAGS) -O2 -o test_sdk_layers test_sdk_layers.m $(LDFLAGS) -framework Accelerate
-
-test_sdk_model: test_sdk_model.m
-	$(CC) $(CFLAGS) -O2 -o test_sdk_model test_sdk_model.m $(LDFLAGS) -framework Accelerate
-
-regression:
-	python3 regression_test.py
-
 PROBES = test_weight_reload test_perf_stats test_qos_sweep test_ane_advanced test_sdk_model
->>>>>>> e113fae6832b497b79e1b32f0861b1797e007f53
 
 test_rmsnorm_bwd: test_rmsnorm_bwd.m $(HEADERS_ANE)
 	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS) -framework Accelerate
@@ -117,26 +52,10 @@ test_perf_stats: test_perf_stats.m
 test_qos_sweep: test_qos_sweep.m
 	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
 
-<<<<<<< HEAD
 test_ane_advanced: test_ane_advanced.m
 	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-test_chaining: test_chaining.m
-	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
-
-=======
-m5_performance_suite: m5_performance_suite.m ane_runtime.h
-	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
-
-m5_pipeline_suite: m5_pipeline_suite.m ane_runtime.h ane_mil_gen.h
-	$(CC) $(CFLAGS) -Wno-unused-function -Wno-gnu-folding-constant -o $@ $< $(LDFLAGS)
-
->>>>>>> 6f398781d734ae1cc53139358829082c0f83000c
-probes: $(PROBES)
-
-=======
+# ANE private API research (chaining, E5 runtime, custom MIL)
 test_chaining: test_chaining.m
 	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
 
@@ -161,99 +80,62 @@ test_e5_validate: test_e5_validate.m
 test_mil_custom: test_mil_custom.m
 	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS) -framework Accelerate
 
+# ANE SDK (layers/)
+benchmark_ane: benchmark_ane.m
+	$(CC) $(CFLAGS) -o benchmark_ane benchmark_ane.m $(LDFLAGS)
+
+test_sdk_layers: test_sdk_layers.m
+	$(CC) $(CFLAGS) -O2 -o test_sdk_layers test_sdk_layers.m $(LDFLAGS) -framework Accelerate
+
+test_sdk_model: test_sdk_model.m
+	$(CC) $(CFLAGS) -O2 -o test_sdk_model test_sdk_model.m $(LDFLAGS) -framework Accelerate
+
+regression:
+	python3 regression_test.py
+
+# M5 benchmark suites
+m5_performance_suite: m5_performance_suite.m ane_runtime.h
+	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
+
+m5_pipeline_suite: m5_pipeline_suite.m ane_runtime.h ane_mil_gen.h
+	$(CC) $(CFLAGS) -Wno-unused-function -Wno-gnu-folding-constant -o $@ $< $(LDFLAGS)
+
+# Training-data validation (plain C, strict flags)
 test_data_validation: test_data_validation.c data_validation.h
 	$(CC_C) $(CFLAGS_C) -o $@ $<
 
-probes: $(PROBES)
-
 security-tests: test_data_validation
 
->>>>>>> d49c1256c6392064ec2cfbd18464a54609b735d5
-data: tokenize
-	@bash download_data.sh
+probes: $(PROBES)
 
 tokenize:
 	python3 tokenize.py
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> d49c1256c6392064ec2cfbd18464a54609b735d5
+data: tokenize
+	@bash download_data.sh
+
 setup: data
 	@echo "=== Setup complete ==="
 	@echo "Data:  tinystories_data00.bin"
 	@echo "To train: make train_large && ./train_large"
 	@echo "Override paths: ANE_MODEL_PATH=... ANE_DATA_PATH=... ./train_large"
 
-<<<<<<< HEAD
-=======
-# Show active build flags — verify security hardening is active (LOW-01)
->>>>>>> 1a7a05708bf5e34349150cb6e0805c16027b9fd7
-=======
->>>>>>> d49c1256c6392064ec2cfbd18464a54609b735d5
+# Show the active build flags, to verify that the hardening flags are on (LOW-01)
 verify-flags:
 	@echo "=== Active CFLAGS ==="
 	@echo "$(CFLAGS)"
 	@echo "=== Compiler version ==="
 	@xcrun clang --version
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-# Build train_large without deprecation suppression to inspect hidden warnings (LOW-02)
-# Informational only — deprecated warnings from private ANE API usage are expected.
+# Build train_large without the deprecation suppression to inspect what it hides (LOW-02); informational only,
+# the warnings from the private ANE API usage are expected.
 check-deprecated:
 	@echo "=== Building without deprecation suppression (informational) ==="
 	@$(CC) $(CFLAGS:-Wno-deprecated-declarations=-Wdeprecated-declarations) \
 	    -o /dev/null train_large.m $(LDFLAGS) -framework Accelerate 2>&1 | \
-	    grep -i "deprecated" | sort -u || echo "(keine zusaetzlichen deprecated-Warnungen)"
-
->>>>>>> 1a7a05708bf5e34349150cb6e0805c16027b9fd7
-clean:
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-	rm -f train train_large train_large_ane train_opt $(PROBES) test_rmsnorm_bwd test_classifier
-=======
-	rm -f train train_large train_large_ane $(PROBES) test_rmsnorm_bwd test_classifier m5_performance_suite m5_pipeline_suite
->>>>>>> 6f398781d734ae1cc53139358829082c0f83000c
-=======
-	rm -f train train_large train_large_ane train_opt train_double_buffer $(PROBES) test_rmsnorm_bwd test_classifier
->>>>>>> 625975449090f5a3cc576a440ac804f1b5d05a05
-
-<<<<<<< HEAD
-.PHONY: clean tokenize probes
-=======
-test_ane_advanced: test_ane_advanced.m
-	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
-
-test_data_validation: test_data_validation.c data_validation.h
-	$(CC_C) $(CFLAGS_C) -o $@ $<
-
-probes: $(PROBES)
-
-security-tests: test_data_validation
-
-tokenize:
-	python3 tokenize.py
+	    grep -i "deprecated" | sort -u || echo "(no additional deprecation warnings)"
 
 clean:
-	rm -f train train_large train_large_ane $(PROBES) test_rmsnorm_bwd test_classifier test_data_validation
+	rm -f train train_large train_large_ane train_opt train_double_buffer $(PROBES) test_rmsnorm_bwd test_classifier test_chaining test_chaining_v2 test_bench_paths test_ane_model test_throughput_ceiling test_coreml_chaining test_e5_validate test_mil_custom test_data_validation test_sdk_layers benchmark_ane m5_performance_suite m5_pipeline_suite
 
-.PHONY: clean tokenize probes security-tests
->>>>>>> 60b0512be32bf88f096481ac105f5558c0afa631
-=======
-	rm -f train train_large train_large_ane train_opt train_double_buffer $(PROBES) test_rmsnorm_bwd test_classifier
-
-.PHONY: clean tokenize probes verify-flags data setup
->>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
-
-=======
-.PHONY: clean tokenize probes verify-flags check-deprecated
->>>>>>> 1a7a05708bf5e34349150cb6e0805c16027b9fd7
-=======
-clean:
-	rm -f train train_large train_large_ane train_opt $(PROBES) test_rmsnorm_bwd test_classifier test_chaining test_chaining_v2 test_bench_paths test_ane_model test_throughput_ceiling test_coreml_chaining test_e5_validate test_mil_custom
-
-.PHONY: clean tokenize probes security-tests verify-flags data setup
->>>>>>> d49c1256c6392064ec2cfbd18464a54609b735d5
+.PHONY: clean tokenize probes security-tests verify-flags check-deprecated data setup regression
