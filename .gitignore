@@ -19,6 +19,7 @@ training/train_large
 training/train_large_ane
 training/train_opt
 training/train_double_buffer
+training/train
 training/test_*
 !training/test_*.m
 

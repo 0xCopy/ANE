@@ -1,0 +1,38 @@
+// What neon_fp16.mlir becomes on AArch64, with and without half-precision arithmetic (FEAT_FP16, "+fullfp16").
+//
+// RUN: mlir-opt %S/neon_fp16.mlir --convert-scf-to-cf --convert-math-to-llvm --convert-vector-to-llvm \
+// RUN:   --convert-arith-to-llvm --finalize-memref-to-llvm --convert-func-to-llvm --convert-cf-to-llvm \
+// RUN:   --reconcile-unrealized-casts | mlir-translate --mlir-to-llvmir > %t.ll
+// RUN: llc -O2 -mtriple=arm64-apple-macosx -mattr=+fullfp16 %t.ll -o - | FileCheck %s --check-prefixes=CHECK,FP16
+// RUN: llc -O2 -mtriple=arm64-apple-macosx -mattr=-fullfp16 %t.ll -o - | FileCheck %s --check-prefixes=CHECK,NOFP16
+
+// The conversions need only base NEON: identical either way.
+// CHECK-LABEL: _cvt_f32_f16:
+// CHECK-DAG: fcvtn {{.*}}4h{{.*}}4s
+// CHECK-DAG: fcvtn2 {{.*}}8h{{.*}}4s
+// CHECK: fcvt h{{[0-9]+}}, s{{[0-9]+}}
+// CHECK-LABEL: _cvt_f16_f32:
+// CHECK-DAG: fcvtl {{.*}}4s{{.*}}4h
+// CHECK-DAG: fcvtl2 {{.*}}4s{{.*}}8h
+
+// Arithmetic: 8 lanes of f16 in one register, or a round trip through f32 per operation.
+// CHECK-LABEL: _mla_step:
+// FP16: fmul.8h
+// FP16: fadd.8h
+// NOFP16: fcvtl
+// NOFP16: fmul.4s
+// NOFP16: fcvtn
+// NOFP16: fadd.4s
+// CHECK-LABEL: _fma_step:
+// FP16: fmla.8h
+// NOFP16-NOT: fmla.8h
+
+// CHECK-LABEL: _quantize8:
+// FP16: fdiv h{{[0-9]+}}, h{{[0-9]+}}, h{{[0-9]+}}
+// FP16: fmul.8h
+// FP16: frinta.8h
+// FP16: fmaxnm.8h
+// FP16: fminnm.8h
+// FP16: fcvtzs.8h
+// FP16: xtn.8b
+// NOFP16-NOT: frinta.8h
