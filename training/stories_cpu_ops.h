@@ -1,7 +1,10 @@
 // stories_cpu_ops.h — CPU operations: RMSNorm, cross-entropy, Adam, softmax
 #pragma once
 #include "stories_config.h"
+<<<<<<< HEAD
 
+=======
+>>>>>>> b012c0ab05863e4bd6ee82e77e7b34d0b7871e0b
 #include <assert.h>
 
 static void rmsnorm(float *out, const float *x, const float *w, int d, int S) {
