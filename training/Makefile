@@ -2,12 +2,18 @@
 CC = xcrun clang
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 CFLAGS = -O2 -Wall -DACCELERATE_NEW_LAPACK -fobjc-arc
 =======
+=======
+CC = xcrun clang
+CC_C = xcrun clang
+>>>>>>> d49c1256c6392064ec2cfbd18464a54609b735d5
 
 ANE_COMPAT = -Wno-deprecated-declarations
 SEC_FLAGS = -fstack-protector-strong -Wformat-security
 
+<<<<<<< HEAD
 CFLAGS = -O2 -Wall $(ANE_COMPAT) -fobjc-arc $(SEC_FLAGS)
 CFLAGS_DEBUG = -O0 -g -Wall $(ANE_COMPAT) -fobjc-arc -fsanitize=address,undefined
 >>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
@@ -25,6 +31,11 @@ SEC_FLAGS = -fstack-protector-strong -Wformat-security
 CFLAGS = -O2 -Wall -DACCELERATE_NEW_LAPACK $(ANE_COMPAT) -fobjc-arc $(SEC_FLAGS)
 CFLAGS_DEBUG = -O0 -g -Wall $(ANE_COMPAT) -fobjc-arc -fsanitize=address,undefined
 >>>>>>> 1a7a05708bf5e34349150cb6e0805c16027b9fd7
+=======
+CFLAGS = -O2 -Wall -DACCELERATE_NEW_LAPACK $(ANE_COMPAT) -fobjc-arc $(SEC_FLAGS)
+CFLAGS_C = -O2 -Wall -Wextra -Werror -std=c11
+CFLAGS_DEBUG = -O0 -g -Wall $(ANE_COMPAT) -fobjc-arc -fsanitize=address,undefined
+>>>>>>> d49c1256c6392064ec2cfbd18464a54609b735d5
 FRAMEWORKS = -framework Foundation -framework CoreML -framework IOSurface
 LDFLAGS = $(FRAMEWORKS) -ldl
 
@@ -104,6 +115,7 @@ test_ane_advanced: test_ane_advanced.m
 	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 test_chaining: test_chaining.m
 	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
 
@@ -117,6 +129,39 @@ m5_pipeline_suite: m5_pipeline_suite.m ane_runtime.h ane_mil_gen.h
 >>>>>>> 6f398781d734ae1cc53139358829082c0f83000c
 probes: $(PROBES)
 
+=======
+test_chaining: test_chaining.m
+	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
+
+test_chaining_v2: test_chaining_v2.m
+	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
+
+test_bench_paths: test_bench_paths.m ane_runtime.h
+	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
+
+test_ane_model: test_ane_model.m
+	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS) -framework Metal
+
+test_throughput_ceiling: test_throughput_ceiling.m ane_runtime.h
+	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
+
+test_coreml_chaining: test_coreml_chaining.m
+	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS) -framework Metal
+
+test_e5_validate: test_e5_validate.m
+	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS) -framework Metal
+
+test_mil_custom: test_mil_custom.m
+	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS) -framework Accelerate
+
+test_data_validation: test_data_validation.c data_validation.h
+	$(CC_C) $(CFLAGS_C) -o $@ $<
+
+probes: $(PROBES)
+
+security-tests: test_data_validation
+
+>>>>>>> d49c1256c6392064ec2cfbd18464a54609b735d5
 data: tokenize
 	@bash download_data.sh
 
@@ -124,21 +169,28 @@ tokenize:
 	python3 tokenize.py
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> d49c1256c6392064ec2cfbd18464a54609b735d5
 setup: data
 	@echo "=== Setup complete ==="
 	@echo "Data:  tinystories_data00.bin"
 	@echo "To train: make train_large && ./train_large"
 	@echo "Override paths: ANE_MODEL_PATH=... ANE_DATA_PATH=... ./train_large"
 
+<<<<<<< HEAD
 =======
 # Show active build flags — verify security hardening is active (LOW-01)
 >>>>>>> 1a7a05708bf5e34349150cb6e0805c16027b9fd7
+=======
+>>>>>>> d49c1256c6392064ec2cfbd18464a54609b735d5
 verify-flags:
 	@echo "=== Active CFLAGS ==="
 	@echo "$(CFLAGS)"
 	@echo "=== Compiler version ==="
 	@xcrun clang --version
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
 # Build train_large without deprecation suppression to inspect hidden warnings (LOW-02)
@@ -188,3 +240,9 @@ clean:
 =======
 .PHONY: clean tokenize probes verify-flags check-deprecated
 >>>>>>> 1a7a05708bf5e34349150cb6e0805c16027b9fd7
+=======
+clean:
+	rm -f train train_large train_large_ane train_opt $(PROBES) test_rmsnorm_bwd test_classifier test_chaining test_chaining_v2 test_bench_paths test_ane_model test_throughput_ceiling test_coreml_chaining test_e5_validate test_mil_custom
+
+.PHONY: clean tokenize probes security-tests verify-flags data setup
+>>>>>>> d49c1256c6392064ec2cfbd18464a54609b735d5

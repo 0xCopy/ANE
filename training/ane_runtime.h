@@ -179,7 +179,12 @@ static void ane_init(void) {
     });
 =======
 static bool g_ane_loaded = false;
+<<<<<<< HEAD
 static bool g_ane_ok = false;  // true only when all private classes loaded successfully
+=======
+static id g_ane_client = nil;
+static bool g_ane_ok = false;
+>>>>>>> d49c1256c6392064ec2cfbd18464a54609b735d5
 
 static void ane_init(void) {
     if (g_ane_loaded) return;
@@ -200,7 +205,15 @@ static void ane_init(void) {
         return;
     }
     g_ane_ok = true;
+<<<<<<< HEAD
 >>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
+=======
+
+    Class clientCls = NSClassFromString(@"_ANEClient");
+    if (clientCls) {
+        g_ane_client = [clientCls performSelector:@selector(sharedConnection)];
+    }
+>>>>>>> d49c1256c6392064ec2cfbd18464a54609b735d5
 }
 
 static IOSurfaceRef ane_create_surface(size_t bytes) {
@@ -418,6 +431,20 @@ static bool ane_eval(ANEKernel *k) {
     }
     return ok;
 >>>>>>> 17dd08025ca563883a5af9a483f7ae8c4895c649
+}
+
+static bool ane_eval_rt(ANEKernel *k) {
+    if (!g_ane_client) return ane_eval(k);
+    NSError *e = nil;
+    BOOL ok = ((BOOL(*)(id,SEL,id,id,id,NSError**))objc_msgSend)(
+        g_ane_client, @selector(evaluateRealTimeWithModel:options:request:error:),
+        k->model, @{}, k->request, &e);
+    if (!ok) {
+        fprintf(stderr, "ANE RT eval failed, falling back to standard: %s\n",
+                e ? [[e description] UTF8String] : "unknown");
+        return ane_eval(k);
+    }
+    return true;
 }
 
 static void ane_free(ANEKernel *k) {
