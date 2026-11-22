@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Build artifacts
 *.o
 *.dSYM/
@@ -51,3 +52,32 @@ training/ane_stories110M_ckpt.bin
 *.swp
 *.swo
 *~
+=======
+# macOS metadata
+.DS_Store
+**/.DS_Store
+
+# Worktrees
+.worktrees/
+worktrees/
+
+# Log files
+*.log
+firebase-debug.log
+
+# Compiled binaries
+training/train
+training/train_large
+training/probe_*
+training/*.dSYM/
+
+# Training data (large binary files)
+training/*.bin
+
+# ANE compiled artifacts
+**/*.mlmodelc/
+**/*.mlpackage/
+
+# External assets (models, datasets)
+assets/
+>>>>>>> 357576698277b5ba88ed30f279a5f390baaf5937
