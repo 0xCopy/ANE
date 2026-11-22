@@ -21,6 +21,11 @@
 #define MODEL_PATH_DEFAULT "stories110M.bin"
 #define DATA_PATH_DEFAULT "tinystories_data00.bin"
 
+static const char *get_path(const char *env_var, const char *default_val) {
+    const char *v = getenv(env_var);
+    return (v && v[0]) ? v : default_val;
+}
+
 // ===== Weight loading from llama2.c format =====
 static bool load_pretrained(LayerWeights *lw, float *rms_final, float *embed, const char *path) {
     FILE *f = fopen(path, "rb");
@@ -207,7 +212,7 @@ int main(int argc, char *argv[]) {
         const char *model_path = MODEL_PATH_DEFAULT;
         const char *data_path = DATA_PATH_DEFAULT;
         bool do_resume = false;
-        bool ane_extras = true;  // classifier, softmax, rmsnorm_bwd on ANE
+        bool ane_extras = true;
         int pos = 0;
         for (int i=1; i<argc; i++) {
             if (strcmp(argv[i], "--resume") == 0) do_resume = true;
@@ -253,6 +258,7 @@ int main(int argc, char *argv[]) {
         if (!resuming) {
             printf("=== ANE Training: Stories110M (ANE-offloaded) ===\n");
             printf("dim=%d hidden=%d heads=%d seq=%d vocab=%d layers=%d\n", DIM, HIDDEN, HEADS, SEQ, VOCAB, NLAYERS);
+            printf("model=%s data=%s ckpt=%s\n", model_path, data_path, ckpt_path);
             if (ane_extras) printf("NEW: final_rmsnorm, classifier_fwd, softmax, rmsnorm_bwd on ANE\n");
             else printf("ANE extras DISABLED (classifier/softmax/rmsnorm_bwd on CPU)\n");
             {
@@ -377,7 +383,7 @@ int main(int argc, char *argv[]) {
             // Check compile budget — account for new kernels
             // Per batch: 60 layer kernels [+ 24 rmsnorm_bwd + 1 classifier + 1 final_rms = 86 with extras]
             int kernels_needed = TOTAL_WEIGHT_KERNELS + (ane_extras ? 2*NLAYERS + 2 : 0);
-            if (g_compile_count + kernels_needed > MAX_COMPILES) {
+            if (g_compile_count + kernels_needed > get_max_compiles()) {
                 for (int L=0; L<NLAYERS; L++) {
                     free_layer_kernels(&kern[L]); free_kern(sdpaBwd2[L]);
                     free_kern(rmsAttBwd[L]); free_kern(rmsFFNBwd[L]);
@@ -419,7 +425,7 @@ int main(int argc, char *argv[]) {
                     }
                 }
             }
-            if (!compile_ok) { g_compile_count = MAX_COMPILES; continue; }
+            if (!compile_ok) { g_compile_count = get_max_compiles(); continue; }
 
             // Re-compile sdpaBwd2 if needed
             for (int L=0; L<NLAYERS; L++) {
@@ -436,7 +442,7 @@ int main(int argc, char *argv[]) {
                 classifierKern = compile_classifier_fwd(embed);
                 if (!finalRmsKern || !classifierKern) {
                     printf("finalRms or classifier compile failed\n");
-                    g_compile_count = MAX_COMPILES; continue;
+                    g_compile_count = get_max_compiles(); continue;
                 }
                 if (!softmaxKern) {
                     softmaxKern = compile_softmax_kern();
@@ -457,7 +463,7 @@ int main(int argc, char *argv[]) {
             uint64_t tt = mach_absolute_time();
             double t_ane=0,t_io=0,t_elem=0,t_rms=0,t_cblas_wait=0,t_cls=0;
 
-            for (int a=0; a<ACCUM_STEPS && step<total_steps; a++, step++) {
+            for (int a=0; a<get_accum_steps() && step<total_steps; a++, step++) {
                 uint64_t t0,t1;
                 size_t max_pos = n_tokens - SEQ - 1;
                 size_t pos = (size_t)(drand48() * max_pos);

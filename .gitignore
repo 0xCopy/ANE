@@ -2,15 +2,78 @@
 *.o
 *.a
 *.dylib
+*.so
+*.exe
+*.dSYM/
+*.mlmodelc/
+*.mlpackage/
+*.metallib
 build/
 .gradle/
+*.rej
+*.rej.*
+*.orig
 
-# Compiled binaries (ObjC demos)
+# Root-level compiled binaries
+ane_probe
+api_explore
+inmem_basic
+inmem_bench
+inmem_peak
+sram_bench
+sram_probe
+
+# Training binaries
+tiny_train
+tiny_train_m1
+train_large
+training/train_large
+training/train_large_ane
+training/train_opt
+training/train_double_buffer
+training/train
+training/m5_performance_suite
+training/m5_pipeline_suite
+training/benchmark_ane
+training/probe_*
+training/test_*
+!training/test_*.m
+
+# Dynamic training binaries
+training/training_dynamic/train
+
+# Test/research binaries
+test_chaining
+
+# KMP-ANE demos
 contrib/kmp-ane/mnist/mnist_ane
 contrib/kmp-ane/tmp/mnist_demo
 tmp/mnist_demo
 tmp/test_matmul
 tmp/test_mil_parse
+
+# Inference binaries and runtime data
+inference/qwen_ane
+inference/*.bin
+inference/.venv/
+inference/benchmark_results.json
+/tmp/ane_venv/
+
+# Generated mlpackage files
+/tmp/ane_*.mlpackage
+
+# Benchmark results
+benchmark_results_*.txt
+
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+
+# Training data and checkpoints (downloaded or generated, not for git)
+training/tinystories_data00.bin
+training/ane_stories110M_ckpt.bin
+training/*.bin
 
 # MNIST data (downloadable)
 **/data/train-images-idx3-ubyte
@@ -18,13 +81,21 @@ tmp/test_mil_parse
 **/data/t10k-images-idx3-ubyte
 **/data/t10k-labels-idx1-ubyte
 
-# Gradle wrapper jar (optional - uncomment to track)
-# gradle/wrapper/gradle-wrapper.jar
+# macOS metadata
+.DS_Store
+**/.DS_Store
+._*
+
+# Editor
+*.swp
+*.swo
+*~
 
 # Logs
-run.log
 *.log
+firebase-debug.log
 
+<<<<<<< HEAD
 # macOS
 .DS_Store
 *.so
@@ -35,3 +106,12 @@ train_large
 *.orig
 *.dSYM/
 .idea/
+=======
+# Worktrees
+.worktrees/
+worktrees/
+
+# Secrets / env
+.env
+inference/.env
+>>>>>>> middle/agglomerate

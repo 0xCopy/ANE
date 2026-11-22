@@ -1,17 +1,40 @@
 // ane_mil_gen.h — Generate MIL text for conv-based linear ops + weight blobs
+// Runtime chip detection: Uses appropriate MIL version based on chip type
 #pragma once
 #import <Foundation/Foundation.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 
+// MED-03: Validate MIL dimensions before use in ANE compiler.
+// Callers use config values already validated by CRIT-03 gatekeeper (model.h/train_large.m),
+// but this guard defends against future internal programming errors.
+static bool mil_dims_valid(int a, int b) {
+    if (a <= 0 || a > 65536 || b <= 0 || b > 65536) {
+        fprintf(stderr, "ane_mil_gen: invalid dims %d/%d (must be 1..65536)\n", a, b);
+        return false;
+    }
+    return true;
+}
+// Set by caller: 1 = fp16 I/O (M1/M2 fallback, no cast ops), 0 = fp32 I/O with cast (M4+)
+extern int g_fp16_io;
+
+// Import chip detection helpers from ane_runtime.h
+#ifndef ANE_RUNTIME_INCLUDED
+// Forward declarations if ane_runtime.h is not included
+extern const char *ane_get_mil_version(void);
+extern const char *ane_get_mil_ios_target(void);
+#endif
+
 // Build an FP16 weight blob with the required header structure.
 // weights_f32: source weights in row-major [out_ch, in_ch]
 // Returns NSData with header + FP16 weights
 static NSData *mil_build_weight_blob(const float *weights_f32, int out_ch, int in_ch) {
+    if (!mil_dims_valid(out_ch, in_ch)) return nil;  // MED-03
     NSUInteger wsize = (NSUInteger)out_ch * in_ch * 2; // FP16
     NSUInteger total = 64 + 64 + wsize; // global header + chunk header + data
     uint8_t *buf = (uint8_t*)calloc(total, 1);
+    if (!buf) { fprintf(stderr, "OOM: calloc(%lu)\n", (unsigned long)total); abort(); }  // HIGH-04
     buf[0] = 0x01; buf[4] = 0x02;
     uint8_t *chunk = buf + 64;
     chunk[0] = 0xEF; chunk[1] = 0xBE; chunk[2] = 0xAD; chunk[3] = 0xDE;
@@ -25,18 +48,49 @@ static NSData *mil_build_weight_blob(const float *weights_f32, int out_ch, int i
     return [NSData dataWithBytesNoCopy:buf length:total freeWhenDone:YES];
 }
 
+// Build raw FP16 weights without header (for dynamic weight injection via IOSurface)
+// weights_f32: source weights in row-major [out_ch, in_ch]
+// Returns NSData with just FP16 values, no headers
+static NSData *mil_build_raw_weights_fp16(const float *weights_f32, int out_ch, int in_ch) {
+    NSUInteger weightSize = (NSUInteger)out_ch * in_ch * sizeof(_Float16);
+    uint8_t *buf = (uint8_t*)malloc(weightSize);
+    _Float16 *fp16 = (_Float16*)buf;
+    for (NSUInteger i = 0; i < (NSUInteger)out_ch * in_ch; i++)
+        fp16[i] = (_Float16)weights_f32[i];
+    return [NSData dataWithBytesNoCopy:buf length:weightSize freeWhenDone:YES];
+}
+
 // Generate MIL for a single matmul: y = W @ x (using matmul op, weights as input)
 // Input x: [1, in_ch, spatial] fp32
 // Input W: [1, out_ch, in_ch] fp32
 // Output:  [1, out_ch, spatial] fp32
+// Uses runtime-detected MIL version
 static NSString *mil_gen_matmul(int in_ch, int out_ch, int spatial) {
+    if (!mil_dims_valid(in_ch, out_ch) || spatial <= 0 || spatial > 65536) {
+        fprintf(stderr, "ane_mil_gen: invalid spatial %d\n", spatial); return nil;
+    }
+    if (g_fp16_io) {
+        return [NSString stringWithFormat:
+            @"program(1.0)\n"
+            "[buildInfo = dict<tensor<string, []>, tensor<string, []>>({{\"coremlc-version\", \"3505.4.1\"}})]\n"
+            "{\n"
+            "    func main<ios16>(tensor<fp16, [1, %d, %d]> x, tensor<fp16, [1, %d, %d]> W) {\n"
+            "        tensor<bool, []> tx = const()[name = tensor<string, []>(\"tx\"), val = tensor<bool, []>(false)];\n"
+            "        tensor<bool, []> ty = const()[name = tensor<string, []>(\"ty\"), val = tensor<bool, []>(false)];\n"
+            "        tensor<fp16, [1, %d, %d]> y = matmul(transpose_x = tx, transpose_y = ty, x = W, y = x)[name = tensor<string, []>(\"mm\")];\n"
+            "    } -> (y);\n"
+            "}\n",
+            in_ch, spatial, out_ch, in_ch, out_ch, spatial];
+    }
+    const char *mil_ver = ane_get_mil_version();
+    const char *ios_target = ane_get_mil_ios_target();
     return [NSString stringWithFormat:
-        @"program(1.3)\n"
+        @"program(%s)\n"
         "[buildInfo = dict<string, string>({{\"coremlc-component-MIL\", \"3510.2.1\"}, "
         "{\"coremlc-version\", \"3505.4.1\"}, {\"coremltools-component-milinternal\", \"\"}, "
         "{\"coremltools-version\", \"9.0\"}})]\n"
         "{\n"
-        "    func main<ios18>(tensor<fp32, [1, %d, %d]> x, tensor<fp32, [1, %d, %d]> W) {\n"
+        "    func main<%s>(tensor<fp32, [1, %d, %d]> x, tensor<fp32, [1, %d, %d]> W) {\n"
         "        string to_fp16 = const()[name = string(\"to_fp16\"), val = string(\"fp16\")];\n"
         "        tensor<fp16, [1, %d, %d]> x16 = cast(dtype = to_fp16, x = x)[name = string(\"cast_x\")];\n"
         "        tensor<fp16, [1, %d, %d]> W16 = cast(dtype = to_fp16, x = W)[name = string(\"cast_W\")];\n"
@@ -47,20 +101,78 @@ static NSString *mil_gen_matmul(int in_ch, int out_ch, int spatial) {
         "        tensor<fp32, [1, %d, %d]> y = cast(dtype = to_fp32, x = y16)[name = string(\"cast_out\")];\n"
         "    } -> (y);\n"
         "}\n",
+        mil_ver, ios_target,
         in_ch, spatial, out_ch, in_ch,
         in_ch, spatial, out_ch, in_ch,
         out_ch, spatial, out_ch, spatial];
 }
 
-// Keep the baked-weight version for reference (used in inference-only scenarios)
-static NSString *mil_gen_conv(int in_ch, int out_ch, int spatial) {
+// Generate MIL for dynamic matmul with weights as input tensor.
+// This is the preferred approach for dynamic weight injection on ANE.
+// Input 0: tensor<fp32, [1, 1, SEQ, IC]> activations (transposed for matmul)
+// Input 1: tensor<fp32, [1, 1, IC, OC]> weights (dynamic)
+// Output:  tensor<fp32, [1, 1, SEQ, OC]>
+// Uses runtime-detected MIL version
+static NSString *mil_gen_dynamic_matmul(int ic, int oc, int seq) {
+    // Explicitly lock to 1.3 and ios17 to bypass MIL 1.5 compiler strictness for dynamic weights
     return [NSString stringWithFormat:
         @"program(1.3)\n"
         "[buildInfo = dict<string, string>({{\"coremlc-component-MIL\", \"3510.2.1\"}, "
         "{\"coremlc-version\", \"3505.4.1\"}, {\"coremltools-component-milinternal\", \"\"}, "
         "{\"coremltools-version\", \"9.0\"}})]\n"
         "{\n"
-        "    func main<ios18>(tensor<fp32, [1, %d, 1, %d]> x) {\n"
+        "    func main<ios17>(tensor<fp32, [1, 1, %d, %d]> x, tensor<fp32, [1, 1, %d, %d]> weights) {\n"
+        "        string to_fp16 = const()[name = string(\"to_fp16\"), val = string(\"fp16\")];\n"
+        "        tensor<fp16, [1, 1, %d, %d]> x16 = cast(dtype = to_fp16, x = x)[name = string(\"cast_x\")];\n"
+        "        tensor<fp16, [1, 1, %d, %d]> w16 = cast(dtype = to_fp16, x = weights)[name = string(\"cast_w\")];\n"
+        "        bool tx = const()[name = string(\"tx\"), val = bool(false)];\n"
+        "        bool ty = const()[name = string(\"ty\"), val = bool(false)];\n"
+        "        tensor<fp16, [1, 1, %d, %d]> y16 = matmul(transpose_x = tx, transpose_y = ty, x = x16, y = w16)[name = string(\"matmul\")];\n"
+        "        string to_fp32 = const()[name = string(\"to_fp32\"), val = string(\"fp32\")];\n"
+        "        tensor<fp32, [1, 1, %d, %d]> y = cast(dtype = to_fp32, x = y16)[name = string(\"cast_out\")];\n"
+        "    } -> (y);\n"
+        "}\n",
+        seq, ic, ic, oc,
+        seq, ic, ic, oc,
+        seq, oc, seq, oc];
+}
+
+// Keep the baked-weight version for reference (used in inference-only scenarios)
+// Uses runtime-detected MIL version
+static NSString *mil_gen_conv(int in_ch, int out_ch, int spatial) {
+    if (!mil_dims_valid(in_ch, out_ch) || spatial <= 0 || spatial > 65536) {
+        fprintf(stderr, "ane_mil_gen: invalid spatial %d\n", spatial); return nil;
+    }
+    if (g_fp16_io) {
+        return [NSString stringWithFormat:
+            @"program(1.0)\n"
+            "[buildInfo = dict<tensor<string, []>, tensor<string, []>>({{\"coremlc-version\", \"3505.4.1\"}})]\n"
+            "{\n"
+            "    func main<ios16>(tensor<fp16, [1, %d, 1, %d]> x) {\n"
+            "        tensor<string, []> c_pad_type = const()[name = tensor<string, []>(\"c_pad_type\"), val = tensor<string, []>(\"valid\")];\n"
+            "        tensor<int32, [2]> c_strides = const()[name = tensor<string, []>(\"c_strides\"), val = tensor<int32, [2]>([1, 1])];\n"
+            "        tensor<int32, [4]> c_pad = const()[name = tensor<string, []>(\"c_pad\"), val = tensor<int32, [4]>([0, 0, 0, 0])];\n"
+            "        tensor<int32, [2]> c_dilations = const()[name = tensor<string, []>(\"c_dilations\"), val = tensor<int32, [2]>([1, 1])];\n"
+            "        tensor<int32, []> c_groups = const()[name = tensor<string, []>(\"c_groups\"), val = tensor<int32, []>(1)];\n"
+            "        tensor<fp16, [%d, %d, 1, 1]> W = const()[name = tensor<string, []>(\"W\"), "
+            "val = tensor<fp16, [%d, %d, 1, 1]>(BLOBFILE(path = tensor<string, []>(\"@model_path/weights/weight.bin\"), offset = tensor<uint64, []>(64)))];\n"
+            "        tensor<fp16, [1, %d, 1, %d]> y = conv(dilations = c_dilations, groups = c_groups, "
+            "pad = c_pad, pad_type = c_pad_type, strides = c_strides, weight = W, x = x)[name = tensor<string, []>(\"conv\")];\n"
+            "    } -> (y);\n"
+            "}\n",
+            in_ch, spatial,
+            out_ch, in_ch, out_ch, in_ch,
+            out_ch, spatial];
+    }
+    const char *mil_ver = ane_get_mil_version();
+    const char *ios_target = ane_get_mil_ios_target();
+    return [NSString stringWithFormat:
+        @"program(%s)\n"
+        "[buildInfo = dict<string, string>({{\"coremlc-component-MIL\", \"3510.2.1\"}, "
+        "{\"coremlc-version\", \"3505.4.1\"}, {\"coremltools-component-milinternal\", \"\"}, "
+        "{\"coremltools-version\", \"9.0\"}})]\n"
+        "{\n"
+        "    func main<%s>(tensor<fp32, [1, %d, 1, %d]> x) {\n"
         "        string c_pad_type = const()[name = string(\"c_pad_type\"), val = string(\"valid\")];\n"
         "        tensor<int32, [2]> c_strides = const()[name = string(\"c_strides\"), val = tensor<int32, [2]>([1, 1])];\n"
         "        tensor<int32, [4]> c_pad = const()[name = string(\"c_pad\"), val = tensor<int32, [4]>([0, 0, 0, 0])];\n"
@@ -76,6 +188,7 @@ static NSString *mil_gen_conv(int in_ch, int out_ch, int spatial) {
         "        tensor<fp32, [1, %d, 1, %d]> y = cast(dtype = to_fp32, x = y16)[name = string(\"cast_out\")];\n"
         "    } -> (y);\n"
         "}\n",
+        mil_ver, ios_target,
         in_ch, spatial, in_ch, spatial,
         out_ch, in_ch, out_ch, in_ch,
         out_ch, spatial, out_ch, spatial];
@@ -86,15 +199,52 @@ static NSString *mil_gen_conv(int in_ch, int out_ch, int spatial) {
 // Outputs: Q[1, dim, 1, S], K[1, dim, 1, S], V[1, dim, 1, S]
 // Weight blob layout: Wq[dim,dim] @ offset 64, Wk @ offset 64+cs, Wv @ offset 64+2*cs
 // where cs = 64 + dim*dim*2
+// Uses runtime-detected MIL version
 static NSString *mil_gen_qkv(int dim, int spatial) {
+    if (!mil_dims_valid(dim, dim) || spatial <= 0 || spatial > 65536) {
+        fprintf(stderr, "ane_mil_gen: invalid spatial %d\n", spatial); return nil;
+    }
     NSUInteger cs = 64 + (NSUInteger)dim * dim * 2;
+    if (g_fp16_io) {
+        return [NSString stringWithFormat:
+            @"program(1.0)\n"
+            "[buildInfo = dict<tensor<string, []>, tensor<string, []>>({{\"coremlc-version\", \"3505.4.1\"}})]\n"
+            "{\n"
+            "    func main<ios16>(tensor<fp16, [1, %d, 1, %d]> x) {\n"
+            "        tensor<string, []> c_pad_type = const()[name = tensor<string, []>(\"c_pad_type\"), val = tensor<string, []>(\"valid\")];\n"
+            "        tensor<int32, [2]> c_strides = const()[name = tensor<string, []>(\"c_strides\"), val = tensor<int32, [2]>([1, 1])];\n"
+            "        tensor<int32, [4]> c_pad = const()[name = tensor<string, []>(\"c_pad\"), val = tensor<int32, [4]>([0, 0, 0, 0])];\n"
+            "        tensor<int32, [2]> c_dilations = const()[name = tensor<string, []>(\"c_dilations\"), val = tensor<int32, [2]>([1, 1])];\n"
+            "        tensor<int32, []> c_groups = const()[name = tensor<string, []>(\"c_groups\"), val = tensor<int32, []>(1)];\n"
+            "        tensor<fp16, [%d, %d, 1, 1]> Wq = const()[name = tensor<string, []>(\"Wq\"), "
+            "val = tensor<fp16, [%d, %d, 1, 1]>(BLOBFILE(path = tensor<string, []>(\"@model_path/weights/weight.bin\"), offset = tensor<uint64, []>(64)))];\n"
+            "        tensor<fp16, [%d, %d, 1, 1]> Wk = const()[name = tensor<string, []>(\"Wk\"), "
+            "val = tensor<fp16, [%d, %d, 1, 1]>(BLOBFILE(path = tensor<string, []>(\"@model_path/weights/weight.bin\"), offset = tensor<uint64, []>(%lu)))];\n"
+            "        tensor<fp16, [%d, %d, 1, 1]> Wv = const()[name = tensor<string, []>(\"Wv\"), "
+            "val = tensor<fp16, [%d, %d, 1, 1]>(BLOBFILE(path = tensor<string, []>(\"@model_path/weights/weight.bin\"), offset = tensor<uint64, []>(%lu)))];\n"
+            "        tensor<fp16, [1, %d, 1, %d]> q = conv(dilations = c_dilations, groups = c_groups, "
+            "pad = c_pad, pad_type = c_pad_type, strides = c_strides, weight = Wq, x = x)[name = tensor<string, []>(\"conv_q\")];\n"
+            "        tensor<fp16, [1, %d, 1, %d]> k = conv(dilations = c_dilations, groups = c_groups, "
+            "pad = c_pad, pad_type = c_pad_type, strides = c_strides, weight = Wk, x = x)[name = tensor<string, []>(\"conv_k\")];\n"
+            "        tensor<fp16, [1, %d, 1, %d]> v = conv(dilations = c_dilations, groups = c_groups, "
+            "pad = c_pad, pad_type = c_pad_type, strides = c_strides, weight = Wv, x = x)[name = tensor<string, []>(\"conv_v\")];\n"
+            "    } -> (q, k, v);\n"
+            "}\n",
+            dim, spatial,
+            dim, dim, dim, dim,
+            dim, dim, dim, dim, (unsigned long)(64 + cs),
+            dim, dim, dim, dim, (unsigned long)(64 + 2*cs),
+            dim, spatial, dim, spatial, dim, spatial];
+    }
+    const char *mil_ver = ane_get_mil_version();
+    const char *ios_target = ane_get_mil_ios_target();
     return [NSString stringWithFormat:
-        @"program(1.3)\n"
+        @"program(%s)\n"
         "[buildInfo = dict<string, string>({{\"coremlc-component-MIL\", \"3510.2.1\"}, "
         "{\"coremlc-version\", \"3505.4.1\"}, {\"coremltools-component-milinternal\", \"\"}, "
         "{\"coremltools-version\", \"9.0\"}})]\n"
         "{\n"
-        "    func main<ios18>(tensor<fp32, [1, %d, 1, %d]> x) {\n"
+        "    func main<%s>(tensor<fp32, [1, %d, 1, %d]> x) {\n"
         "        string c_pad_type = const()[name = string(\"c_pad_type\"), val = string(\"valid\")];\n"
         "        tensor<int32, [2]> c_strides = const()[name = string(\"c_strides\"), val = tensor<int32, [2]>([1, 1])];\n"
         "        tensor<int32, [4]> c_pad = const()[name = string(\"c_pad\"), val = tensor<int32, [4]>([0, 0, 0, 0])];\n"
@@ -120,6 +270,7 @@ static NSString *mil_gen_qkv(int dim, int spatial) {
         "        tensor<fp32, [1, %d, 1, %d]> v = cast(dtype = to_fp32, x = v16)[name = string(\"cast_v\")];\n"
         "    } -> (q, k, v);\n"
         "}\n",
+        mil_ver, ios_target,
         dim, spatial, dim, spatial,
         dim, dim, dim, dim,
         dim, dim, dim, dim, (unsigned long)(64 + cs),
@@ -130,10 +281,12 @@ static NSString *mil_gen_qkv(int dim, int spatial) {
 
 // Build weight blob for fused QKV (3 weight matrices concatenated)
 static NSData *mil_build_qkv_weight_blob(const float *wq, const float *wk, const float *wv, int dim) {
+    if (!mil_dims_valid(dim, dim)) return nil;  // MED-03
     NSUInteger wsize = (NSUInteger)dim * dim * 2;
     NSUInteger cs = 64 + wsize;
     NSUInteger total = 64 + 3 * cs;
     uint8_t *buf = (uint8_t*)calloc(total, 1);
+    if (!buf) { fprintf(stderr, "OOM: calloc(%lu)\n", (unsigned long)total); abort(); }  // HIGH-04
     buf[0] = 0x01; buf[4] = 0x02;
     const float *ws[3] = {wq, wk, wv};
     for (int w = 0; w < 3; w++) {
@@ -151,10 +304,12 @@ static NSData *mil_build_qkv_weight_blob(const float *wq, const float *wk, const
 
 // Build weight blob for fused FFN up (w1 + w3, both [hidden_dim, dim])
 static NSData *mil_build_ffn_up_weight_blob(const float *w1, const float *w3, int hidden_dim, int dim) {
+    if (!mil_dims_valid(hidden_dim, dim)) return nil;  // MED-03
     NSUInteger wsize = (NSUInteger)hidden_dim * dim * 2;
     NSUInteger cs = 64 + wsize;
     NSUInteger total = 64 + 2 * cs;
     uint8_t *buf = (uint8_t*)calloc(total, 1);
+    if (!buf) { fprintf(stderr, "OOM: calloc(%lu)\n", (unsigned long)total); abort(); }  // HIGH-04
     buf[0] = 0x01; buf[4] = 0x02;
     const float *ws[2] = {w1, w3};
     for (int w = 0; w < 2; w++) {
@@ -171,15 +326,47 @@ static NSData *mil_build_ffn_up_weight_blob(const float *w1, const float *w3, in
 }
 
 // Generate MIL for fused FFN up: w1 + w3 parallel convs
+// Uses runtime-detected MIL version
 static NSString *mil_gen_ffn_up(int dim, int hidden_dim, int spatial) {
+    if (!mil_dims_valid(dim, hidden_dim) || spatial <= 0 || spatial > 65536) {
+        fprintf(stderr, "ane_mil_gen: invalid spatial %d\n", spatial); return nil;
+    }
     NSUInteger cs = 64 + (NSUInteger)hidden_dim * dim * 2;
+    if (g_fp16_io) {
+        return [NSString stringWithFormat:
+            @"program(1.0)\n"
+            "[buildInfo = dict<tensor<string, []>, tensor<string, []>>({{\"coremlc-version\", \"3505.4.1\"}})]\n"
+            "{\n"
+            "    func main<ios16>(tensor<fp16, [1, %d, 1, %d]> x) {\n"
+            "        tensor<string, []> c_pad_type = const()[name = tensor<string, []>(\"c_pad_type\"), val = tensor<string, []>(\"valid\")];\n"
+            "        tensor<int32, [2]> c_strides = const()[name = tensor<string, []>(\"c_strides\"), val = tensor<int32, [2]>([1, 1])];\n"
+            "        tensor<int32, [4]> c_pad = const()[name = tensor<string, []>(\"c_pad\"), val = tensor<int32, [4]>([0, 0, 0, 0])];\n"
+            "        tensor<int32, [2]> c_dilations = const()[name = tensor<string, []>(\"c_dilations\"), val = tensor<int32, [2]>([1, 1])];\n"
+            "        tensor<int32, []> c_groups = const()[name = tensor<string, []>(\"c_groups\"), val = tensor<int32, []>(1)];\n"
+            "        tensor<fp16, [%d, %d, 1, 1]> W1 = const()[name = tensor<string, []>(\"W1\"), "
+            "val = tensor<fp16, [%d, %d, 1, 1]>(BLOBFILE(path = tensor<string, []>(\"@model_path/weights/weight.bin\"), offset = tensor<uint64, []>(64)))];\n"
+            "        tensor<fp16, [%d, %d, 1, 1]> W3 = const()[name = tensor<string, []>(\"W3\"), "
+            "val = tensor<fp16, [%d, %d, 1, 1]>(BLOBFILE(path = tensor<string, []>(\"@model_path/weights/weight.bin\"), offset = tensor<uint64, []>(%lu)))];\n"
+            "        tensor<fp16, [1, %d, 1, %d]> out1 = conv(dilations = c_dilations, groups = c_groups, "
+            "pad = c_pad, pad_type = c_pad_type, strides = c_strides, weight = W1, x = x)[name = tensor<string, []>(\"conv_w1\")];\n"
+            "        tensor<fp16, [1, %d, 1, %d]> out3 = conv(dilations = c_dilations, groups = c_groups, "
+            "pad = c_pad, pad_type = c_pad_type, strides = c_strides, weight = W3, x = x)[name = tensor<string, []>(\"conv_w3\")];\n"
+            "    } -> (out1, out3);\n"
+            "}\n",
+            dim, spatial,
+            hidden_dim, dim, hidden_dim, dim,
+            hidden_dim, dim, hidden_dim, dim, (unsigned long)(64 + cs),
+            hidden_dim, spatial, hidden_dim, spatial];
+    }
+    const char *mil_ver = ane_get_mil_version();
+    const char *ios_target = ane_get_mil_ios_target();
     return [NSString stringWithFormat:
-        @"program(1.3)\n"
+        @"program(%s)\n"
         "[buildInfo = dict<string, string>({{\"coremlc-component-MIL\", \"3510.2.1\"}, "
         "{\"coremlc-version\", \"3505.4.1\"}, {\"coremltools-component-milinternal\", \"\"}, "
         "{\"coremltools-version\", \"9.0\"}})]\n"
         "{\n"
-        "    func main<ios18>(tensor<fp32, [1, %d, 1, %d]> x) {\n"
+        "    func main<%s>(tensor<fp32, [1, %d, 1, %d]> x) {\n"
         "        string c_pad_type = const()[name = string(\"c_pad_type\"), val = string(\"valid\")];\n"
         "        tensor<int32, [2]> c_strides = const()[name = string(\"c_strides\"), val = tensor<int32, [2]>([1, 1])];\n"
         "        tensor<int32, [4]> c_pad = const()[name = string(\"c_pad\"), val = tensor<int32, [4]>([0, 0, 0, 0])];\n"
@@ -200,9 +387,128 @@ static NSString *mil_gen_ffn_up(int dim, int hidden_dim, int spatial) {
         "        tensor<fp32, [1, %d, 1, %d]> out3 = cast(dtype = to_fp32, x = h3)[name = string(\"cast_h3\")];\n"
         "    } -> (out1, out3);\n"
         "}\n",
+        mil_ver, ios_target,
         dim, spatial, dim, spatial,
         hidden_dim, dim, hidden_dim, dim,
         hidden_dim, dim, hidden_dim, dim, (unsigned long)(64 + cs),
         hidden_dim, spatial, hidden_dim, spatial,
         hidden_dim, spatial, hidden_dim, spatial];
+}
+
+// Build weight blob for GQA QKV (3 weight matrices with different shapes)
+static NSData *mil_build_qkv_gqa_weight_blob(const float *wq, int q_dim, int dim,
+                                               const float *wk, const float *wv, int kv_dim) {
+    NSUInteger wsize_q  = (NSUInteger)q_dim  * dim * 2;
+    NSUInteger wsize_kv = (NSUInteger)kv_dim * dim * 2;
+    NSUInteger cs_q  = 64 + wsize_q;
+    NSUInteger cs_kv = 64 + wsize_kv;
+    NSUInteger total = 64 + cs_q + 2 * cs_kv;
+    uint8_t *buf = (uint8_t*)calloc(total, 1);
+    buf[0] = 0x01; buf[4] = 0x02;
+
+    // Chunk 0: Wq
+    {
+        uint8_t *chunk = buf + 64;
+        chunk[0]=0xEF; chunk[1]=0xBE; chunk[2]=0xAD; chunk[3]=0xDE; chunk[4]=0x01;
+        *(uint32_t*)(chunk + 8) = (uint32_t)wsize_q;
+        *(uint32_t*)(chunk + 16) = (uint32_t)(64 + 64);
+        _Float16 *fp16 = (_Float16*)(chunk + 64);
+        for (NSUInteger i = 0; i < (NSUInteger)q_dim * dim; i++) fp16[i] = (_Float16)wq[i];
+    }
+    // Chunk 1: Wk
+    {
+        uint8_t *chunk = buf + 64 + cs_q;
+        chunk[0]=0xEF; chunk[1]=0xBE; chunk[2]=0xAD; chunk[3]=0xDE; chunk[4]=0x01;
+        *(uint32_t*)(chunk + 8) = (uint32_t)wsize_kv;
+        *(uint32_t*)(chunk + 16) = (uint32_t)(64 + cs_q + 64);
+        _Float16 *fp16 = (_Float16*)(chunk + 64);
+        for (NSUInteger i = 0; i < (NSUInteger)kv_dim * dim; i++) fp16[i] = (_Float16)wk[i];
+    }
+    // Chunk 2: Wv
+    {
+        uint8_t *chunk = buf + 64 + cs_q + cs_kv;
+        chunk[0]=0xEF; chunk[1]=0xBE; chunk[2]=0xAD; chunk[3]=0xDE; chunk[4]=0x01;
+        *(uint32_t*)(chunk + 8) = (uint32_t)wsize_kv;
+        *(uint32_t*)(chunk + 16) = (uint32_t)(64 + cs_q + cs_kv + 64);
+        _Float16 *fp16 = (_Float16*)(chunk + 64);
+        for (NSUInteger i = 0; i < (NSUInteger)kv_dim * dim; i++) fp16[i] = (_Float16)wv[i];
+    }
+    return [NSData dataWithBytesNoCopy:buf length:total freeWhenDone:YES];
+}
+
+// Generate MIL for fused GQA QKV: Q, K, V have different output dimensions
+// Qwen2.5-0.5B: Q=[q_dim, dim], K=[kv_dim, dim], V=[kv_dim, dim]
+// Weight blob: Wq[q_dim,dim] @ chunk0, Wk[kv_dim,dim] @ chunk1, Wv[kv_dim,dim] @ chunk2
+static NSString *mil_gen_qkv_gqa(int dim, int q_dim, int kv_dim, int spatial) {
+    NSUInteger cs_q  = 64 + (NSUInteger)q_dim  * dim * 2;
+    NSUInteger cs_kv = 64 + (NSUInteger)kv_dim * dim * 2;
+    NSUInteger off_k = 64 + cs_q;
+    NSUInteger off_v = off_k + cs_kv;
+    if (g_fp16_io) {
+        return [NSString stringWithFormat:
+            @"program(1.0)\n"
+            "[buildInfo = dict<tensor<string, []>, tensor<string, []>>({{\"coremlc-version\", \"3505.4.1\"}})]\n"
+            "{\n"
+            "    func main<ios16>(tensor<fp16, [1, %d, 1, %d]> x) {\n"
+            "        tensor<string, []> c_pad_type = const()[name = tensor<string, []>(\"c_pad_type\"), val = tensor<string, []>(\"valid\")];\n"
+            "        tensor<int32, [2]> c_strides = const()[name = tensor<string, []>(\"c_strides\"), val = tensor<int32, [2]>([1, 1])];\n"
+            "        tensor<int32, [4]> c_pad = const()[name = tensor<string, []>(\"c_pad\"), val = tensor<int32, [4]>([0, 0, 0, 0])];\n"
+            "        tensor<int32, [2]> c_dilations = const()[name = tensor<string, []>(\"c_dilations\"), val = tensor<int32, [2]>([1, 1])];\n"
+            "        tensor<int32, []> c_groups = const()[name = tensor<string, []>(\"c_groups\"), val = tensor<int32, []>(1)];\n"
+            "        tensor<fp16, [%d, %d, 1, 1]> Wq = const()[name = tensor<string, []>(\"Wq\"), "
+            "val = tensor<fp16, [%d, %d, 1, 1]>(BLOBFILE(path = tensor<string, []>(\"@model_path/weights/weight.bin\"), offset = tensor<uint64, []>(64)))];\n"
+            "        tensor<fp16, [%d, %d, 1, 1]> Wk = const()[name = tensor<string, []>(\"Wk\"), "
+            "val = tensor<fp16, [%d, %d, 1, 1]>(BLOBFILE(path = tensor<string, []>(\"@model_path/weights/weight.bin\"), offset = tensor<uint64, []>(%lu)))];\n"
+            "        tensor<fp16, [%d, %d, 1, 1]> Wv = const()[name = tensor<string, []>(\"Wv\"), "
+            "val = tensor<fp16, [%d, %d, 1, 1]>(BLOBFILE(path = tensor<string, []>(\"@model_path/weights/weight.bin\"), offset = tensor<uint64, []>(%lu)))];\n"
+            "        tensor<fp16, [1, %d, 1, %d]> q = conv(dilations = c_dilations, groups = c_groups, "
+            "pad = c_pad, pad_type = c_pad_type, strides = c_strides, weight = Wq, x = x)[name = tensor<string, []>(\"conv_q\")];\n"
+            "        tensor<fp16, [1, %d, 1, %d]> k = conv(dilations = c_dilations, groups = c_groups, "
+            "pad = c_pad, pad_type = c_pad_type, strides = c_strides, weight = Wk, x = x)[name = tensor<string, []>(\"conv_k\")];\n"
+            "        tensor<fp16, [1, %d, 1, %d]> v = conv(dilations = c_dilations, groups = c_groups, "
+            "pad = c_pad, pad_type = c_pad_type, strides = c_strides, weight = Wv, x = x)[name = tensor<string, []>(\"conv_v\")];\n"
+            "    } -> (q, k, v);\n"
+            "}\n",
+            dim, spatial,
+            q_dim, dim, q_dim, dim,
+            kv_dim, dim, kv_dim, dim, (unsigned long)off_k,
+            kv_dim, dim, kv_dim, dim, (unsigned long)off_v,
+            q_dim, spatial, kv_dim, spatial, kv_dim, spatial];
+    }
+    return [NSString stringWithFormat:
+        @"program(1.0)\n"
+        "[buildInfo = dict<tensor<string, []>, tensor<string, []>>({{\"coremlc-version\", \"3505.4.1\"}})]\n"
+        "{\n"
+        "    func main<ios16>(tensor<fp32, [1, %d, 1, %d]> x) {\n"
+        "        tensor<string, []> c_pad_type = const()[name = tensor<string, []>(\"c_pad_type\"), val = tensor<string, []>(\"valid\")];\n"
+        "        tensor<int32, [2]> c_strides = const()[name = tensor<string, []>(\"c_strides\"), val = tensor<int32, [2]>([1, 1])];\n"
+        "        tensor<int32, [4]> c_pad = const()[name = tensor<string, []>(\"c_pad\"), val = tensor<int32, [4]>([0, 0, 0, 0])];\n"
+        "        tensor<int32, [2]> c_dilations = const()[name = tensor<string, []>(\"c_dilations\"), val = tensor<int32, [2]>([1, 1])];\n"
+        "        tensor<int32, []> c_groups = const()[name = tensor<string, []>(\"c_groups\"), val = tensor<int32, []>(1)];\n"
+        "        tensor<string, []> to_fp16 = const()[name = tensor<string, []>(\"to_fp16\"), val = tensor<string, []>(\"fp16\")];\n"
+        "        tensor<fp16, [1, %d, 1, %d]> x16 = cast(dtype = to_fp16, x = x)[name = tensor<string, []>(\"cast_in\")];\n"
+        "        tensor<fp16, [%d, %d, 1, 1]> Wq = const()[name = tensor<string, []>(\"Wq\"), "
+        "val = tensor<fp16, [%d, %d, 1, 1]>(BLOBFILE(path = tensor<string, []>(\"@model_path/weights/weight.bin\"), offset = tensor<uint64, []>(64)))];\n"
+        "        tensor<fp16, [%d, %d, 1, 1]> Wk = const()[name = tensor<string, []>(\"Wk\"), "
+        "val = tensor<fp16, [%d, %d, 1, 1]>(BLOBFILE(path = tensor<string, []>(\"@model_path/weights/weight.bin\"), offset = tensor<uint64, []>(%lu)))];\n"
+        "        tensor<fp16, [%d, %d, 1, 1]> Wv = const()[name = tensor<string, []>(\"Wv\"), "
+        "val = tensor<fp16, [%d, %d, 1, 1]>(BLOBFILE(path = tensor<string, []>(\"@model_path/weights/weight.bin\"), offset = tensor<uint64, []>(%lu)))];\n"
+        "        tensor<fp16, [1, %d, 1, %d]> q16 = conv(dilations = c_dilations, groups = c_groups, "
+        "pad = c_pad, pad_type = c_pad_type, strides = c_strides, weight = Wq, x = x16)[name = tensor<string, []>(\"conv_q\")];\n"
+        "        tensor<fp16, [1, %d, 1, %d]> k16 = conv(dilations = c_dilations, groups = c_groups, "
+        "pad = c_pad, pad_type = c_pad_type, strides = c_strides, weight = Wk, x = x16)[name = tensor<string, []>(\"conv_k\")];\n"
+        "        tensor<fp16, [1, %d, 1, %d]> v16 = conv(dilations = c_dilations, groups = c_groups, "
+        "pad = c_pad, pad_type = c_pad_type, strides = c_strides, weight = Wv, x = x16)[name = tensor<string, []>(\"conv_v\")];\n"
+        "        tensor<string, []> to_fp32 = const()[name = tensor<string, []>(\"to_fp32\"), val = tensor<string, []>(\"fp32\")];\n"
+        "        tensor<fp32, [1, %d, 1, %d]> q = cast(dtype = to_fp32, x = q16)[name = tensor<string, []>(\"cast_q\")];\n"
+        "        tensor<fp32, [1, %d, 1, %d]> k = cast(dtype = to_fp32, x = k16)[name = tensor<string, []>(\"cast_k\")];\n"
+        "        tensor<fp32, [1, %d, 1, %d]> v = cast(dtype = to_fp32, x = v16)[name = tensor<string, []>(\"cast_v\")];\n"
+        "    } -> (q, k, v);\n"
+        "}\n",
+        dim, spatial, dim, spatial,
+        q_dim, dim, q_dim, dim,
+        kv_dim, dim, kv_dim, dim, (unsigned long)off_k,
+        kv_dim, dim, kv_dim, dim, (unsigned long)off_v,
+        q_dim, spatial, kv_dim, spatial, kv_dim, spatial,
+        q_dim, spatial, kv_dim, spatial, kv_dim, spatial];
 }
