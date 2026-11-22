@@ -17,6 +17,9 @@
 #include "../../../training/ane_runtime.h"
 #include "../../../training/ane_mil_gen.h"
 
+// Declared extern in ane_mil_gen.h; one definition per link. 1 = fp16 I/O for M1/M2 (no cast op).
+int g_fp16_io = 0;
+
 // ─── Internal state ─────────────────────────────────────────────────────────
 struct ANEMnistTrainer {
     ANEMnistConfig cfg;

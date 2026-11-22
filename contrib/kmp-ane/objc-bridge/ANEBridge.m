@@ -482,6 +482,7 @@ ANEBridgeStatus ane_bridge_matmul_eval(ANEBridgeKernel *kernel,
     if (s != ANE_OK) return s;
     s = ane_bridge_eval(kernel);
     if (s != ANE_OK) return s;
+    if (!y) return ANE_OK;  // caller reads the output itself (see ane_bridge_matmul_eval_rowmajor)
     return ane_bridge_read_output(kernel, 0, y, (size_t)out_ch * spatial * sizeof(float));
 }
 
