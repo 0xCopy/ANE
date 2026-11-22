@@ -1,13 +1,3 @@
-<<<<<<< HEAD
-CC = xcrun clang
-CFLAGS = -O2 -Wall -Wno-deprecated-declarations -DACCELERATE_NEW_LAPACK -fobjc-arc
-CC_C = xcrun clang
-CFLAGS_C = -O2 -Wall -Wextra -Werror -std=c11
-FRAMEWORKS = -framework Foundation -framework CoreML -framework IOSurface
-LDFLAGS = $(FRAMEWORKS) -ldl
-
-HEADERS_LARGE = stories_config.h stories_io.h stories_mil.h stories_cpu_ops.h data_validation.h
-=======
 CC = xcrun clang
 CC_C = xcrun clang
 
@@ -27,7 +17,6 @@ LDFLAGS = $(FRAMEWORKS) -ldl
 
 HEADERS_LARGE = stories_config.h stories_io.h stories_mil.h stories_cpu_ops.h data_validation.h
 HEADERS_OPT = $(HEADERS_LARGE) stories_cpu_ops_opt.h
->>>>>>> middle/agglomerate
 
 HEADERS_ANE = $(HEADERS_LARGE) ane_rmsnorm_bwd.h ane_classifier.h
 

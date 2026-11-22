@@ -95,7 +95,13 @@ training/*.bin
 *.log
 firebase-debug.log
 
-<<<<<<< HEAD
+# Worktrees
+.worktrees/
+worktrees/
+
+# Secrets / env
+.env
+inference/.env
 # macOS
 .DS_Store
 *.so
@@ -106,12 +112,3 @@ train_large
 *.orig
 *.dSYM/
 .idea/
-=======
-# Worktrees
-.worktrees/
-worktrees/
-
-# Secrets / env
-.env
-inference/.env
->>>>>>> middle/agglomerate
