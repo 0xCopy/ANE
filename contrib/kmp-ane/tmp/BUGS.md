@@ -47,7 +47,7 @@ static void ane_free(ANEKernel *k) {
 ---
 
 ## Status
-- [ ] Fix Bug 1 in `training/ane_runtime.h`
-- [ ] Fix Bug 2 in `objc-bridge/ANEBridge.m`
+- [x] Fix Bug 1 in `training/ane_runtime.h` (nil the ARC fields before free; MNIST demo went from dying at 106/118 compiles with ANE Code=54 to completing 118/118)
+- [x] Bug 2 in `objc-bridge/ANEBridge.m` (inherits the Bug 1 fix; wrapper unchanged)
 - [ ] Fix Bug 3 in `objc-bridge/ANEBridge.m`
-- [ ] Fix Bug 4 inherits from Bug 1 fix
+- [x] Bug 4 inherits from Bug 1 fix

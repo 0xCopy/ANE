@@ -412,6 +412,13 @@ static void ane_free(ANEKernel *k) {
     for (int i = 0; i < k->nOutputs; i++) CFRelease(k->ioOutputs[i]);
     if (k->weightsSurface) CFRelease(k->weightsSurface);
     [[NSFileManager defaultManager] removeItemAtPath:k->tmpDir error:nil];
+    // ANEKernel is calloc'd, so ARC never releases its strong ObjC fields on free().
+    // Nil them first (assignment releases) or every kernel leaks its model/request/tmpDir
+    // and ANE resources run out well before the compile budget.
+    k->model = nil;
+    k->weightsBuffer = nil;
+    k->request = nil;
+    k->tmpDir = nil;
     free(k->ioInputs); free(k->ioOutputs);
     free(k->inputBytes); free(k->outputBytes);
     free(k);
