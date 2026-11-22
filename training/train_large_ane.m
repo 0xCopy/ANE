@@ -18,8 +18,18 @@
 #include "ane_classifier.h"
 
 #define CKPT_PATH_DEFAULT "ane_stories110M_ckpt.bin"
+<<<<<<< HEAD
 #define MODEL_PATH_DEFAULT "stories110M.bin"
 #define DATA_PATH_DEFAULT "tinystories_data00.bin"
+=======
+#define MODEL_PATH_DEFAULT "../../assets/models/stories110M.bin"
+#define DATA_PATH "tinystories_data00.bin"
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
+
+static const char *get_path(const char *env_var, const char *default_val) {
+    const char *v = getenv(env_var);
+    return (v && v[0]) ? v : default_val;
+}
 
 // ===== Weight loading from llama2.c format =====
 static bool load_pretrained(LayerWeights *lw, float *rms_final, float *embed, const char *path) {
@@ -197,17 +207,23 @@ int main(int argc, char *argv[]) {
     @autoreleasepool {
         setbuf(stdout, NULL);
         ane_init();
+        init_accum_steps();
         mach_timebase_info(&g_tb);
 
         int total_steps = 10000;
         float lr = 3e-4f;
         float adam_b1=0.9f, adam_b2=0.999f, adam_eps=1e-8f;
         int adam_t = 0, start_step = 0;
+<<<<<<< HEAD
         const char *ckpt_path = CKPT_PATH_DEFAULT;
         const char *model_path = MODEL_PATH_DEFAULT;
         const char *data_path = DATA_PATH_DEFAULT;
+=======
+        const char *ckpt_path = get_path("ANE_CKPT_PATH", CKPT_PATH_DEFAULT);
+        const char *model_path = get_path("ANE_MODEL_PATH", MODEL_PATH_DEFAULT);
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
         bool do_resume = false;
-        bool ane_extras = true;  // classifier, softmax, rmsnorm_bwd on ANE
+        bool ane_extras = true;
         int pos = 0;
         for (int i=1; i<argc; i++) {
             if (strcmp(argv[i], "--resume") == 0) do_resume = true;
@@ -253,6 +269,7 @@ int main(int argc, char *argv[]) {
         if (!resuming) {
             printf("=== ANE Training: Stories110M (ANE-offloaded) ===\n");
             printf("dim=%d hidden=%d heads=%d seq=%d vocab=%d layers=%d\n", DIM, HIDDEN, HEADS, SEQ, VOCAB, NLAYERS);
+            printf("model=%s data=%s ckpt=%s\n", model_path, DATA_PATH, ckpt_path);
             if (ane_extras) printf("NEW: final_rmsnorm, classifier_fwd, softmax, rmsnorm_bwd on ANE\n");
             else printf("ANE extras DISABLED (classifier/softmax/rmsnorm_bwd on CPU)\n");
             {
@@ -293,6 +310,7 @@ int main(int argc, char *argv[]) {
             close(data_fd);
             return 1;
         }
+<<<<<<< HEAD
 =======
         int data_fd = open(DATA_PATH, O_RDONLY);
         if (data_fd < 0) { printf("Cannot open %s\n", DATA_PATH); return 1; }
@@ -316,6 +334,8 @@ int main(int argc, char *argv[]) {
         if (token_data == MAP_FAILED) { perror("mmap"); close(data_fd); return 1; }
         close(data_fd); // mapping remains valid; avoid fd leaks across exec() restarts
 >>>>>>> 60b0512be32bf88f096481ac105f5558c0afa631
+=======
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
         printf("Token data: %zu tokens (%.1f MB)\n", n_tokens, data_len/1e6);
 
         TokenDataValidationError data_err = {0};

@@ -18,6 +18,7 @@ static NSString *gen_sdpa_fwd_flex(void) {
     NSMutableString *m = [NSMutableString string];
     [m appendString:MIL_HDR];
 <<<<<<< HEAD
+<<<<<<< HEAD
     [m appendFormat:@"    func main<ios18>(tensor<fp16, [1, %d, 1, %d]> x, "
                      "tensor<fp16, [1,%d,1,1]> rw, "
                      "tensor<fp16, [%d,%d,1,1]> Wq, "
@@ -82,6 +83,23 @@ static NSString *gen_sdpa_fwd_flex(void) {
     [m appendFormat:@"        tensor<fp16, [1,%d,1,1]> rw = const()[name=tensor<string, []>(\"rw\"), val=tensor<fp16, [1,%d,1,1]>(BLOBFILE(path=tensor<string, []>(\"@model_path/weights/rms1.bin\"), offset=tensor<uint64, []>(64)))];\n", DIM, DIM];
     [m appendFormat:@"        tensor<fp16, [1,%d,1,%d]> xn = mul(x=xr,y=rw)[name=tensor<string, []>(\"xn\")];\n", DIM, SEQ];
     [m appendString:@CONV_CONST];
+=======
+    [m appendFormat:@"    func main<ios16>(tensor<fp16, [1, %d, 1, %d]> x) {\n", DIM, SEQ];
+    [m appendFormat:@"        tensor<fp16, [1,%d,1,%d]> sq = mul(x=x,y=x)[name=tensor<string, []>(\"sq\")];\n", DIM, SEQ];
+    [m appendFormat:@"        tensor<int32, [1]> rax = const()[name=tensor<string, []>(\"rax\"), val=tensor<int32, [1]>([1])];\n"];
+    [m appendFormat:@"        tensor<bool, []> kd = const()[name=tensor<string, []>(\"kd\"), val=tensor<bool, []>(true)];\n"];
+    [m appendFormat:@"        tensor<fp16, [1,1,1,%d]> ss = reduce_sum(x=sq,axes=rax,keep_dims=kd)[name=tensor<string, []>(\"ss\")];\n", SEQ];
+    [m appendFormat:@"        tensor<fp16, []> invd = const()[name=tensor<string, []>(\"invd\"), val=tensor<fp16, []>(%f)];\n", invd];
+    [m appendFormat:@"        tensor<fp16, [1,1,1,%d]> ss2 = mul(x=ss,y=invd)[name=tensor<string, []>(\"ss2\")];\n", SEQ];
+    [m appendFormat:@"        tensor<fp16, []> eps = const()[name=tensor<string, []>(\"eps\"), val=tensor<fp16, []>(0.00001)];\n"];
+    [m appendFormat:@"        tensor<fp16, [1,1,1,%d]> ss3 = add(x=ss2,y=eps)[name=tensor<string, []>(\"ss3\")];\n", SEQ];
+    [m appendFormat:@"        tensor<fp16, []> nhalf = const()[name=tensor<string, []>(\"nhalf\"), val=tensor<fp16, []>(-0.5)];\n"];
+    [m appendFormat:@"        tensor<fp16, [1,1,1,%d]> rrms = pow(x=ss3,y=nhalf)[name=tensor<string, []>(\"rrms\")];\n", SEQ];
+    [m appendFormat:@"        tensor<fp16, [1,%d,1,%d]> xr = mul(x=x,y=rrms)[name=tensor<string, []>(\"xr\")];\n", DIM, SEQ];
+    [m appendFormat:@"        tensor<fp16, [1,%d,1,1]> rw = const()[name=tensor<string, []>(\"rw\"), val=tensor<fp16, [1,%d,1,1]>(BLOBFILE(path=tensor<string, []>(\"@model_path/weights/rms1.bin\"), offset=tensor<uint64, []>(64)))];\n", DIM, DIM];
+    [m appendFormat:@"        tensor<fp16, [1,%d,1,%d]> xn = mul(x=xr,y=rw)[name=tensor<string, []>(\"xn\")];\n", DIM, SEQ];
+    [m appendString:@CONV_CONST];
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
     [m appendFormat:@"        tensor<fp16, [%d,%d,1,1]> Wq = const()[name=tensor<string, []>(\"Wq\"), val=tensor<fp16, [%d,%d,1,1]>(BLOBFILE(path=tensor<string, []>(\"@model_path/weights/wq.bin\"), offset=tensor<uint64, []>(64)))];\n", DIM,DIM,DIM,DIM];
     [m appendFormat:@"        tensor<fp16, [%d,%d,1,1]> Wk = const()[name=tensor<string, []>(\"Wk\"), val=tensor<fp16, [%d,%d,1,1]>(BLOBFILE(path=tensor<string, []>(\"@model_path/weights/wk.bin\"), offset=tensor<uint64, []>(64)))];\n", DIM,DIM,DIM,DIM];
     [m appendFormat:@"        tensor<fp16, [%d,%d,1,1]> Wv = const()[name=tensor<string, []>(\"Wv\"), val=tensor<fp16, [%d,%d,1,1]>(BLOBFILE(path=tensor<string, []>(\"@model_path/weights/wv.bin\"), offset=tensor<uint64, []>(64)))];\n", DIM,DIM,DIM,DIM];
@@ -114,7 +132,10 @@ static NSString *gen_sdpa_fwd_flex(void) {
     [m appendString:@"        tensor<int32, []> cax = const()[name=tensor<string, []>(\"cax\"), val=tensor<int32, []>(1)];\n"];
     [m appendString:@"        tensor<bool, []> cid = const()[name=tensor<string, []>(\"cid\"), val=tensor<bool, []>(false)];\n"];
     [m appendFormat:@"        tensor<fp16, [1,%d,1,%d]> out = concat(axis=cax,interleave=cid,values=(oo,qf,kf,vf,af,xn))[name=tensor<string, []>(\"cat\")];\n", 6*DIM,SEQ];
+<<<<<<< HEAD
 >>>>>>> 2d2adacf09ec6352cf8fea53c7a916bd5257144f
+=======
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
     [m appendString:@"    } -> (out);\n}\n"];
     return m;
 }
@@ -124,6 +145,7 @@ static NSString *gen_ffn_fwd_flex(void) {
     float invd = 1.0f/(float)DIM;
     NSMutableString *m = [NSMutableString string];
     [m appendString:MIL_HDR];
+<<<<<<< HEAD
 <<<<<<< HEAD
     [m appendFormat:@"    func main<ios18>(tensor<fp16, [1, %d, 1, %d]> x, "
                      "tensor<fp16, [1,%d,1,1]> rw, "
@@ -169,6 +191,23 @@ static NSString *gen_ffn_fwd_flex(void) {
     [m appendFormat:@"        tensor<fp16, [1,%d,1,1]> rw = const()[name=tensor<string, []>(\"rw\"), val=tensor<fp16, [1,%d,1,1]>(BLOBFILE(path=tensor<string, []>(\"@model_path/weights/rms2.bin\"), offset=tensor<uint64, []>(64)))];\n", DIM, DIM];
     [m appendFormat:@"        tensor<fp16, [1,%d,1,%d]> xn = mul(x=xr,y=rw)[name=tensor<string, []>(\"xn\")];\n", DIM, SEQ];
     [m appendString:@CONV_CONST];
+=======
+    [m appendFormat:@"    func main<ios16>(tensor<fp16, [1, %d, 1, %d]> x) {\n", DIM, SEQ];
+    [m appendFormat:@"        tensor<fp16, [1,%d,1,%d]> sq = mul(x=x,y=x)[name=tensor<string, []>(\"sq\")];\n", DIM, SEQ];
+    [m appendFormat:@"        tensor<int32, [1]> rax = const()[name=tensor<string, []>(\"rax\"), val=tensor<int32, [1]>([1])];\n"];
+    [m appendFormat:@"        tensor<bool, []> kd = const()[name=tensor<string, []>(\"kd\"), val=tensor<bool, []>(true)];\n"];
+    [m appendFormat:@"        tensor<fp16, [1,1,1,%d]> ss = reduce_sum(x=sq,axes=rax,keep_dims=kd)[name=tensor<string, []>(\"ss\")];\n", SEQ];
+    [m appendFormat:@"        tensor<fp16, []> invd = const()[name=tensor<string, []>(\"invd\"), val=tensor<fp16, []>(%f)];\n", invd];
+    [m appendFormat:@"        tensor<fp16, [1,1,1,%d]> ss2 = mul(x=ss,y=invd)[name=tensor<string, []>(\"ss2\")];\n", SEQ];
+    [m appendFormat:@"        tensor<fp16, []> eps = const()[name=tensor<string, []>(\"eps\"), val=tensor<fp16, []>(0.00001)];\n"];
+    [m appendFormat:@"        tensor<fp16, [1,1,1,%d]> ss3 = add(x=ss2,y=eps)[name=tensor<string, []>(\"ss3\")];\n", SEQ];
+    [m appendFormat:@"        tensor<fp16, []> nhalf = const()[name=tensor<string, []>(\"nhalf\"), val=tensor<fp16, []>(-0.5)];\n"];
+    [m appendFormat:@"        tensor<fp16, [1,1,1,%d]> rrms = pow(x=ss3,y=nhalf)[name=tensor<string, []>(\"rrms\")];\n", SEQ];
+    [m appendFormat:@"        tensor<fp16, [1,%d,1,%d]> xr = mul(x=x,y=rrms)[name=tensor<string, []>(\"xr\")];\n", DIM, SEQ];
+    [m appendFormat:@"        tensor<fp16, [1,%d,1,1]> rw = const()[name=tensor<string, []>(\"rw\"), val=tensor<fp16, [1,%d,1,1]>(BLOBFILE(path=tensor<string, []>(\"@model_path/weights/rms2.bin\"), offset=tensor<uint64, []>(64)))];\n", DIM, DIM];
+    [m appendFormat:@"        tensor<fp16, [1,%d,1,%d]> xn = mul(x=xr,y=rw)[name=tensor<string, []>(\"xn\")];\n", DIM, SEQ];
+    [m appendString:@CONV_CONST];
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
     [m appendFormat:@"        tensor<fp16, [%d,%d,1,1]> W1 = const()[name=tensor<string, []>(\"W1\"), val=tensor<fp16, [%d,%d,1,1]>(BLOBFILE(path=tensor<string, []>(\"@model_path/weights/w1.bin\"), offset=tensor<uint64, []>(64)))];\n", HIDDEN,DIM,HIDDEN,DIM];
     [m appendFormat:@"        tensor<fp16, [%d,%d,1,1]> W3 = const()[name=tensor<string, []>(\"W3\"), val=tensor<fp16, [%d,%d,1,1]>(BLOBFILE(path=tensor<string, []>(\"@model_path/weights/w3.bin\"), offset=tensor<uint64, []>(64)))];\n", HIDDEN,DIM,HIDDEN,DIM];
     [m appendFormat:@"        tensor<fp16, [%d,%d,1,1]> W2 = const()[name=tensor<string, []>(\"W2\"), val=tensor<fp16, [%d,%d,1,1]>(BLOBFILE(path=tensor<string, []>(\"@model_path/weights/w2.bin\"), offset=tensor<uint64, []>(64)))];\n", DIM,HIDDEN,DIM,HIDDEN];
@@ -181,7 +220,10 @@ static NSString *gen_ffn_fwd_flex(void) {
     [m appendString:@"        tensor<int32, []> cax = const()[name=tensor<string, []>(\"cax\"), val=tensor<int32, []>(1)];\n"];
     [m appendString:@"        tensor<bool, []> cid = const()[name=tensor<string, []>(\"cid\"), val=tensor<bool, []>(false)];\n"];
     [m appendFormat:@"        tensor<fp16, [1,%d,1,%d]> out = concat(axis=cax,interleave=cid,values=(y,h1,h3,gate,xn))[name=tensor<string, []>(\"cat\")];\n", 2*DIM+3*HIDDEN,SEQ];
+<<<<<<< HEAD
 >>>>>>> 2d2adacf09ec6352cf8fea53c7a916bd5257144f
+=======
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
     [m appendString:@"    } -> (out);\n}\n"];
     return m;
 }
@@ -190,6 +232,7 @@ static NSString *gen_ffn_fwd_flex(void) {
 static NSString *gen_ffn_bwd_flex(void) {
     NSMutableString *m = [NSMutableString string];
     [m appendString:MIL_HDR];
+<<<<<<< HEAD
 <<<<<<< HEAD
     [m appendFormat:@"    func main<ios18>(tensor<fp16, [1, %d, 1, %d]> x, "
                      "tensor<fp16, [%d,%d,1,1]> W1t, "
@@ -225,6 +268,10 @@ static NSString *gen_ffn_bwd_flex(void) {
 =======
     [m appendFormat:@"    func main<ios16>(tensor<fp16, [1, %d, 1, %d]> x) {\n", DIM+2*HIDDEN, SEQ];
     [m appendString:@CONV_CONST];
+=======
+    [m appendFormat:@"    func main<ios16>(tensor<fp16, [1, %d, 1, %d]> x) {\n", DIM+2*HIDDEN, SEQ];
+    [m appendString:@CONV_CONST];
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
     [m appendString:@"        tensor<int32, [4]> bd = const()[name=tensor<string, []>(\"bd\"), val=tensor<int32, [4]>([0,0,0,0])];\n"];
     [m appendFormat:@"        tensor<int32, [4]> sd = const()[name=tensor<string, []>(\"sd\"), val=tensor<int32, [4]>([1,%d,1,%d])];\n", DIM, SEQ];
     [m appendFormat:@"        tensor<fp16, [1,%d,1,%d]> dffn = slice_by_size(x=x,begin=bd,size=sd)[name=tensor<string, []>(\"s0\")];\n", DIM, SEQ];
@@ -253,7 +300,10 @@ static NSString *gen_ffn_bwd_flex(void) {
     [m appendString:@"        tensor<int32, []> cax = const()[name=tensor<string, []>(\"cax\"), val=tensor<int32, []>(1)];\n"];
     [m appendString:@"        tensor<bool, []> cid = const()[name=tensor<string, []>(\"cid\"), val=tensor<bool, []>(false)];\n"];
     [m appendFormat:@"        tensor<fp16, [1,%d,1,%d]> out = concat(axis=cax,interleave=cid,values=(dx,dh1,dh3))[name=tensor<string, []>(\"cat\")];\n", DIM+2*HIDDEN, SEQ];
+<<<<<<< HEAD
 >>>>>>> 2d2adacf09ec6352cf8fea53c7a916bd5257144f
+=======
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
     [m appendString:@"    } -> (out);\n}\n"];
     return m;
 }
@@ -262,6 +312,7 @@ static NSString *gen_ffn_bwd_flex(void) {
 static NSString *gen_qkvb_flex(void) {
     NSMutableString *m = [NSMutableString string];
     [m appendString:MIL_HDR];
+<<<<<<< HEAD
 <<<<<<< HEAD
     [m appendFormat:@"    func main<ios18>(tensor<fp16, [1, %d, 1, %d]> x, "
                      "tensor<fp16, [%d,%d,1,1]> Wqt, "
@@ -284,6 +335,10 @@ static NSString *gen_qkvb_flex(void) {
 =======
     [m appendFormat:@"    func main<ios16>(tensor<fp16, [1, %d, 1, %d]> x) {\n", 3*DIM, SEQ];
     [m appendString:@CONV_CONST];
+=======
+    [m appendFormat:@"    func main<ios16>(tensor<fp16, [1, %d, 1, %d]> x) {\n", 3*DIM, SEQ];
+    [m appendString:@CONV_CONST];
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
     [m appendFormat:@"        tensor<int32, [4]> sz = const()[name=tensor<string, []>(\"sz\"), val=tensor<int32, [4]>([1,%d,1,%d])];\n", DIM, SEQ];
     [m appendString:@"        tensor<int32, [4]> b0 = const()[name=tensor<string, []>(\"b0\"), val=tensor<int32, [4]>([0,0,0,0])];\n"];
     [m appendFormat:@"        tensor<fp16, [1,%d,1,%d]> dq = slice_by_size(x=x,begin=b0,size=sz)[name=tensor<string, []>(\"s0\")];\n", DIM,SEQ];
@@ -299,7 +354,10 @@ static NSString *gen_qkvb_flex(void) {
     [m appendFormat:@"        tensor<fp16, [1,%d,1,%d]> dxv = conv(dilations=dl,groups=gr,pad=pd,pad_type=pt,strides=st,weight=Wvt,x=dv)[name=tensor<string, []>(\"cv\")];\n", DIM,SEQ];
     [m appendFormat:@"        tensor<fp16, [1,%d,1,%d]> dxqk = add(x=dxq,y=dxk)[name=tensor<string, []>(\"aqk\")];\n", DIM,SEQ];
     [m appendFormat:@"        tensor<fp16, [1,%d,1,%d]> out = add(x=dxqk,y=dxv)[name=tensor<string, []>(\"out\")];\n", DIM,SEQ];
+<<<<<<< HEAD
 >>>>>>> 2d2adacf09ec6352cf8fea53c7a916bd5257144f
+=======
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
     [m appendString:@"    } -> (out);\n}\n"];
     return m;
 }
@@ -309,6 +367,7 @@ static NSString *gen_sdpa_bwd1_flex(void) {
     float sc = 1.0f/sqrtf((float)HD);
     NSMutableString *m = [NSMutableString string];
     [m appendString:MIL_HDR];
+<<<<<<< HEAD
 <<<<<<< HEAD
     [m appendFormat:@"    func main<ios18>(tensor<fp16, [1, %d, 1, %d]> x, "
                      "tensor<fp16, [%d,%d,1,1]> Wot, "
@@ -357,6 +416,10 @@ static NSString *gen_sdpa_bwd1_flex(void) {
 =======
     [m appendFormat:@"    func main<ios16>(tensor<fp16, [1, %d, 1, %d]> x) {\n", 4*DIM, SEQ];
     [m appendString:@CONV_CONST];
+=======
+    [m appendFormat:@"    func main<ios16>(tensor<fp16, [1, %d, 1, %d]> x) {\n", 4*DIM, SEQ];
+    [m appendString:@CONV_CONST];
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
     [m appendFormat:@"        tensor<int32, [4]> sz = const()[name=tensor<string, []>(\"sz\"), val=tensor<int32, [4]>([1,%d,1,%d])];\n", DIM, SEQ];
     [m appendString:@"        tensor<int32, [4]> b0 = const()[name=tensor<string, []>(\"b0\"), val=tensor<int32, [4]>([0,0,0,0])];\n"];
     [m appendFormat:@"        tensor<fp16, [1,%d,1,%d]> qf = slice_by_size(x=x,begin=b0,size=sz)[name=tensor<string, []>(\"s0\")];\n", DIM,SEQ];
@@ -398,7 +461,10 @@ static NSString *gen_sdpa_bwd1_flex(void) {
     [m appendString:@"        tensor<int32, []> cax = const()[name=tensor<string, []>(\"cax\"), val=tensor<int32, []>(1)];\n"];
     [m appendString:@"        tensor<bool, []> cid = const()[name=tensor<string, []>(\"cid\"), val=tensor<bool, []>(false)];\n"];
     [m appendFormat:@"        tensor<fp16, [1,%d,1,%d]> out = concat(axis=cax,interleave=cid,values=(dvf,pf,dpf))[name=tensor<string, []>(\"cat\")];\n", DIM+2*SCORE_CH,SEQ];
+<<<<<<< HEAD
 >>>>>>> 2d2adacf09ec6352cf8fea53c7a916bd5257144f
+=======
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
     [m appendString:@"    } -> (out);\n}\n"];
     return m;
 }
@@ -409,6 +475,7 @@ static NSString *gen_sdpa_bwd2_flex(void) {
     int bwd2_in = 2*SCORE_CH + 2*DIM;
     NSMutableString *m = [NSMutableString string];
     [m appendString:MIL_HDR];
+<<<<<<< HEAD
 <<<<<<< HEAD
     [m appendFormat:@"    func main<ios18>(tensor<fp16, [1, %d, 1, %d]> x) {\n", bwd2_in, SEQ];
     [m appendFormat:@"        tensor<int32, [4]> sz_sc = const()[name=string(\"szsc\"), val=tensor<int32, [4]>([1,%d,1,%d])];\n", SCORE_CH, SEQ];
@@ -451,6 +518,8 @@ static NSString *gen_sdpa_bwd2_flex(void) {
     [m appendString:@"        bool cid = const()[name=string(\"cid\"), val=bool(false)];\n"];
     [m appendFormat:@"        tensor<fp16, [1,%d,1,%d]> out = concat(axis=cax,interleave=cid,values=(dqf,dkf));\n", 2*DIM,SEQ];
 =======
+=======
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
     [m appendFormat:@"    func main<ios16>(tensor<fp16, [1, %d, 1, %d]> x) {\n", bwd2_in, SEQ];
     [m appendFormat:@"        tensor<int32, [4]> sz_sc = const()[name=tensor<string, []>(\"szsc\"), val=tensor<int32, [4]>([1,%d,1,%d])];\n", SCORE_CH, SEQ];
     [m appendString:@"        tensor<int32, [4]> b0 = const()[name=tensor<string, []>(\"b0\"), val=tensor<int32, [4]>([0,0,0,0])];\n"];
@@ -491,7 +560,10 @@ static NSString *gen_sdpa_bwd2_flex(void) {
     [m appendString:@"        tensor<int32, []> cax = const()[name=tensor<string, []>(\"cax\"), val=tensor<int32, []>(1)];\n"];
     [m appendString:@"        tensor<bool, []> cid = const()[name=tensor<string, []>(\"cid\"), val=tensor<bool, []>(false)];\n"];
     [m appendFormat:@"        tensor<fp16, [1,%d,1,%d]> out = concat(axis=cax,interleave=cid,values=(dqf,dkf))[name=tensor<string, []>(\"cat\")];\n", 2*DIM,SEQ];
+<<<<<<< HEAD
 >>>>>>> 2d2adacf09ec6352cf8fea53c7a916bd5257144f
+=======
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
     [m appendString:@"    } -> (out);\n}\n"];
     return m;
 }

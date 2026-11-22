@@ -17,9 +17,20 @@
 #import <Metal/Metal.h>
 #import <MetalPerformanceShaders/MetalPerformanceShaders.h>
 
+<<<<<<< HEAD
 #define CKPT_PATH "ane_stories110M_ckpt.bin"
 #define MODEL_PATH_DEFAULT "stories110M.bin"
 #define DATA_PATH "tinystories_data00.bin"
+=======
+#define CKPT_PATH_DEFAULT "ane_stories110M_ckpt.bin"
+#define MODEL_PATH_DEFAULT "stories110M.bin"
+#define DATA_PATH_DEFAULT "tinystories_data00.bin"
+
+static const char *get_path(const char *env_var, const char *default_val) {
+    const char *v = getenv(env_var);
+    return (v && v[0]) ? v : default_val;
+}
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
 
 // ===== Pre-allocated capture buffers per layer (Phase 1) =====
 // Eliminates malloc/free in dispatch blocks
@@ -346,7 +357,13 @@ int main(int argc, char *argv[]) {
         int adam_t = 0, start_step = 0;
 
         // Parse args
+<<<<<<< HEAD
         const char *model_path = MODEL_PATH_DEFAULT;
+=======
+        const char *model_path = get_path("ANE_MODEL_PATH", MODEL_PATH_DEFAULT);
+        const char *ckpt_path = get_path("ANE_CKPT_PATH", CKPT_PATH_DEFAULT);
+        const char *data_path = get_path("ANE_DATA_PATH", DATA_PATH_DEFAULT);
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
         bool do_resume = false;
         bool use_metal = false;  // default off: Metal dW contends with ANE for memory bandwidth
         int pos = 0;
@@ -411,7 +428,11 @@ int main(int argc, char *argv[]) {
         float resume_loss = 0;
         bool resuming = false;
         if (do_resume) {
+<<<<<<< HEAD
             resuming = load_checkpoint(CKPT_PATH, &start_step, &total_steps, &lr, &resume_loss,
+=======
+            resuming = load_checkpoint(ckpt_path, &start_step, &total_steps, &lr, &resume_loss,
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
                 &cum_compile, &cum_train, &cum_wall, &cum_steps, &cum_batches, &adam_t,
                 lw, la, rms_final, &arms_final, embed, &aembed);
             if (resuming) printf("[RESUMED step %d, loss=%.4f]\n", start_step, resume_loss);
@@ -443,7 +464,11 @@ int main(int argc, char *argv[]) {
             printf("Params: %.2fM (transformer %.2fM + embed %.2fM)\n", tp/1e6, xfmr_params/1e6, embed_params/1e6);
             printf("Kernels: %d (%d weight-bearing + %d static sdpaBwd2)\n",
                    TOTAL_WEIGHT_KERNELS+NLAYERS, TOTAL_WEIGHT_KERNELS, NLAYERS);
+<<<<<<< HEAD
             printf("Accum %d steps per recompile | Adam LR=%.1e b1=%.1f b2=%.3f\n", get_accum_steps(), lr, adam_b1, adam_b2);
+=======
+            printf("Accum %d steps per recompile | Adam LR=%.1e b1=%.1f b2=%.3f\n", ACCUM_STEPS, lr, adam_b1, adam_b2);
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
             double fwd_f = NLAYERS*(4.0*2*DIM*DIM*SEQ + 2.0*2*DIM*HIDDEN*SEQ + 2.0*HIDDEN*DIM*SEQ);
             double bwd_dx_f = fwd_f, bwd_dw_f = fwd_f;
             double sdpa_f = NLAYERS*2.0*HEADS*5*SEQ*SEQ*HD;
@@ -457,8 +482,13 @@ int main(int argc, char *argv[]) {
         }
 
         // mmap token data
+<<<<<<< HEAD
         int data_fd = open(DATA_PATH, O_RDONLY);
         if (data_fd < 0) { printf("Cannot open %s\n", DATA_PATH); return 1; }
+=======
+        int data_fd = open(data_path, O_RDONLY);
+        if (data_fd < 0) { printf("Cannot open %s\n", data_path); return 1; }
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
         struct stat st; fstat(data_fd, &st);
         size_t data_len = st.st_size;
         uint16_t *token_data = (uint16_t*)mmap(NULL, data_len, PROT_READ, MAP_PRIVATE, data_fd, 0);
@@ -505,10 +535,17 @@ int main(int argc, char *argv[]) {
         int step = start_step;
         while (step < total_steps) {
             // Check compile budget
+<<<<<<< HEAD
             if (g_compile_count + TOTAL_WEIGHT_KERNELS > get_max_compiles()) {
                 for (int L=0; L<NLAYERS; L++) { free_layer_kernels(&kern[L]); free_kern(sdpaBwd2[L]); }
                 double wall = tb_ms(mach_absolute_time() - t_wall_start);
                 save_checkpoint(CKPT_PATH, step, total_steps, lr, last_loss,
+=======
+            if (g_compile_count + TOTAL_WEIGHT_KERNELS > MAX_COMPILES) {
+                for (int L=0; L<NLAYERS; L++) { free_layer_kernels(&kern[L]); free_kern(sdpaBwd2[L]); }
+                double wall = tb_ms(mach_absolute_time() - t_wall_start);
+                save_checkpoint(ckpt_path, step, total_steps, lr, last_loss,
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
                     total_compile_ms+cum_compile, total_train_ms+cum_train, wall+cum_wall,
                     total_steps_done+cum_steps, total_batches+cum_batches, adam_t,
                     lw, la, rms_final, &arms_final, embed, &aembed);
@@ -533,7 +570,11 @@ int main(int argc, char *argv[]) {
                     compile_ok = false; break;
                 }
             }
+<<<<<<< HEAD
             if (!compile_ok) { g_compile_count = get_max_compiles(); continue; }
+=======
+            if (!compile_ok) { g_compile_count = MAX_COMPILES; continue; }
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
 
             for (int L=0; L<NLAYERS; L++) {
                 if (!sdpaBwd2[L]) {
@@ -556,7 +597,11 @@ int main(int argc, char *argv[]) {
             uint64_t tt = mach_absolute_time();
             double t_ane=0,t_io=0,t_elem=0,t_rms=0,t_cblas_wait=0,t_cls=0,t_metal=0,t_bwd=0;
 
+<<<<<<< HEAD
             for (int a=0; a<get_accum_steps() && step<total_steps; a++, step++) {
+=======
+            for (int a=0; a<ACCUM_STEPS && step<total_steps; a++, step++) {
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
                 uint64_t t0,t1;
                 size_t max_pos = n_tokens - SEQ - 1;
                 size_t pos = (size_t)(drand48() * max_pos);

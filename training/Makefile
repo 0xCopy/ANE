@@ -1,6 +1,15 @@
 <<<<<<< HEAD
 CC = xcrun clang
+<<<<<<< HEAD
 CFLAGS = -O2 -Wall -DACCELERATE_NEW_LAPACK -fobjc-arc
+=======
+
+ANE_COMPAT = -Wno-deprecated-declarations
+SEC_FLAGS = -fstack-protector-strong -Wformat-security
+
+CFLAGS = -O2 -Wall $(ANE_COMPAT) -fobjc-arc $(SEC_FLAGS)
+CFLAGS_DEBUG = -O0 -g -Wall $(ANE_COMPAT) -fobjc-arc -fsanitize=address,undefined
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
 FRAMEWORKS = -framework Foundation -framework CoreML -framework IOSurface
 LDFLAGS = $(FRAMEWORKS) -ldl
 
@@ -29,9 +38,20 @@ train_large: train_large.m $(HEADERS_LARGE)
 train_large_ane: train_large_ane.m $(HEADERS_ANE)
 	$(CC) $(CFLAGS) -o $@ train_large_ane.m $(LDFLAGS) -framework Accelerate
 
+<<<<<<< HEAD
 train_opt: train_opt.m $(HEADERS_OPT)
 	$(CC) $(CFLAGS) -o $@ train_opt.m $(LDFLAGS) -framework Accelerate -framework Metal -framework MetalPerformanceShaders
 
+=======
+HEADERS_OPT = $(HEADERS_LARGE) stories_cpu_ops_opt.h
+
+train_opt: train_opt.m $(HEADERS_OPT)
+	$(CC) $(CFLAGS) -o $@ train_opt.m $(LDFLAGS) -framework Accelerate -framework Metal -framework MetalPerformanceShaders
+
+train_double_buffer: train_double_buffer.m $(HEADERS_LARGE)
+	$(CC) $(CFLAGS) -o $@ train_double_buffer.m $(LDFLAGS) -framework Accelerate
+
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
 PROBES = test_weight_reload test_perf_stats test_qos_sweep test_ane_advanced
 =======
 benchmark_ane: benchmark_ane.m
@@ -68,12 +88,31 @@ test_qos_sweep: test_qos_sweep.m
 test_ane_advanced: test_ane_advanced.m
 	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
 
+test_chaining: test_chaining.m
+	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
+
 probes: $(PROBES)
+
+data: tokenize
+	@bash download_data.sh
 
 tokenize:
 	python3 tokenize.py
 
+setup: data
+	@echo "=== Setup complete ==="
+	@echo "Data:  tinystories_data00.bin"
+	@echo "To train: make train_large && ./train_large"
+	@echo "Override paths: ANE_MODEL_PATH=... ANE_DATA_PATH=... ./train_large"
+
+verify-flags:
+	@echo "=== Active CFLAGS ==="
+	@echo "$(CFLAGS)"
+	@echo "=== Compiler version ==="
+	@xcrun clang --version
+
 clean:
+<<<<<<< HEAD
 	rm -f train train_large train_large_ane train_opt $(PROBES) test_rmsnorm_bwd test_classifier
 
 .PHONY: clean tokenize probes
@@ -96,4 +135,9 @@ clean:
 
 .PHONY: clean tokenize probes security-tests
 >>>>>>> 60b0512be32bf88f096481ac105f5558c0afa631
+=======
+	rm -f train train_large train_large_ane train_opt train_double_buffer $(PROBES) test_rmsnorm_bwd test_classifier
+
+.PHONY: clean tokenize probes verify-flags data setup
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
 

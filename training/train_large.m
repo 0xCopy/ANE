@@ -7,9 +7,20 @@
 #include "stories_cpu_ops.h"
 #include "data_validation.h"
 
+<<<<<<< HEAD
 #define CKPT_PATH_DEFAULT "ane_stories110M_ckpt.bin"
 #define MODEL_PATH_DEFAULT "stories110M.bin"
 #define DATA_PATH_DEFAULT "tinystories_data00.bin"
+=======
+#define CKPT_PATH_DEFAULT "ane_stories110M_ckpt.bin"
+#define MODEL_PATH_DEFAULT "../../assets/models/stories110M.bin"
+#define DATA_PATH "tinystories_data00.bin"
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
+
+static const char *get_path(const char *env_var, const char *default_val) {
+    const char *v = getenv(env_var);
+    return (v && v[0]) ? v : default_val;
+}
 
 // ===== Weight loading from llama2.c format =====
 static bool load_pretrained(LayerWeights *lw, float *rms_final, float *embed, const char *path) {
@@ -222,6 +233,7 @@ int main(int argc, char *argv[]) {
     @autoreleasepool {
         setbuf(stdout, NULL);
         ane_init();
+        init_accum_steps();
         mach_timebase_info(&g_tb);
 
         int total_steps = 10000;
@@ -231,6 +243,7 @@ int main(int argc, char *argv[]) {
         int accum_steps = get_accum_steps();
         int max_compiles = get_max_compiles();
 
+<<<<<<< HEAD
 <<<<<<< HEAD
         // Parse args
         const char *ckpt_path = CKPT_PATH_DEFAULT;
@@ -469,6 +482,24 @@ int main(int argc, char *argv[]) {
                 else if (pos == 1) { /* seq - compile-time constant */ }
                 else if (pos == 2) total_steps = atoi(argv[i]);
                 else if (pos == 3) lr = atof(argv[i]);
+=======
+        // Parse args (env vars set defaults, CLI flags override)
+        const char *ckpt_path = get_path("ANE_CKPT_PATH", CKPT_PATH_DEFAULT);
+        const char *model_path = get_path("ANE_MODEL_PATH", MODEL_PATH_DEFAULT);
+        bool do_resume = false;
+        int pos = 0;
+        for (int i=1; i<argc; i++) {
+            if (strcmp(argv[i], "--resume") == 0) do_resume = true;
+            else if (strcmp(argv[i], "--steps") == 0 && i+1<argc) total_steps = atoi(argv[++i]);
+            else if (strcmp(argv[i], "--lr") == 0 && i+1<argc) lr = atof(argv[++i]);
+            else if (strcmp(argv[i], "--ckpt") == 0 && i+1<argc) ckpt_path = argv[++i];
+            else if (strcmp(argv[i], "--model") == 0 && i+1<argc) model_path = argv[++i];
+            else if (argv[i][0] != '-') {
+                if (pos == 0) model_path = argv[i];
+                else if (pos == 1) { /* seq - compile-time constant */ }
+                else if (pos == 2) total_steps = atoi(argv[i]);
+                else if (pos == 3) lr = atof(argv[i]);
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
                 pos++;
             }
 =======
@@ -524,6 +555,7 @@ int main(int argc, char *argv[]) {
         if (!resuming) {
             printf("=== ANE Training: Stories110M (12 layers) ===\n");
             printf("dim=%d hidden=%d heads=%d seq=%d vocab=%d layers=%d\n", DIM, HIDDEN, HEADS, SEQ, VOCAB, NLAYERS);
+            printf("model=%s data=%s ckpt=%s\n", model_path, DATA_PATH, ckpt_path);
             if (!load_pretrained(lw, rms_final, embed, model_path)) {
                 printf("Pretrained load failed, using random init\n");
                 srand48(42);
@@ -567,6 +599,7 @@ int main(int argc, char *argv[]) {
             return 1;
         }
         struct stat st; fstat(data_fd, &st);
+<<<<<<< HEAD
 =======
         }
 
@@ -711,6 +744,19 @@ int main(int argc, char *argv[]) {
             return 1;
         }
 >>>>>>> 60b0512be32bf88f096481ac105f5558c0afa631
+=======
+        size_t data_len = st.st_size;
+        uint16_t *token_data = (uint16_t*)mmap(NULL, data_len, PROT_READ, MAP_PRIVATE, data_fd, 0);
+        if (token_data == MAP_FAILED) { printf("mmap failed\n"); return 1; }
+        size_t n_tokens = data_len / 2;
+        if (n_tokens <= (size_t)(SEQ + 1)) {
+            printf("Token data too short: need at least %d tokens, got %zu\n", SEQ + 2, n_tokens);
+            munmap(token_data, data_len);
+            close(data_fd);
+            return 1;
+        }
+        printf("Token data: %zu tokens (%.1f MB)\n", n_tokens, data_len/1e6);
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
 
         // Gradient buffers shared across layers (reused each step)
         float *dy = (float*)malloc(SEQ*DIM*4);            // gradient flowing backward

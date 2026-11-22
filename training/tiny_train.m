@@ -167,6 +167,7 @@ static void free_kern(Kern *k) {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 static bool ane_eval_k(Kern *k, const float *in, float *out, int in_ch, int out_ch, int sp) {
     float *tmp = (float*)malloc(in_ch * sp * sizeof(float));
     for (int t = 0; t < sp; t++)
@@ -176,6 +177,10 @@ static bool ane_eval_k(Kern *k, const float *in, float *out, int in_ch, int out_
 static void ane_eval_k(Kern *k, const float *in, float *out, int in_ch, int out_ch, int sp) {
     // Transpose [S,C] -> [C,S] and write to IOSurface
 >>>>>>> 2d2adacf09ec6352cf8fea53c7a916bd5257144f
+=======
+static void ane_eval_k(Kern *k, const float *in, float *out, int in_ch, int out_ch, int sp) {
+    // Transpose [S,C] -> [C,S] and write to IOSurface
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
     IOSurfaceLock(k->ioIn, 0, NULL);
     void *base_in = IOSurfaceGetBaseAddress(k->ioIn);
     if (g_fp16_io) {
@@ -197,6 +202,7 @@ static void ane_eval_k(Kern *k, const float *in, float *out, int in_ch, int out_
     BOOL ok = ((BOOL(*)(id,SEL,unsigned int,id,id,NSError**))objc_msgSend)(
         mdl, @selector(evaluateWithQoS:options:request:error:), 21, @{}, req, &e);
 <<<<<<< HEAD
+<<<<<<< HEAD
     if (!ok) {
         fprintf(stderr, "ANE eval failed: %s\n",
                 e ? [[e description] UTF8String] : "unknown error");
@@ -207,6 +213,10 @@ static void ane_eval_k(Kern *k, const float *in, float *out, int in_ch, int out_
 
     // Read output, transpose [C,S] -> [S,C]
 >>>>>>> 2d2adacf09ec6352cf8fea53c7a916bd5257144f
+=======
+
+    // Read output, transpose [C,S] -> [S,C]
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
     IOSurfaceLock(k->ioOut, kIOSurfaceLockReadOnly, NULL);
     void *base_out = IOSurfaceGetBaseAddress(k->ioOut);
     if (g_fp16_io) {
@@ -222,6 +232,7 @@ static void ane_eval_k(Kern *k, const float *in, float *out, int in_ch, int out_
     }
     IOSurfaceUnlock(k->ioOut, kIOSurfaceLockReadOnly, NULL);
 <<<<<<< HEAD
+<<<<<<< HEAD
     for (int t = 0; t < sp; t++)
         for (int c = 0; c < out_ch; c++)
             out[t*out_ch + c] = tmp2[c*sp + t];
@@ -229,6 +240,8 @@ static void ane_eval_k(Kern *k, const float *in, float *out, int in_ch, int out_
     return true;
 =======
 >>>>>>> 2d2adacf09ec6352cf8fea53c7a916bd5257144f
+=======
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
 }
 
 // === Checkpoint: save/restore training state for exec() restart ===
@@ -249,6 +262,7 @@ static void save_checkpoint(const char *path, int step, float loss,
                             const float *W1, const float *W2,
                             double cc, double ct, double cw, int cs, int cb) {
 <<<<<<< HEAD
+<<<<<<< HEAD
     char tmp_path[512];
     snprintf(tmp_path, sizeof(tmp_path), "%s.tmp", path);
     FILE *f = fopen(tmp_path, "wb");
@@ -258,6 +272,10 @@ static void save_checkpoint(const char *path, int step, float loss,
     FILE *f = fopen(path, "wb");
     CkptHeader hdr = {step, loss, D, H, S, total_steps, lr, cc, ct, cw, cs, cb, g_fp16_io};
 >>>>>>> 2d2adacf09ec6352cf8fea53c7a916bd5257144f
+=======
+    FILE *f = fopen(path, "wb");
+    CkptHeader hdr = {step, loss, D, H, S, total_steps, lr, cc, ct, cw, cs, cb, g_fp16_io};
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
     fwrite(&hdr, sizeof(hdr), 1, f);
     fwrite(W1, sizeof(float), H * D, f);
     fwrite(W2, sizeof(float), D * H, f);

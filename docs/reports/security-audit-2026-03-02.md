@@ -141,9 +141,12 @@ size_t tot = 128 + ws;
 **Datei:** `training/train_large.m:375-376`
 **Schweregrad:** HOCH
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 **Status: BEHOBEN** (2026-03-02, Branch `fix/high-security-findings`)
 >>>>>>> e2e0c8332aca99dde38764e8a4a14f82b04ec84d
+=======
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
 
 ```c
 size_t max_pos = n_tokens - SEQ - 1;
@@ -164,9 +167,12 @@ uint16_t *input_tokens = token_data + pos;
 **Datei:** `training/train_large.m:8-10`
 **Schweregrad:** HOCH
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 **Status: BEHOBEN** (2026-03-02, Branch `fix/high-security-findings`)
 >>>>>>> e2e0c8332aca99dde38764e8a4a14f82b04ec84d
+=======
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
 
 ```c
 #define CKPT_PATH "ane_stories110M_ckpt.bin"
@@ -185,9 +191,12 @@ uint16_t *input_tokens = token_data + pos;
 **Datei:** `training/train_large.m:331`
 **Schweregrad:** HOCH
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 **Status: BEHOBEN** (2026-03-02, Branch `fix/high-security-findings`)
 >>>>>>> e2e0c8332aca99dde38764e8a4a14f82b04ec84d
+=======
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
 
 ```c
 execl(argv[0], argv[0], "--resume", NULL);
@@ -204,9 +213,12 @@ execl(argv[0], argv[0], "--resume", NULL);
 **Dateien:** Alle `.m` und `.h` Dateien
 **Schweregrad:** HOCH
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 **Status: BEHOBEN** (2026-03-02, Branch `fix/high-security-findings`)
 >>>>>>> e2e0c8332aca99dde38764e8a4a14f82b04ec84d
+=======
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
 
 ```c
 // train_large.m:219
@@ -221,9 +233,12 @@ Keiner der `malloc()`/`calloc()`-Aufrufe prüft den Rückgabewert auf NULL. Bei 
 **Datei:** `training/stories_io.h:131-134`
 **Schweregrad:** HOCH
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 **Status: BEHOBEN** (2026-03-02, Branch `fix/high-security-findings`)
 >>>>>>> e2e0c8332aca99dde38764e8a4a14f82b04ec84d
+=======
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
 
 ```c
 static void ane_run(Kern *k) {
@@ -243,7 +258,10 @@ static void ane_run(Kern *k) {
 ### [MED-01] IOSurface Lock ohne Fehlerbehandlung
 **Datei:** `training/stories_io.h:62-83`
 **Schweregrad:** MITTEL
+<<<<<<< HEAD
 **Status: BEHOBEN** (2026-03-02, Branch `fix/med-security-findings`)
+=======
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
 
 ```c
 IOSurfaceLock(s, 0, NULL);  // Return-Code ignoriert
@@ -256,7 +274,10 @@ IOSurfaceLock(s, 0, NULL);  // Return-Code ignoriert
 ### [MED-02] Temporäres Verzeichnis nicht sicher erstellt (TOCTOU-Risiko)
 **Datei:** `training/ane_runtime.h:68-80`, `training/stories_io.h:94-100`
 **Schweregrad:** MITTEL
+<<<<<<< HEAD
 **Status: BEHOBEN** (2026-03-02, Branch `fix/med-security-findings`)
+=======
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
 
 ```objc
 NSString *td = [NSTemporaryDirectory() stringByAppendingPathComponent:hx];
@@ -270,7 +291,10 @@ TOCTOU-Race zwischen `createDirectoryAtPath` und `writeToFile`. Der `hexStringId
 ### [MED-03] MIL-Text-Generierung ohne Parameter-Validierung
 **Datei:** `training/ane_mil_gen.h:32-52`
 **Schweregrad:** MITTEL
+<<<<<<< HEAD
 **Status: BEHOBEN** (2026-03-02, Branch `fix/med-security-findings`)
+=======
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
 
 ```objc
 return [NSString stringWithFormat:
@@ -284,7 +308,10 @@ Negative oder extrem große `in_ch`/`out_ch`/`spatial`-Werte durch fehlerhafte K
 ### [MED-04] Keine Endianness-Prüfung bei Checkpoint-Serialisierung
 **Datei:** `training/train_large.m:110-181`
 **Schweregrad:** MITTEL
+<<<<<<< HEAD
 **Status: BEHOBEN** (2026-03-02, Branch `fix/med-security-findings`)
+=======
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
 
 ```c
 h.magic = 0x424C5A54;
@@ -298,7 +325,10 @@ Das `CkptHdr`-Struct wird als binärer Dump ohne Endianness-Marker geschrieben. 
 ### [MED-05] NEON-Vektorisierung ohne Alignment-Garantie
 **Datei:** `training/stories_io.h:41-58`
 **Schweregrad:** MITTEL
+<<<<<<< HEAD
 **Status: BEHOBEN** (2026-03-02, Branch `fix/med-security-findings`)
+=======
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
 
 ```c
 float16x8_t h = vld1q_f16((const __fp16*)(src + i));
@@ -311,7 +341,10 @@ Zeiger-Arithmetik mit `ch_off * sp` könnte das für NEON benötigte Alignment v
 ### [MED-06] Globale Variablen ohne Thread-Safety
 **Datei:** `training/stories_io.h`, `training/stories_config.h`
 **Schweregrad:** MITTEL
+<<<<<<< HEAD
 **Status: BEHOBEN** (2026-03-02, Branch `fix/med-security-findings`)
+=======
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
 
 ```c
 static bool g_ane_loaded = false;

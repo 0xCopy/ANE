@@ -19,6 +19,7 @@ typedef struct {
 } ANEKernel;
 
 static Class g_ANEDesc, g_ANEInMem, g_ANEReq, g_ANEIO;
+<<<<<<< HEAD
 static bool g_ane_ok = false;  // true only when all private classes loaded successfully
 
 static void ane_init(void) {
@@ -44,6 +45,30 @@ static void ane_init(void) {
         }
         g_ane_ok = true;  // dispatch_once guarantees memory barrier before completion
     });
+=======
+static bool g_ane_loaded = false;
+static bool g_ane_ok = false;  // true only when all private classes loaded successfully
+
+static void ane_init(void) {
+    if (g_ane_loaded) return;
+    g_ane_loaded = true;  // Set first to prevent re-entry (ref: CRIT-01)
+    void *handle = dlopen(
+        "/System/Library/PrivateFrameworks/AppleNeuralEngine.framework/AppleNeuralEngine",
+        RTLD_NOW);
+    if (!handle) {
+        fprintf(stderr, "ANE: dlopen failed: %s\n", dlerror());
+        return;
+    }
+    g_ANEDesc  = NSClassFromString(@"_ANEInMemoryModelDescriptor");
+    g_ANEInMem = NSClassFromString(@"_ANEInMemoryModel");
+    g_ANEReq   = NSClassFromString(@"_ANERequest");
+    g_ANEIO    = NSClassFromString(@"_ANEIOSurfaceObject");
+    if (!g_ANEDesc || !g_ANEInMem || !g_ANEReq || !g_ANEIO) {
+        fprintf(stderr, "ANE: Private classes not found (macOS version mismatch?)\n");
+        return;
+    }
+    g_ane_ok = true;
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
 }
 
 static IOSurfaceRef ane_create_surface(size_t bytes) {

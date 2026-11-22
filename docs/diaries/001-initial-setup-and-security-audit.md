@@ -64,6 +64,7 @@ Branch `fix/crit-security-findings` erstellt. Alle 4 CRIT-Findings behoben:
 **Simulation:** 3 Iterationsrunden (CRIT-03 benötigte 3 Runs), Gesamtbewertung 96.15% (alle Kriterien ≥ 95%)
 **Branch:** `fix/crit-security-findings` auf `manni07/ANE`
 
+<<<<<<< HEAD
 ## MED-Finding Fixes (2026-03-02)
 
 Branch `fix/med-security-findings` erstellt (basiert auf `main` + cherry-pick CRIT-Commit).
@@ -80,11 +81,14 @@ Alle 6 MED-Findings behoben. Simulation: 2–3 Iterationsrunden, Gesamtbewertung
 
 **Branch:** `fix/med-security-findings` auf `manni07/ANE`
 
+=======
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
 ## Status
 
 | Finding-Typ | Anzahl | Status |
 |-------------|--------|--------|
 | KRITISCH (CRIT-01–04) | 4 | ✅ BEHOBEN |
+<<<<<<< HEAD
 <<<<<<< HEAD
 | HOCH (HIGH-01–05) | 5 | Offen |
 | MITTEL (MED-01–06) | 6 | ✅ BEHOBEN |
@@ -451,3 +455,8 @@ Alle Teilprobleme vollstaendig behoben:
 
 Alle 19 Sicherheitsbefunde vollstaendig behoben. Branch: `fix/high-security-findings` auf `manni07/ANE`.
 >>>>>>> e2e0c8332aca99dde38764e8a4a14f82b04ec84d
+=======
+| HOCH (HIGH-01–05) | 5 | Offen |
+| MITTEL (MED-01–06) | 6 | Offen |
+| NIEDRIG (LOW-01–04) | 4 | ✅ BEHOBEN |
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf

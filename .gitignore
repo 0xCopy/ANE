@@ -2,6 +2,9 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
 # Build artifacts
 *.o
 *.dSYM/
@@ -23,10 +26,25 @@ training/train_large
 training/train_large_ane
 training/train_opt
 training/train_double_buffer
+<<<<<<< HEAD
 training/train
 training/test_*
 !training/test_*.m
 
+=======
+training/test_*
+!training/test_*.m
+
+# Inference binaries and runtime data
+inference/qwen_ane
+inference/qwen05b.bin
+inference/qwen05b_f32.bin
+inference/qwen05b_f16.bin
+inference/qwen05b_q8.bin
+inference/.venv/
+inference/benchmark_results.json
+
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
 # Dynamic training binaries
 training/training_dynamic/train
 
@@ -36,17 +54,51 @@ test_chaining
 # Generated mlpackage files
 /tmp/ane_*.mlpackage
 
+<<<<<<< HEAD
 # Benchmark results
 benchmark_results_*.txt
+=======
+# Benchmark results (keep community_benchmarks/ submissions)
+benchmark_results_*.txt
+community_benchmarks/SUMMARY.json
+community_benchmarks/SUMMARY.md
+community_benchmarks/apple_m4_max_20260303_*.json
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
 
 # Python
 __pycache__/
 *.pyc
 *.egg-info/
+<<<<<<< HEAD
 
 # Training data (downloaded separately)
 training/tinystories_data00.bin
 training/ane_stories110M_ckpt.bin
+=======
+/tmp/ane_venv/
+
+# Training data (downloaded separately)
+assets/
+
+# Web dashboard (lives in separate private repo)
+web/
+
+# Training data binaries (downloaded via make setup)
+training/tinystories_data00.bin
+training/ane_stories110M_ckpt.bin
+*.bin
+*.metallib
+!training/download_data.sh
+
+# Secrets / env
+.env
+inference/.env
+
+# Internal / private
+.cursor/
+docs/launch/
+comm
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
 
 # macOS
 .DS_Store
@@ -55,6 +107,7 @@ training/ane_stories110M_ckpt.bin
 *.swp
 *.swo
 *~
+<<<<<<< HEAD
 =======
 # macOS metadata
 .DS_Store
@@ -129,3 +182,5 @@ tiny_train
 tiny_train_m1
 train_large
 >>>>>>> 2d2adacf09ec6352cf8fea53c7a916bd5257144f
+=======
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf

@@ -138,11 +138,15 @@ static void io_write_fp16_at(IOSurfaceRef s, int ch_off, const float *data, int 
     IOSurfaceUnlock(s, 0, NULL);
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
 // Read raw fp16 from IOSurface without conversion (for fp16 activation cache)
 static void io_read_raw_fp16(IOSurfaceRef s, _Float16 *data, int ch_off, int channels, int sp) {
     IOSurfaceLock(s, kIOSurfaceLockReadOnly, NULL);
     memcpy(data, (_Float16*)IOSurfaceGetBaseAddress(s) + ch_off * sp, channels * sp * sizeof(_Float16));
     IOSurfaceUnlock(s, kIOSurfaceLockReadOnly, NULL);
+<<<<<<< HEAD
 =======
 static void io_write_fp16_t(IOSurfaceRef s, const float *w, int rows, int cols) {
     IOSurfaceLock(s, 0, NULL);
@@ -150,6 +154,8 @@ static void io_write_fp16_t(IOSurfaceRef s, const float *w, int rows, int cols) 
     for(int i=0;i<rows;i++) for(int j=0;j<cols;j++) f16[j*rows+i]=(_Float16)w[i*cols+j];
     IOSurfaceUnlock(s, 0, NULL);
 >>>>>>> e113fae6832b497b79e1b32f0861b1797e007f53
+=======
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
 }
 
 // Kernel compile/eval

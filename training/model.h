@@ -81,6 +81,7 @@ static int model_load_weights(Model *m, const char *path) {
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> 89380a26ab7dcb2cd524c9fb5d77c954f843c01f
     if (fread(&m->cfg, sizeof(Config), 1, f) != 1) {
@@ -103,6 +104,8 @@ static int model_load_weights(Model *m, const char *path) {
 =======
 =======
 >>>>>>> e2e0c8332aca99dde38764e8a4a14f82b04ec84d
+=======
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
     // Validate config read — gatekeeper for all subsequent malloc() sizes (CRIT-03)
     if (fread(&m->cfg, sizeof(Config), 1, f) != 1) {
         fprintf(stderr, "model: config read failed (truncated file?)\n");
@@ -112,11 +115,14 @@ static int model_load_weights(Model *m, const char *path) {
     // In this research context, a truncated weight file causes incorrect model behavior
     // (detectable via training loss divergence). The config read above is the gatekeeper.
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> 357576698277b5ba88ed30f279a5f390baaf5937
 =======
 >>>>>>> 89380a26ab7dcb2cd524c9fb5d77c954f843c01f
 =======
 >>>>>>> e2e0c8332aca99dde38764e8a4a14f82b04ec84d
+=======
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
     bool shared = m->cfg.vocab_size > 0;
     if (m->cfg.vocab_size < 0) m->cfg.vocab_size = -m->cfg.vocab_size;
 
@@ -131,6 +137,7 @@ static int model_load_weights(Model *m, const char *path) {
 
     size_t d = (size_t)m->cfg.dim, hd = (size_t)m->cfg.hidden_dim, nl = (size_t)m->cfg.n_layers, vs = (size_t)m->cfg.vocab_size;
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
     m->token_embedding = (float*)malloc(vs * d * sizeof(float));
@@ -162,6 +169,20 @@ static int model_load_weights(Model *m, const char *path) {
 =======
     m->token_embedding = (float*)malloc((size_t)vs * d * sizeof(float));  // (size_t) prevents int overflow (CRIT-04)
     fread(m->token_embedding, sizeof(float), vs * d, f);
+=======
+    m->token_embedding = (float*)malloc((size_t)vs * d * sizeof(float));  // (size_t) prevents int overflow (CRIT-04)
+    fread(m->token_embedding, sizeof(float), vs * d, f);
+
+    float *rms_att_all = (float*)malloc((size_t)nl * d * sizeof(float));
+    float *wq_all = (float*)malloc((size_t)nl * d * d * sizeof(float));
+    float *wk_all = (float*)malloc((size_t)nl * d * d * sizeof(float));
+    float *wv_all = (float*)malloc((size_t)nl * d * d * sizeof(float));
+    float *wo_all = (float*)malloc((size_t)nl * d * d * sizeof(float));
+    float *rms_ffn_all = (float*)malloc((size_t)nl * d * sizeof(float));
+    float *w1_all = (float*)malloc((size_t)nl * hd * d * sizeof(float));
+    float *w2_all = (float*)malloc((size_t)nl * d * hd * sizeof(float));
+    float *w3_all = (float*)malloc((size_t)nl * hd * d * sizeof(float));
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
 
     float *rms_att_all = (float*)malloc((size_t)nl * d * sizeof(float));
     float *wq_all = (float*)malloc((size_t)nl * d * d * sizeof(float));
@@ -249,12 +270,15 @@ static int model_load_weights(Model *m, const char *path) {
     } else {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         m->wcls = (float*)malloc(vs * d * sizeof(float));
         FREAD_CHECK(m->wcls, vs * d, f, "wcls");
 <<<<<<< HEAD
 =======
 =======
 >>>>>>> e2e0c8332aca99dde38764e8a4a14f82b04ec84d
+=======
+>>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
         m->wcls = (float*)malloc((size_t)vs * d * sizeof(float));  // (size_t) prevents int overflow (CRIT-04)
         fread(m->wcls, sizeof(float), vs * d, f);
 >>>>>>> 357576698277b5ba88ed30f279a5f390baaf5937
