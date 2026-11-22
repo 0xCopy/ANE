@@ -1,0 +1,6501 @@
+{
+ "failing_program_culprits": {
+  "acos": [
+   "acos"
+  ],
+  "argmax_c": [
+   "reduce_argmax"
+  ],
+  "argmin_w": [
+   "reduce_argmin"
+  ],
+  "asin": [
+   "asin"
+  ],
+  "atanh": [
+   "atanh"
+  ],
+  "band_part": [
+   "band_part"
+  ],
+  "cast_roundtrip_fp32": [],
+  "cast_roundtrip_int32": [],
+  "cosh": [
+   "cosh"
+  ],
+  "cumsum_w": [
+   "cumsum"
+  ],
+  "cv_bs2_relu_c_65537": [],
+  "cv_bs2_relu_c_69632": [],
+  "cv_bs2_relu_c_73728": [],
+  "cv_bs2_relu_c_77824": [],
+  "cv_bs2_relu_c_81919": [],
+  "cv_bs2_relu_w_16385": [],
+  "cv_bs2_relu_w_17408": [],
+  "cv_bs2_relu_w_18432": [],
+  "cv_bs2_relu_w_20480": [],
+  "cv_bs2_relu_w_22528": [],
+  "cv_bs2_relu_w_24575": [],
+  "cv_bs_relu_c_114688": [],
+  "cv_bs_relu_c_122880": [],
+  "cv_bs_relu_c_131071": [],
+  "cv_bs_relu_c_81920": [],
+  "cv_bs_relu_c_98304": [],
+  "cv_bs_relu_w_24576": [],
+  "cv_bs_relu_w_32768": [],
+  "cv_bs_relu_w_49152": [],
+  "cv_bs_relu_w_57344": [],
+  "cv_bs_relu_w_65535": [],
+  "cv_bs_relu_w_65537": [],
+  "cv_crop_resize": [
+   "crop_resize"
+  ],
+  "cv_crop_resize_1box": [
+   "crop_resize"
+  ],
+  "cv_crop_resize_unnorm": [
+   "crop_resize"
+  ],
+  "cv_k16x16_same": [],
+  "cv_k16x16_valid": [],
+  "cv_sw_relu_c_131072": [],
+  "cv_sw_relu_w_1048576": [],
+  "cv_sw_relu_w_262144": [],
+  "cv_sw_relu_w_65536": [],
+  "gather_along_axis": [
+   "gather_along_axis"
+  ],
+  "gather_c": [
+   "gather"
+  ],
+  "gather_dynamic": [
+   "gather"
+  ],
+  "ix_band_part_4d_lower": [
+   "band_part"
+  ],
+  "ix_band_part_band21": [
+   "band_part"
+  ],
+  "ix_band_part_lower_tri": [
+   "band_part"
+  ],
+  "ix_band_part_small_8x8": [
+   "band_part"
+  ],
+  "ix_band_part_upper_tri": [
+   "band_part"
+  ],
+  "ix_gather_2d_ax0_dyn": [
+   "gather"
+  ],
+  "ix_gather_2d_ax1_const": [
+   "gather"
+  ],
+  "ix_gather_3d_ax0_dyn": [
+   "gather"
+  ],
+  "ix_gather_3d_ax1_const": [
+   "gather"
+  ],
+  "ix_gather_3d_ax2_dyn": [
+   "gather"
+  ],
+  "ix_gather_along_ax0_dyn": [
+   "gather_along_axis"
+  ],
+  "ix_gather_along_ax1_dyn": [
+   "gather_along_axis"
+  ],
+  "ix_gather_along_ax1_neg_const": [
+   "gather_along_axis"
+  ],
+  "ix_gather_along_ax2_dyn": [
+   "gather_along_axis"
+  ],
+  "ix_gather_along_ax3_const": [
+   "gather_along_axis"
+  ],
+  "ix_gather_along_ax3_dyn": [
+   "gather_along_axis"
+  ],
+  "ix_gather_ax0_const": [
+   "gather"
+  ],
+  "ix_gather_ax0_dyn": [
+   "gather"
+  ],
+  "ix_gather_ax1_const": [
+   "gather"
+  ],
+  "ix_gather_ax1_const_retry": [
+   "gather"
+  ],
+  "ix_gather_ax1_dyn": [
+   "gather"
+  ],
+  "ix_gather_ax2_const": [
+   "gather"
+  ],
+  "ix_gather_ax2_const_retry": [
+   "gather"
+  ],
+  "ix_gather_ax2_dyn": [
+   "gather"
+  ],
+  "ix_gather_ax3_const": [
+   "gather"
+  ],
+  "ix_gather_ax3_dyn": [
+   "gather"
+  ],
+  "ix_gather_nd_bd0_const": [
+   "gather_nd"
+  ],
+  "ix_gather_nd_bd0_dyn": [
+   "gather_nd"
+  ],
+  "ix_gather_nd_bd0_k1_const": [
+   "gather_nd"
+  ],
+  "ix_gather_nd_bd1_const": [
+   "gather_nd"
+  ],
+  "ix_gather_nd_bd1_dyn": [
+   "gather_nd"
+  ],
+  "ix_gather_neg_const_ax1": [
+   "gather"
+  ],
+  "ix_gather_validate_ax1": [
+   "gather"
+  ],
+  "ix_non_zero_1d_round": [
+   "non_zero"
+  ],
+  "ix_non_zero_2d_round": [
+   "non_zero"
+  ],
+  "ix_non_zero_round": [
+   "non_zero"
+  ],
+  "ix_one_hot_axis0": [
+   "one_hot"
+  ],
+  "ix_one_hot_axis1_onoff": [
+   "one_hot"
+  ],
+  "ix_one_hot_axis_last": [
+   "one_hot"
+  ],
+  "ix_one_hot_depth2": [
+   "one_hot"
+  ],
+  "ix_reverse_seq_bax0_sax1": [
+   "reverse_sequence"
+  ],
+  "ix_reverse_seq_bax0_sax3": [
+   "reverse_sequence"
+  ],
+  "ix_reverse_seq_bax1_sax3": [
+   "reverse_sequence"
+  ],
+  "ix_scatter_along_ax1_add": [
+   "scatter_along_axis"
+  ],
+  "ix_scatter_along_ax1_update": [
+   "scatter_along_axis"
+  ],
+  "ix_scatter_along_ax3_add": [
+   "scatter_along_axis"
+  ],
+  "ix_scatter_along_ax3_update": [
+   "scatter_along_axis"
+  ],
+  "ix_scatter_ax1_add": [
+   "scatter"
+  ],
+  "ix_scatter_ax1_update": [
+   "scatter"
+  ],
+  "ix_scatter_ax3_add": [
+   "scatter"
+  ],
+  "ix_scatter_ax3_update": [
+   "scatter"
+  ],
+  "ix_scatter_nd_add": [
+   "scatter_nd"
+  ],
+  "ix_scatter_nd_update": [
+   "scatter_nd"
+  ],
+  "ix_slice_update_stride2": [],
+  "ix_sliding_windows_ax1_w8s4": [
+   "sliding_windows"
+  ],
+  "ix_sliding_windows_ax3_w4s2": [
+   "sliding_windows"
+  ],
+  "lg_argmax_w": [],
+  "lg_argmax_w_f16out": [],
+  "lg_argmin_c": [],
+  "lg_argsort_cast16": [],
+  "lg_argsort_identity": [],
+  "lg_argsort_reshape": [],
+  "lg_argsort_slice": [],
+  "lg_dead_add_shared_const": [],
+  "lg_dead_add_tensor_const": [],
+  "lg_dead_chain3": [],
+  "lg_dead_equal": [],
+  "lg_dead_equal_cast": [],
+  "lg_dead_greater_select": [],
+  "lg_dead_mul_add": [],
+  "lg_topk_idx_w4": [],
+  "lg_topk_val_w4": [],
+  "logical_or": [
+   "logical_or"
+  ],
+  "logical_xor": [
+   "logical_xor"
+  ],
+  "mod": [
+   "mod"
+  ],
+  "one_hot": [
+   "one_hot"
+  ],
+  "rc_cond": [],
+  "rc_cond_constpred": [],
+  "rc_gru_s2_h16_fwd": [
+   "gru"
+  ],
+  "rc_gru_s32_h128_fwd": [
+   "gru"
+  ],
+  "rc_gru_s32_h128_rev": [
+   "gru"
+  ],
+  "rc_gru_s32_h64_fwd": [
+   "gru"
+  ],
+  "rc_gru_s32_h64_rev": [
+   "gru"
+  ],
+  "rc_gru_s8_h128_fwd": [
+   "gru"
+  ],
+  "rc_gru_s8_h128_rev": [
+   "gru"
+  ],
+  "rc_gru_s8_h64_fwd": [
+   "gru"
+  ],
+  "rc_gru_s8_h64_rev": [
+   "gru"
+  ],
+  "rc_lim_big_16mb": [],
+  "rc_lim_big_8mb": [],
+  "rc_list_length": [
+   "list_length",
+   "list_write",
+   "make_list"
+  ],
+  "rc_lstm_s2_h16_fwd": [
+   "lstm"
+  ],
+  "rc_lstm_s32_h128_fwd": [
+   "lstm"
+  ],
+  "rc_lstm_s32_h64_fwd": [
+   "lstm"
+  ],
+  "rc_lstm_s8_h128_fwd": [
+   "lstm"
+  ],
+  "rc_lstm_s8_h64_fwd": [
+   "lstm"
+  ],
+  "rc_make_list_write_read": [
+   "list_read",
+   "list_write",
+   "make_list"
+  ],
+  "rc_non_maximum_suppression": [
+   "non_maximum_suppression"
+  ],
+  "rc_random_bernoulli": [
+   "random_bernoulli"
+  ],
+  "rc_random_categorical": [
+   "random_categorical"
+  ],
+  "rc_random_normal": [
+   "random_normal"
+  ],
+  "rc_random_normal_bare": [
+   "random_normal"
+  ],
+  "rc_random_uniform_bare": [
+   "random_uniform"
+  ],
+  "rc_rnn_s2_h16_fwd": [
+   "rnn"
+  ],
+  "rc_rnn_s32_h128_fwd": [
+   "rnn"
+  ],
+  "rc_rnn_s32_h128_rev": [
+   "rnn"
+  ],
+  "rc_rnn_s32_h64_fwd": [
+   "rnn"
+  ],
+  "rc_rnn_s32_h64_rev": [
+   "rnn"
+  ],
+  "rc_rnn_s8_h128_fwd": [
+   "rnn"
+  ],
+  "rc_rnn_s8_h128_rev": [
+   "rnn"
+  ],
+  "rc_rnn_s8_h64_fwd": [
+   "rnn"
+  ],
+  "rc_rnn_s8_h64_rev": [
+   "rnn"
+  ],
+  "rc_shape": [
+   "shape"
+  ],
+  "rc_shape_int32_out": [
+   "shape"
+  ],
+  "rc_while_loop": [],
+  "rc_while_loop_1iter": [],
+  "rd_argmax_ax0_k": [
+   "reduce_argmax"
+  ],
+  "rd_argmax_ax0_nk": [
+   "reduce_argmax"
+  ],
+  "rd_argmax_ax1_k": [
+   "reduce_argmax"
+  ],
+  "rd_argmax_ax1_nk": [
+   "reduce_argmax"
+  ],
+  "rd_argmax_ax2_k": [
+   "reduce_argmax"
+  ],
+  "rd_argmax_ax2_nk": [
+   "reduce_argmax"
+  ],
+  "rd_argmax_ax3_k": [
+   "reduce_argmax"
+  ],
+  "rd_argmax_ax3_nk": [
+   "reduce_argmax"
+  ],
+  "rd_argmin_ax0_k": [
+   "reduce_argmin"
+  ],
+  "rd_argmin_ax0_nk": [
+   "reduce_argmin"
+  ],
+  "rd_argmin_ax1_k": [
+   "reduce_argmin"
+  ],
+  "rd_argmin_ax1_nk": [
+   "reduce_argmin"
+  ],
+  "rd_argmin_ax2_k": [
+   "reduce_argmin"
+  ],
+  "rd_argmin_ax2_nk": [
+   "reduce_argmin"
+  ],
+  "rd_argmin_ax3_k": [
+   "reduce_argmin"
+  ],
+  "rd_argmin_ax3_nk": [
+   "reduce_argmin"
+  ],
+  "rd_cumsum_ax1_ex0_rev0": [
+   "cumsum"
+  ],
+  "rd_cumsum_ax1_ex0_rev1": [
+   "cumsum"
+  ],
+  "rd_cumsum_ax1_ex1_rev0": [
+   "cumsum"
+  ],
+  "rd_cumsum_ax1_ex1_rev1": [
+   "cumsum"
+  ],
+  "rd_cumsum_ax3_ex0_rev0": [
+   "cumsum"
+  ],
+  "rd_cumsum_ax3_ex0_rev1": [
+   "cumsum"
+  ],
+  "rd_cumsum_ax3_ex1_rev0": [
+   "cumsum"
+  ],
+  "rd_cumsum_ax3_ex1_rev1": [
+   "cumsum"
+  ],
+  "rd_r2_acos": [
+   "acos"
+  ],
+  "rd_r2_asin": [
+   "asin"
+  ],
+  "rd_r2_atanh": [
+   "atanh"
+  ],
+  "rd_r2_cosh": [
+   "cosh"
+  ],
+  "rd_r2_logical_or": [
+   "logical_or"
+  ],
+  "rd_r2_logical_xor": [
+   "logical_xor"
+  ],
+  "rd_r2_mod": [
+   "mod"
+  ],
+  "rd_r2_reduce_prod": [
+   "reduce_prod"
+  ],
+  "rd_r2_sinh": [
+   "sinh"
+  ],
+  "rd_r2_tan": [
+   "tan"
+  ],
+  "rd_r3_acos": [
+   "acos"
+  ],
+  "rd_r3_asin": [
+   "asin"
+  ],
+  "rd_r3_atanh": [
+   "atanh"
+  ],
+  "rd_r3_cosh": [
+   "cosh"
+  ],
+  "rd_r3_logical_or": [
+   "logical_or"
+  ],
+  "rd_r3_logical_xor": [
+   "logical_xor"
+  ],
+  "rd_r3_mod": [
+   "mod"
+  ],
+  "rd_r3_reduce_prod": [
+   "reduce_prod"
+  ],
+  "rd_r3_sinh": [
+   "sinh"
+  ],
+  "rd_r3_tan": [
+   "tan"
+  ],
+  "rd_r5_acos": [
+   "acos"
+  ],
+  "rd_r5_asin": [
+   "asin"
+  ],
+  "rd_r5_atanh": [
+   "atanh"
+  ],
+  "rd_r5_cosh": [
+   "cosh"
+  ],
+  "rd_r5_logical_or": [
+   "logical_or"
+  ],
+  "rd_r5_logical_xor": [
+   "logical_xor"
+  ],
+  "rd_r5_mod": [
+   "mod"
+  ],
+  "rd_r5_reduce_prod": [
+   "reduce_prod"
+  ],
+  "rd_r5_sinh": [
+   "sinh"
+  ],
+  "rd_r5_tan": [
+   "tan"
+  ],
+  "rd_red_prod_ax0_k": [
+   "reduce_prod"
+  ],
+  "rd_red_prod_ax0_nk": [
+   "reduce_prod"
+  ],
+  "rd_red_prod_ax123_k": [
+   "reduce_prod"
+  ],
+  "rd_red_prod_ax123_nk": [
+   "reduce_prod"
+  ],
+  "rd_red_prod_ax12_k": [
+   "reduce_prod"
+  ],
+  "rd_red_prod_ax12_nk": [
+   "reduce_prod"
+  ],
+  "rd_red_prod_ax1_k": [
+   "reduce_prod"
+  ],
+  "rd_red_prod_ax1_nk": [
+   "reduce_prod"
+  ],
+  "rd_red_prod_ax23_k": [
+   "reduce_prod"
+  ],
+  "rd_red_prod_ax23_nk": [
+   "reduce_prod"
+  ],
+  "rd_red_prod_ax2_k": [
+   "reduce_prod"
+  ],
+  "rd_red_prod_ax2_nk": [
+   "reduce_prod"
+  ],
+  "rd_red_prod_ax3_k": [
+   "reduce_prod"
+  ],
+  "rd_red_prod_ax3_nk": [
+   "reduce_prod"
+  ],
+  "rd_sortvals_ax1_asc": [
+   "topk"
+  ],
+  "rd_sortvals_ax1_desc": [
+   "topk"
+  ],
+  "rd_sortvals_ax3_asc": [
+   "topk"
+  ],
+  "rd_sortvals_ax3_desc": [
+   "topk"
+  ],
+  "rd_topk_k1_ax1_asc": [
+   "topk"
+  ],
+  "rd_topk_k1_ax1_desc": [
+   "topk"
+  ],
+  "rd_topk_k1_ax3_asc": [
+   "topk"
+  ],
+  "rd_topk_k1_ax3_desc": [
+   "topk"
+  ],
+  "rd_topk_k4_ax1_asc": [
+   "topk"
+  ],
+  "rd_topk_k4_ax1_desc": [
+   "topk"
+  ],
+  "rd_topk_k4_ax3_asc": [
+   "topk"
+  ],
+  "rd_topk_k4_ax3_desc": [
+   "topk"
+  ],
+  "rd_topk_k8_ax1_asc": [
+   "topk"
+  ],
+  "rd_topk_k8_ax1_desc": [
+   "topk"
+  ],
+  "rd_topk_k8_ax3_asc": [
+   "topk"
+  ],
+  "rd_topk_k8_ax3_desc": [
+   "topk"
+  ],
+  "rd_var_argmax_castout": [
+   "reduce_argmax"
+  ],
+  "rd_var_cumsum_r2": [
+   "cumsum"
+  ],
+  "rd_var_topk_k1_vals": [
+   "topk"
+  ],
+  "rd_var_topk_r2": [
+   "topk"
+  ],
+  "reduce_prod_c": [
+   "reduce_prod"
+  ],
+  "reduce_prod_hw": [
+   "reduce_prod"
+  ],
+  "reduce_prod_w": [
+   "reduce_prod"
+  ],
+  "sh_conv1x1_ic32513_h1w64": [],
+  "sh_conv1x1_ic32513_h2w32": [],
+  "sh_conv1x1_ic65536_h1w64": [],
+  "sh_conv1x1_ic65536_h2w32": [],
+  "sh_conv1x1_ic65536_h64w1": [],
+  "sh_k16_oc64_ic32": [],
+  "sh_k16_oc64_ic48": [],
+  "sh_k16_oc64_ic64": [],
+  "sh_k17_oc16_ic1": [],
+  "sh_k1x16_oc64_ic4": [],
+  "sh_k20_oc16_ic1": [],
+  "sh_k4x16_oc64_ic4": [],
+  "sh_kh32_oc16": [],
+  "sh_kh34_oc16": [],
+  "sh_kw16_oc16": [],
+  "sh_kw16_oc32": [],
+  "sh_kw17_oc16": [],
+  "sh_kw17_oc32": [],
+  "sh_kw18_oc16": [],
+  "sh_kw18_oc32": [],
+  "sh_kw19_oc16": [],
+  "sh_kw19_oc32": [],
+  "sh_kw20_oc16": [],
+  "sh_kw20_oc32": [],
+  "sh_kw21_oc16": [],
+  "sh_kw21_oc32": [],
+  "sh_kw22_oc16": [],
+  "sh_kw22_oc32": [],
+  "sh_kw23_oc16": [],
+  "sh_kw23_oc32": [],
+  "sh_kw24_oc16": [],
+  "sh_kw24_oc32": [],
+  "sh_kw25_oc16": [],
+  "sh_kw25_oc32": [],
+  "sh_kw26_oc16": [],
+  "sh_kw26_oc32": [],
+  "sh_kw27_oc16": [],
+  "sh_kw27_oc32": [],
+  "sh_kw28_oc16": [],
+  "sh_kw28_oc32": [],
+  "sh_kw29_oc16": [],
+  "sh_kw29_oc32": [],
+  "sh_kw30_oc16": [],
+  "sh_kw30_oc32": [],
+  "sh_kw31_oc16": [],
+  "sh_kw31_oc32": [],
+  "sh_kw32_oc16": [],
+  "sh_kw32_oc32": [],
+  "sh_kw33_oc16": [],
+  "sh_kw33_oc32": [],
+  "sh_kw34_oc16": [],
+  "sh_kw34_oc32": [],
+  "sh_relu_8mb_c131072_w32": [],
+  "sh_resample_symmetric_any": [],
+  "sh_resample_symmetric_inside": [],
+  "sinh": [
+   "sinh"
+  ],
+  "tan": [
+   "tan"
+  ],
+  "topk_w4": [
+   "topk"
+  ],
+  "wq_affine_i8_pc1_zp0": [],
+  "wq_affine_i8_pc1_zp5": [],
+  "wq_affine_i8_tensor_axis1": [],
+  "wq_affine_u8_pc1_zp128": [],
+  "wq_blockwise_i4_b32": [],
+  "wq_blockwise_i8_b16": [],
+  "wq_blockwise_i8_b32": [],
+  "wq_blockwise_i8_b32_axis0": [],
+  "wq_blockwise_i8_b32_offset3": [],
+  "wq_blockwise_i8_b8": [],
+  "wq_linear_affine_i8_pc1": [],
+  "wq_linear_blockwise_i8_b32": [],
+  "wq_speed_affine_i8_pc1": [],
+  "wq_speed_blockwise_i8_b32": [],
+  "wq_speed_blockwise_i8_b64": []
+ },
+ "ops": {
+  "abs": {
+   "args": {
+    "x": {
+     "tensor": 6
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 6,
+   "ok_programs": [
+    "abs",
+    "rc_lim_outputs_12",
+    "rc_lim_outputs_16",
+    "rc_lim_outputs_4",
+    "rc_lim_outputs_6",
+    "rc_lim_outputs_8"
+   ],
+   "present": {
+    "x": 6
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 6,
+   "wrong": 0
+  },
+  "acos": {
+   "args": {
+    "x": {
+     "tensor": 4
+    }
+   },
+   "error_classes": {
+    "InvalidMILProgram": 4
+   },
+   "fail": 4,
+   "failing_programs": [
+    "acos",
+    "rd_r2_acos",
+    "rd_r3_acos",
+    "rd_r5_acos"
+   ],
+   "failing_variants": [],
+   "failing_without_dead_ops": 4,
+   "ok": 0,
+   "ok_programs": [],
+   "present": {
+    "x": 4
+   },
+   "results": [
+    1
+   ],
+   "status": "unsupported",
+   "uses": 4,
+   "wrong": 0
+  },
+  "add": {
+   "args": {
+    "x": {
+     "tensor": 7089
+    },
+    "y": {
+     "blob": 682,
+     "float": 5600,
+     "int": 2,
+     "tensor": 805
+    }
+   },
+   "error_classes": {
+    "CompilationFailure": 4,
+    "InvalidMILProgram": 4
+   },
+   "fail": 8,
+   "failing_programs": [
+    "lg_dead_add_shared_const",
+    "lg_dead_add_tensor_const",
+    "lg_dead_chain3",
+    "lg_dead_mul_add",
+    "rc_random_bernoulli",
+    "rc_random_normal"
+   ],
+   "failing_variants": [
+    "lg_dead_add_shared_const",
+    "lg_dead_add_tensor_const",
+    "lg_dead_chain3",
+    "lg_dead_mul_add",
+    "rc_while_loop",
+    "rc_while_loop_1iter"
+   ],
+   "failing_without_dead_ops": 2,
+   "ok": 7072,
+   "ok_programs": [
+    "add",
+    "add_bcast_channel",
+    "add_scalar_const",
+    "ix_fill_const",
+    "ix_range_1d_f16",
+    "lg_add_bcast_both"
+   ],
+   "present": {
+    "x": 7089,
+    "y": 7089
+   },
+   "results": [
+    1
+   ],
+   "status": "sensitive",
+   "uses": 7089,
+   "wrong": 9
+  },
+  "argsort": {
+   "args": {
+    "ascending": {
+     "bool": 19
+    },
+    "axis": {
+     "int": 19
+    },
+    "x": {
+     "tensor": 19
+    }
+   },
+   "error_classes": {
+    "InvalidMILProgram": 9
+   },
+   "fail": 9,
+   "failing_programs": [
+    "lg_argmax_w",
+    "lg_argmax_w_f16out",
+    "lg_argmin_c",
+    "lg_argsort_cast16",
+    "lg_argsort_identity",
+    "lg_argsort_reshape"
+   ],
+   "failing_variants": [
+    "lg_argmax_w",
+    "lg_argmax_w_f16out",
+    "lg_argmin_c",
+    "lg_argsort_cast16",
+    "lg_argsort_identity",
+    "lg_argsort_reshape",
+    "lg_argsort_slice",
+    "lg_topk_idx_w4"
+   ],
+   "failing_without_dead_ops": 9,
+   "ok": 10,
+   "ok_programs": [
+    "argsort_w",
+    "lg_argsort_alone",
+    "rd_argsort_ax1_asc",
+    "rd_argsort_ax1_desc",
+    "rd_argsort_ax3_asc",
+    "rd_argsort_ax3_desc"
+   ],
+   "present": {
+    "ascending": 19,
+    "axis": 19,
+    "x": 19
+   },
+   "results": [
+    1
+   ],
+   "status": "sensitive",
+   "uses": 19,
+   "wrong": 0
+  },
+  "asin": {
+   "args": {
+    "x": {
+     "tensor": 4
+    }
+   },
+   "error_classes": {
+    "InvalidMILProgram": 4
+   },
+   "fail": 4,
+   "failing_programs": [
+    "asin",
+    "rd_r2_asin",
+    "rd_r3_asin",
+    "rd_r5_asin"
+   ],
+   "failing_variants": [],
+   "failing_without_dead_ops": 4,
+   "ok": 0,
+   "ok_programs": [],
+   "present": {
+    "x": 4
+   },
+   "results": [
+    1
+   ],
+   "status": "unsupported",
+   "uses": 4,
+   "wrong": 0
+  },
+  "atan": {
+   "args": {
+    "x": {
+     "tensor": 4
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 4,
+   "ok_programs": [
+    "atan",
+    "rc_lim_outputs_16",
+    "rd_comp_acos",
+    "rd_comp_asin"
+   ],
+   "present": {
+    "x": 4
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 4,
+   "wrong": 0
+  },
+  "atanh": {
+   "args": {
+    "x": {
+     "tensor": 4
+    }
+   },
+   "error_classes": {
+    "InvalidMILProgram": 4
+   },
+   "fail": 4,
+   "failing_programs": [
+    "atanh",
+    "rd_r2_atanh",
+    "rd_r3_atanh",
+    "rd_r5_atanh"
+   ],
+   "failing_variants": [],
+   "failing_without_dead_ops": 4,
+   "ok": 0,
+   "ok_programs": [],
+   "present": {
+    "x": 4
+   },
+   "results": [
+    1
+   ],
+   "status": "unsupported",
+   "uses": 4,
+   "wrong": 0
+  },
+  "avg_pool": {
+   "args": {
+    "ceil_mode": {
+     "bool": 6
+    },
+    "exclude_padding_from_average": {
+     "bool": 6
+    },
+    "kernel_sizes": {
+     "ints": 6
+    },
+    "pad": {
+     "ints": 6
+    },
+    "pad_type": {
+     "str": 6
+    },
+    "strides": {
+     "ints": 6
+    },
+    "x": {
+     "tensor": 6
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 6,
+   "ok_programs": [
+    "avg_pool2x2",
+    "cv_avg_k2_s2_ceil",
+    "cv_avg_k3_s1_same",
+    "cv_avg_k5_s2_custom",
+    "cv_avg_k7_s1_excl",
+    "cv_avg_k7_s1_noexcl"
+   ],
+   "present": {
+    "ceil_mode": 6,
+    "exclude_padding_from_average": 6,
+    "kernel_sizes": 6,
+    "pad": 6,
+    "pad_type": 6,
+    "strides": 6,
+    "x": 6
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 6,
+   "wrong": 0
+  },
+  "band_part": {
+   "args": {
+    "lower": {
+     "int": 6
+    },
+    "upper": {
+     "int": 6
+    },
+    "x": {
+     "tensor": 6
+    }
+   },
+   "error_classes": {
+    "InvalidMILProgram": 6
+   },
+   "fail": 6,
+   "failing_programs": [
+    "band_part",
+    "ix_band_part_4d_lower",
+    "ix_band_part_band21",
+    "ix_band_part_lower_tri",
+    "ix_band_part_small_8x8",
+    "ix_band_part_upper_tri"
+   ],
+   "failing_variants": [],
+   "failing_without_dead_ops": 6,
+   "ok": 0,
+   "ok_programs": [],
+   "present": {
+    "lower": 6,
+    "upper": 6,
+    "x": 6
+   },
+   "results": [
+    1
+   ],
+   "status": "unsupported",
+   "uses": 6,
+   "wrong": 0
+  },
+  "batch_norm": {
+   "args": {
+    "beta": {
+     "blob": 1
+    },
+    "epsilon": {
+     "float": 1
+    },
+    "gamma": {
+     "blob": 1
+    },
+    "mean": {
+     "blob": 1
+    },
+    "variance": {
+     "blob": 1
+    },
+    "x": {
+     "tensor": 1
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 1,
+   "ok_programs": [
+    "batch_norm"
+   ],
+   "present": {
+    "beta": 1,
+    "epsilon": 1,
+    "gamma": 1,
+    "mean": 1,
+    "variance": 1,
+    "x": 1
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 1,
+   "wrong": 0
+  },
+  "batch_to_space": {
+   "args": {
+    "block_shape": {
+     "ints": 1
+    },
+    "crops": {
+     "tconst": 1
+    },
+    "x": {
+     "tensor": 1
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 1,
+   "ok_programs": [
+    "ix_batch_to_space_b14"
+   ],
+   "present": {
+    "block_shape": 1,
+    "crops": 1,
+    "x": 1
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 1,
+   "wrong": 0
+  },
+  "cast": {
+   "args": {
+    "dtype": {
+     "str": 183
+    },
+    "x": {
+     "tensor": 183
+    }
+   },
+   "error_classes": {
+    "CompilationFailure": 4,
+    "InvalidMILProgram": 41
+   },
+   "fail": 45,
+   "failing_programs": [
+    "cast_roundtrip_fp32",
+    "cast_roundtrip_fp32",
+    "cast_roundtrip_int32",
+    "cast_roundtrip_int32",
+    "lg_argmax_w_f16out",
+    "lg_argsort_cast16"
+   ],
+   "failing_variants": [
+    "cast_roundtrip_fp32",
+    "cast_roundtrip_int32",
+    "lg_argmax_w_f16out",
+    "lg_argsort_cast16",
+    "lg_dead_chain3",
+    "lg_dead_equal_cast",
+    "lg_topk_val_w4"
+   ],
+   "failing_without_dead_ops": 19,
+   "ok": 138,
+   "ok_programs": [
+    "cast_roundtrip_int16",
+    "cast_roundtrip_int16",
+    "cast_roundtrip_int8",
+    "cast_roundtrip_int8",
+    "cast_roundtrip_uint16",
+    "cast_roundtrip_uint16"
+   ],
+   "present": {
+    "dtype": 183,
+    "x": 183
+   },
+   "results": [
+    1
+   ],
+   "status": "sensitive",
+   "uses": 183,
+   "wrong": 0
+  },
+  "ceil": {
+   "args": {
+    "x": {
+     "tensor": 5
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 5,
+   "ok_programs": [
+    "ceil",
+    "rc_lim_outputs_12",
+    "rc_lim_outputs_16",
+    "rc_lim_outputs_8",
+    "rd_rnd_half_ceil"
+   ],
+   "present": {
+    "x": 5
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 5,
+   "wrong": 0
+  },
+  "clamped_relu": {
+   "args": {
+    "alpha": {
+     "float": 1
+    },
+    "beta": {
+     "float": 1
+    },
+    "x": {
+     "tensor": 1
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 1,
+   "ok_programs": [
+    "clamped_relu"
+   ],
+   "present": {
+    "alpha": 1,
+    "beta": 1,
+    "x": 1
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 1,
+   "wrong": 0
+  },
+  "clip": {
+   "args": {
+    "alpha": {
+     "float": 1
+    },
+    "beta": {
+     "float": 1
+    },
+    "x": {
+     "tensor": 1
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 1,
+   "ok_programs": [
+    "clip"
+   ],
+   "present": {
+    "alpha": 1,
+    "beta": 1,
+    "x": 1
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 1,
+   "wrong": 0
+  },
+  "concat": {
+   "args": {
+    "axis": {
+     "int": 23
+    },
+    "interleave": {
+     "bool": 23
+    },
+    "values": {
+     "tuple": 23
+    }
+   },
+   "error_classes": {
+    "InvalidMILProgram": 1
+   },
+   "fail": 1,
+   "failing_programs": [
+    "lg_topk_val_w4"
+   ],
+   "failing_variants": [
+    "lg_topk_val_w4"
+   ],
+   "failing_without_dead_ops": 1,
+   "ok": 22,
+   "ok_programs": [
+    "concat_c",
+    "concat_w",
+    "ix_concat3_ax1",
+    "ix_concat3_ax3",
+    "ix_concat3_ax3_interleave",
+    "lg_topk2_both"
+   ],
+   "present": {
+    "axis": 23,
+    "interleave": 23,
+    "values": 23
+   },
+   "results": [
+    1
+   ],
+   "status": "sensitive",
+   "uses": 23,
+   "wrong": 0
+  },
+  "constexpr_affine_dequantize": {
+   "args": {},
+   "error_classes": {
+    "InvalidMILProgram": 6
+   },
+   "fail": 6,
+   "failing_programs": [
+    "wq_affine_i8_pc1_zp0",
+    "wq_affine_i8_pc1_zp5",
+    "wq_affine_i8_tensor_axis1",
+    "wq_affine_u8_pc1_zp128",
+    "wq_linear_affine_i8_pc1",
+    "wq_speed_affine_i8_pc1"
+   ],
+   "failing_variants": [
+    "wq_affine_i8_pc1_zp0",
+    "wq_affine_i8_pc1_zp5",
+    "wq_affine_i8_tensor_axis1",
+    "wq_affine_u8_pc1_zp128",
+    "wq_linear_affine_i8_pc1",
+    "wq_speed_affine_i8_pc1"
+   ],
+   "failing_without_dead_ops": 6,
+   "ok": 8,
+   "ok_programs": [
+    "wq_affine_i8_pc0_zp0",
+    "wq_affine_i8_pc0_zp5",
+    "wq_affine_i8_tensor_zp0",
+    "wq_affine_u8_pc0_zp128",
+    "wq_affine_u8_tensor_zp100",
+    "wq_linear_affine_i8_pc0"
+   ],
+   "present": {},
+   "results": [
+    1
+   ],
+   "status": "sensitive",
+   "uses": 14,
+   "wrong": 0
+  },
+  "constexpr_blockwise_shift_scale": {
+   "args": {
+    "data": {
+     "qblob": 11
+    },
+    "offset": {
+     "qblob": 1
+    },
+    "scale": {
+     "blob": 11
+    }
+   },
+   "error_classes": {
+    "InvalidMILProgram": 9
+   },
+   "fail": 9,
+   "failing_programs": [
+    "wq_blockwise_i4_b32",
+    "wq_blockwise_i8_b16",
+    "wq_blockwise_i8_b32",
+    "wq_blockwise_i8_b32_axis0",
+    "wq_blockwise_i8_b32_offset3",
+    "wq_blockwise_i8_b8"
+   ],
+   "failing_variants": [
+    "wq_blockwise_i4_b32",
+    "wq_blockwise_i8_b16",
+    "wq_blockwise_i8_b32",
+    "wq_blockwise_i8_b32_axis0",
+    "wq_blockwise_i8_b32_offset3",
+    "wq_blockwise_i8_b8",
+    "wq_linear_blockwise_i8_b32",
+    "wq_speed_blockwise_i8_b32"
+   ],
+   "failing_without_dead_ops": 9,
+   "ok": 2,
+   "ok_programs": [
+    "wq_blockwise_i4_b64",
+    "wq_blockwise_i8_b64"
+   ],
+   "present": {
+    "data": 11,
+    "offset": 1,
+    "scale": 11
+   },
+   "results": [
+    1
+   ],
+   "status": "sensitive",
+   "uses": 11,
+   "wrong": 0
+  },
+  "constexpr_lut_to_dense": {
+   "args": {
+    "indices": {
+     "qblob": 9
+    },
+    "lut": {
+     "blob": 7,
+     "tconst": 2
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 9,
+   "ok_programs": [
+    "wq_linear_lut4_tensor",
+    "wq_lut1_tensor",
+    "wq_lut2_tensor",
+    "wq_lut4_perchannel",
+    "wq_lut4_tensor",
+    "wq_lut6_tensor"
+   ],
+   "present": {
+    "indices": 9,
+    "lut": 9
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 9,
+   "wrong": 0
+  },
+  "constexpr_sparse_to_dense": {
+   "args": {
+    "mask": {
+     "qblob": 3
+    },
+    "nonzero_data": {
+     "blob": 3
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 3,
+   "ok_programs": [
+    "wq_linear_sparse50",
+    "wq_sparse50",
+    "wq_speed_sparse50"
+   ],
+   "present": {
+    "mask": 3,
+    "nonzero_data": 3
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 3,
+   "wrong": 0
+  },
+  "conv": {
+   "args": {
+    "bias": {
+     "blob": 2
+    },
+    "dilations": {
+     "ints": 214
+    },
+    "groups": {
+     "int": 214
+    },
+    "pad": {
+     "ints": 214
+    },
+    "pad_type": {
+     "str": 214
+    },
+    "strides": {
+     "ints": 214
+    },
+    "weight": {
+     "blob": 182,
+     "tensor": 32
+    },
+    "x": {
+     "tensor": 214
+    }
+   },
+   "error_classes": {
+    "CompilationFailure": 53,
+    "InvalidMILProgram": 13,
+    "_ANECompiler : ANECCompile() FAILED": 1
+   },
+   "fail": 67,
+   "failing_programs": [
+    "cv_k16x16_same",
+    "cv_k16x16_valid",
+    "cv_k16x16_valid_ic16",
+    "sh_conv1x1_ic32513_h1w64",
+    "sh_conv1x1_ic32513_h2w32",
+    "sh_conv1x1_ic65536_h1w64"
+   ],
+   "failing_variants": [
+    "cv_k16x16_same",
+    "cv_k16x16_valid",
+    "sh_conv1x1_ic32513_h1w64",
+    "sh_conv1x1_ic32513_h2w32",
+    "sh_conv1x1_ic65536_h1w64",
+    "sh_conv1x1_ic65536_h2w32",
+    "sh_conv1x1_ic65536_h64w1",
+    "sh_k16_oc64_ic32"
+   ],
+   "failing_without_dead_ops": 67,
+   "ok": 139,
+   "ok_programs": [
+    "conv1d_k3",
+    "conv1x1",
+    "conv1x1_bias",
+    "conv1x7",
+    "conv3d_k3",
+    "conv3x3_dilated2"
+   ],
+   "present": {
+    "bias": 2,
+    "dilations": 214,
+    "groups": 214,
+    "pad": 214,
+    "pad_type": 214,
+    "strides": 214,
+    "weight": 214,
+    "x": 214
+   },
+   "results": [
+    1
+   ],
+   "status": "sensitive",
+   "uses": 214,
+   "wrong": 8
+  },
+  "conv_transpose": {
+   "args": {
+    "bias": {
+     "blob": 1
+    },
+    "dilations": {
+     "ints": 6
+    },
+    "groups": {
+     "int": 6
+    },
+    "pad": {
+     "ints": 6
+    },
+    "pad_type": {
+     "str": 6
+    },
+    "strides": {
+     "ints": 6
+    },
+    "weight": {
+     "blob": 6
+    },
+    "x": {
+     "tensor": 6
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 6,
+   "ok_programs": [
+    "conv_transpose2x2_s2",
+    "cv_ct_k2_s1",
+    "cv_ct_k3_s1_bias",
+    "cv_ct_k3_s2",
+    "cv_ct_k4_s2",
+    "cv_ct_k4_s4"
+   ],
+   "present": {
+    "bias": 1,
+    "dilations": 6,
+    "groups": 6,
+    "pad": 6,
+    "pad_type": 6,
+    "strides": 6,
+    "weight": 6,
+    "x": 6
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 6,
+   "wrong": 0
+  },
+  "cos": {
+   "args": {
+    "x": {
+     "tensor": 5
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 5,
+   "ok_programs": [
+    "cos",
+    "lg_tan",
+    "rc_lim_outputs_12",
+    "rc_lim_outputs_16",
+    "rd_comp_tan"
+   ],
+   "present": {
+    "x": 5
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 5,
+   "wrong": 0
+  },
+  "cosh": {
+   "args": {
+    "x": {
+     "tensor": 4
+    }
+   },
+   "error_classes": {
+    "InvalidMILProgram": 4
+   },
+   "fail": 4,
+   "failing_programs": [
+    "cosh",
+    "rd_r2_cosh",
+    "rd_r3_cosh",
+    "rd_r5_cosh"
+   ],
+   "failing_variants": [],
+   "failing_without_dead_ops": 4,
+   "ok": 0,
+   "ok_programs": [],
+   "present": {
+    "x": 4
+   },
+   "results": [
+    1
+   ],
+   "status": "unsupported",
+   "uses": 4,
+   "wrong": 0
+  },
+  "crop": {
+   "args": {
+    "crop_height": {
+     "ints": 2
+    },
+    "crop_width": {
+     "ints": 2
+    },
+    "x": {
+     "tensor": 2
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 2,
+   "ok_programs": [
+    "ix_crop_h_real",
+    "ix_crop_hw"
+   ],
+   "present": {
+    "crop_height": 2,
+    "crop_width": 2,
+    "x": 2
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 2,
+   "wrong": 0
+  },
+  "crop_resize": {
+   "args": {
+    "box_coordinate_mode": {
+     "str": 3
+    },
+    "box_indices": {
+     "tensor": 3
+    },
+    "boxes": {
+     "tensor": 3
+    },
+    "normalized_coordinates": {
+     "bool": 3
+    },
+    "pad_value": {
+     "float": 3
+    },
+    "sampling_mode": {
+     "str": 3
+    },
+    "spatial_scale": {
+     "float": 3
+    },
+    "target_height": {
+     "int": 3
+    },
+    "target_width": {
+     "int": 3
+    },
+    "x": {
+     "tensor": 3
+    }
+   },
+   "error_classes": {
+    "InvalidMILProgram": 3
+   },
+   "fail": 3,
+   "failing_programs": [
+    "cv_crop_resize",
+    "cv_crop_resize_1box",
+    "cv_crop_resize_unnorm"
+   ],
+   "failing_variants": [],
+   "failing_without_dead_ops": 3,
+   "ok": 0,
+   "ok_programs": [],
+   "present": {
+    "box_coordinate_mode": 3,
+    "box_indices": 3,
+    "boxes": 3,
+    "normalized_coordinates": 3,
+    "pad_value": 3,
+    "sampling_mode": 3,
+    "spatial_scale": 3,
+    "target_height": 3,
+    "target_width": 3,
+    "x": 3
+   },
+   "results": [
+    1
+   ],
+   "status": "unsupported",
+   "uses": 3,
+   "wrong": 0
+  },
+  "cumsum": {
+   "args": {
+    "axis": {
+     "int": 10
+    },
+    "exclusive": {
+     "bool": 10
+    },
+    "reverse": {
+     "bool": 10
+    },
+    "x": {
+     "tensor": 10
+    }
+   },
+   "error_classes": {
+    "InvalidMILProgram": 10
+   },
+   "fail": 10,
+   "failing_programs": [
+    "cumsum_w",
+    "rd_cumsum_ax1_ex0_rev0",
+    "rd_cumsum_ax1_ex0_rev1",
+    "rd_cumsum_ax1_ex1_rev0",
+    "rd_cumsum_ax1_ex1_rev1",
+    "rd_cumsum_ax3_ex0_rev0"
+   ],
+   "failing_variants": [],
+   "failing_without_dead_ops": 10,
+   "ok": 0,
+   "ok_programs": [],
+   "present": {
+    "axis": 10,
+    "exclusive": 10,
+    "reverse": 10,
+    "x": 10
+   },
+   "results": [
+    1
+   ],
+   "status": "unsupported",
+   "uses": 10,
+   "wrong": 0
+  },
+  "depth_to_space": {
+   "args": {
+    "block_size": {
+     "int": 1
+    },
+    "x": {
+     "tensor": 1
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 1,
+   "ok_programs": [
+    "depth_to_space"
+   ],
+   "present": {
+    "block_size": 1,
+    "x": 1
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 1,
+   "wrong": 0
+  },
+  "dequantize": {
+   "args": {
+    "axis": {
+     "int": 2
+    },
+    "input": {
+     "tensor": 5
+    },
+    "scale": {
+     "blob": 2,
+     "float": 3
+    },
+    "zero_point": {
+     "int": 3,
+     "qblob": 2
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 5,
+   "ok_programs": [
+    "wq_act_qdq_i8_axis1",
+    "wq_act_qdq_i8_tensor",
+    "wq_act_qdq_i8_zp7",
+    "wq_act_qdq_u8_axis1_zp",
+    "wq_act_qdq_u8_zp128"
+   ],
+   "present": {
+    "axis": 2,
+    "input": 5,
+    "scale": 5,
+    "zero_point": 5
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 5,
+   "wrong": 0
+  },
+  "einsum": {
+   "args": {
+    "equation": {
+     "str": 1
+    },
+    "values": {
+     "tuple": 1
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 1,
+   "ok_programs": [
+    "einsum_nchw_nwhu"
+   ],
+   "present": {
+    "equation": 1,
+    "values": 1
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 1,
+   "wrong": 0
+  },
+  "elu": {
+   "args": {
+    "alpha": {
+     "float": 1
+    },
+    "x": {
+     "tensor": 1
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 1,
+   "ok_programs": [
+    "elu"
+   ],
+   "present": {
+    "alpha": 1,
+    "x": 1
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 1,
+   "wrong": 0
+  },
+  "equal": {
+   "args": {
+    "x": {
+     "blob": 46,
+     "tensor": 66
+    },
+    "y": {
+     "blob": 6,
+     "float": 3,
+     "tensor": 103
+    }
+   },
+   "error_classes": {
+    "CompilationFailure": 3,
+    "InvalidMILProgram": 4
+   },
+   "fail": 7,
+   "failing_programs": [
+    "lg_dead_chain3",
+    "lg_dead_equal",
+    "lg_dead_equal_cast",
+    "lg_topk_val_w4",
+    "lg_topk_val_w4",
+    "lg_topk_val_w4"
+   ],
+   "failing_variants": [
+    "lg_dead_chain3",
+    "lg_dead_equal",
+    "lg_dead_equal_cast",
+    "lg_topk_val_w4"
+   ],
+   "failing_without_dead_ops": 1,
+   "ok": 105,
+   "ok_programs": [
+    "equal",
+    "lg_argmax_w_iota",
+    "lg_argmin_c_iota",
+    "lg_bis_add_m1000",
+    "lg_bis_add_m1000",
+    "lg_bis_add_m60000"
+   ],
+   "present": {
+    "x": 112,
+    "y": 112
+   },
+   "results": [
+    1
+   ],
+   "status": "sensitive",
+   "uses": 112,
+   "wrong": 0
+  },
+  "erf": {
+   "args": {
+    "x": {
+     "tensor": 2
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 2,
+   "ok_programs": [
+    "erf",
+    "rc_lim_outputs_16"
+   ],
+   "present": {
+    "x": 2
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 2,
+   "wrong": 0
+  },
+  "exp": {
+   "args": {
+    "x": {
+     "tensor": 18
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 18,
+   "ok_programs": [
+    "exp",
+    "lg_cosh",
+    "lg_cosh",
+    "lg_dead_exp_after_input",
+    "lg_dead_exp_after_live",
+    "lg_dead_exp_beside_reduce"
+   ],
+   "present": {
+    "x": 18
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 18,
+   "wrong": 0
+  },
+  "exp2": {
+   "args": {
+    "x": {
+     "tensor": 1
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 1,
+   "ok_programs": [
+    "exp2"
+   ],
+   "present": {
+    "x": 1
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 1,
+   "wrong": 0
+  },
+  "expand_dims": {
+   "args": {
+    "axes": {
+     "ints": 5
+    },
+    "x": {
+     "tensor": 5
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 5,
+   "ok_programs": [
+    "expand_dims",
+    "ix_expand_dims_ax0",
+    "ix_expand_dims_ax04_rank3",
+    "ix_expand_dims_ax2",
+    "ix_expand_dims_axm1"
+   ],
+   "present": {
+    "axes": 5,
+    "x": 5
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 5,
+   "wrong": 0
+  },
+  "fill": {
+   "args": {
+    "shape": {
+     "ints": 1
+    },
+    "value": {
+     "float": 1
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 1,
+   "ok_programs": [
+    "ix_fill_const"
+   ],
+   "present": {
+    "shape": 1,
+    "value": 1
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 1,
+   "wrong": 0
+  },
+  "fill_like": {
+   "args": {
+    "ref_tensor": {
+     "tensor": 1
+    },
+    "value": {
+     "float": 1
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 1,
+   "ok_programs": [
+    "rc_fill_like"
+   ],
+   "present": {
+    "ref_tensor": 1,
+    "value": 1
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 1,
+   "wrong": 0
+  },
+  "flatten2d": {
+   "args": {
+    "axis": {
+     "int": 5
+    },
+    "x": {
+     "tensor": 5
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 5,
+   "ok_programs": [
+    "flatten2d",
+    "ix_flatten2d_ax0",
+    "ix_flatten2d_ax1",
+    "ix_flatten2d_ax2",
+    "ix_flatten2d_ax3"
+   ],
+   "present": {
+    "axis": 5,
+    "x": 5
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 5,
+   "wrong": 0
+  },
+  "floor": {
+   "args": {
+    "x": {
+     "tensor": 7
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 7,
+   "ok_programs": [
+    "floor",
+    "rc_lim_outputs_12",
+    "rc_lim_outputs_16",
+    "rc_lim_outputs_6",
+    "rc_lim_outputs_8",
+    "rd_comp_mod_floor"
+   ],
+   "present": {
+    "x": 7
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 7,
+   "wrong": 0
+  },
+  "floor_div": {
+   "args": {
+    "x": {
+     "tensor": 2
+    },
+    "y": {
+     "tensor": 2
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 2,
+   "ok_programs": [
+    "floor_div",
+    "rd_comp_mod_fdiv"
+   ],
+   "present": {
+    "x": 2,
+    "y": 2
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 2,
+   "wrong": 0
+  },
+  "gather": {
+   "args": {
+    "axis": {
+     "int": 19
+    },
+    "batch_dims": {
+     "int": 19
+    },
+    "indices": {
+     "ints": 11,
+     "tensor": 8
+    },
+    "validate_indices": {
+     "bool": 19
+    },
+    "x": {
+     "tensor": 19
+    }
+   },
+   "error_classes": {
+    "CompilationFailure": 4,
+    "InvalidMILProgram": 15
+   },
+   "fail": 19,
+   "failing_programs": [
+    "gather_c",
+    "gather_dynamic",
+    "ix_gather_2d_ax0_dyn",
+    "ix_gather_2d_ax1_const",
+    "ix_gather_3d_ax0_dyn",
+    "ix_gather_3d_ax1_const"
+   ],
+   "failing_variants": [],
+   "failing_without_dead_ops": 19,
+   "ok": 0,
+   "ok_programs": [],
+   "present": {
+    "axis": 19,
+    "batch_dims": 19,
+    "indices": 19,
+    "validate_indices": 19,
+    "x": 19
+   },
+   "results": [
+    1
+   ],
+   "status": "unsupported",
+   "uses": 19,
+   "wrong": 0
+  },
+  "gather_along_axis": {
+   "args": {
+    "axis": {
+     "int": 7
+    },
+    "indices": {
+     "tconst": 2,
+     "tensor": 5
+    },
+    "validate_indices": {
+     "bool": 7
+    },
+    "x": {
+     "tensor": 7
+    }
+   },
+   "error_classes": {
+    "CompilationFailure": 7
+   },
+   "fail": 7,
+   "failing_programs": [
+    "gather_along_axis",
+    "ix_gather_along_ax0_dyn",
+    "ix_gather_along_ax1_dyn",
+    "ix_gather_along_ax1_neg_const",
+    "ix_gather_along_ax2_dyn",
+    "ix_gather_along_ax3_const"
+   ],
+   "failing_variants": [],
+   "failing_without_dead_ops": 7,
+   "ok": 0,
+   "ok_programs": [],
+   "present": {
+    "axis": 7,
+    "indices": 7,
+    "validate_indices": 7,
+    "x": 7
+   },
+   "results": [
+    1
+   ],
+   "status": "unsupported",
+   "uses": 7,
+   "wrong": 0
+  },
+  "gather_nd": {
+   "args": {
+    "batch_dims": {
+     "int": 5
+    },
+    "indices": {
+     "tconst": 3,
+     "tensor": 2
+    },
+    "validate_indices": {
+     "bool": 5
+    },
+    "x": {
+     "tensor": 5
+    }
+   },
+   "error_classes": {
+    "InvalidMILProgram": 5
+   },
+   "fail": 5,
+   "failing_programs": [
+    "ix_gather_nd_bd0_const",
+    "ix_gather_nd_bd0_dyn",
+    "ix_gather_nd_bd0_k1_const",
+    "ix_gather_nd_bd1_const",
+    "ix_gather_nd_bd1_dyn"
+   ],
+   "failing_variants": [],
+   "failing_without_dead_ops": 5,
+   "ok": 0,
+   "ok_programs": [],
+   "present": {
+    "batch_dims": 5,
+    "indices": 5,
+    "validate_indices": 5,
+    "x": 5
+   },
+   "results": [
+    1
+   ],
+   "status": "unsupported",
+   "uses": 5,
+   "wrong": 0
+  },
+  "gelu": {
+   "args": {
+    "mode": {
+     "str": 3
+    },
+    "x": {
+     "tensor": 3
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 3,
+   "ok_programs": [
+    "gelu_exact",
+    "gelu_sigmoid",
+    "gelu_tanh"
+   ],
+   "present": {
+    "mode": 3,
+    "x": 3
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 3,
+   "wrong": 0
+  },
+  "greater": {
+   "args": {
+    "x": {
+     "tensor": 3
+    },
+    "y": {
+     "float": 2,
+     "tensor": 1
+    }
+   },
+   "error_classes": {
+    "CompilationFailure": 1
+   },
+   "fail": 1,
+   "failing_programs": [
+    "lg_dead_greater_select"
+   ],
+   "failing_variants": [
+    "lg_dead_greater_select"
+   ],
+   "failing_without_dead_ops": 0,
+   "ok": 2,
+   "ok_programs": [
+    "greater",
+    "select"
+   ],
+   "present": {
+    "x": 3,
+    "y": 3
+   },
+   "results": [
+    1
+   ],
+   "status": "sensitive",
+   "uses": 3,
+   "wrong": 0
+  },
+  "greater_equal": {
+   "args": {
+    "x": {
+     "tensor": 1
+    },
+    "y": {
+     "tensor": 1
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 1,
+   "ok_programs": [
+    "greater_equal"
+   ],
+   "present": {
+    "x": 1,
+    "y": 1
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 1,
+   "wrong": 0
+  },
+  "gru": {
+   "args": {
+    "activation": {
+     "str": 9
+    },
+    "bias": {
+     "blob": 9
+    },
+    "direction": {
+     "str": 9
+    },
+    "initial_h": {
+     "tensor": 9
+    },
+    "output_sequence": {
+     "bool": 9
+    },
+    "recurrent_activation": {
+     "str": 9
+    },
+    "weight_hh": {
+     "blob": 9
+    },
+    "weight_ih": {
+     "blob": 9
+    },
+    "x": {
+     "tensor": 9
+    }
+   },
+   "error_classes": {
+    "InvalidMILProgram": 9
+   },
+   "fail": 9,
+   "failing_programs": [
+    "rc_gru_s2_h16_fwd",
+    "rc_gru_s32_h128_fwd",
+    "rc_gru_s32_h128_rev",
+    "rc_gru_s32_h64_fwd",
+    "rc_gru_s32_h64_rev",
+    "rc_gru_s8_h128_fwd"
+   ],
+   "failing_variants": [],
+   "failing_without_dead_ops": 9,
+   "ok": 0,
+   "ok_programs": [],
+   "present": {
+    "activation": 9,
+    "bias": 9,
+    "direction": 9,
+    "initial_h": 9,
+    "output_sequence": 9,
+    "recurrent_activation": 9,
+    "weight_hh": 9,
+    "weight_ih": 9,
+    "x": 9
+   },
+   "results": [
+    2
+   ],
+   "status": "unsupported",
+   "uses": 9,
+   "wrong": 0
+  },
+  "identity": {
+   "args": {
+    "x": {
+     "tensor": 5
+    }
+   },
+   "error_classes": {
+    "CompilationFailure": 1,
+    "InvalidMILProgram": 2
+   },
+   "fail": 3,
+   "failing_programs": [
+    "lg_argsort_identity",
+    "rc_random_normal_bare",
+    "rc_random_uniform_bare"
+   ],
+   "failing_variants": [
+    "lg_argsort_identity"
+   ],
+   "failing_without_dead_ops": 1,
+   "ok": 2,
+   "ok_programs": [
+    "identity",
+    "ix_identity"
+   ],
+   "present": {
+    "x": 5
+   },
+   "results": [
+    1
+   ],
+   "status": "sensitive",
+   "uses": 5,
+   "wrong": 0
+  },
+  "instance_norm": {
+   "args": {
+    "beta": {
+     "blob": 1
+    },
+    "epsilon": {
+     "float": 1
+    },
+    "gamma": {
+     "blob": 1
+    },
+    "x": {
+     "tensor": 1
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 1,
+   "ok_programs": [
+    "instance_norm"
+   ],
+   "present": {
+    "beta": 1,
+    "epsilon": 1,
+    "gamma": 1,
+    "x": 1
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 1,
+   "wrong": 0
+  },
+  "inverse": {
+   "args": {
+    "epsilon": {
+     "float": 1
+    },
+    "x": {
+     "tensor": 1
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 1,
+   "ok_programs": [
+    "inverse"
+   ],
+   "present": {
+    "epsilon": 1,
+    "x": 1
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 1,
+   "wrong": 0
+  },
+  "l2_norm": {
+   "args": {
+    "epsilon": {
+     "float": 1
+    },
+    "x": {
+     "tensor": 1
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 1,
+   "ok_programs": [
+    "l2_norm"
+   ],
+   "present": {
+    "epsilon": 1,
+    "x": 1
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 1,
+   "wrong": 0
+  },
+  "l2_pool": {
+   "args": {
+    "ceil_mode": {
+     "bool": 3
+    },
+    "kernel_sizes": {
+     "ints": 3
+    },
+    "pad": {
+     "ints": 3
+    },
+    "pad_type": {
+     "str": 3
+    },
+    "strides": {
+     "ints": 3
+    },
+    "x": {
+     "tensor": 3
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 3,
+   "ok_programs": [
+    "cv_l2_k3_s1_same",
+    "cv_l2_k5_s2_valid",
+    "l2_pool2x2"
+   ],
+   "present": {
+    "ceil_mode": 3,
+    "kernel_sizes": 3,
+    "pad": 3,
+    "pad_type": 3,
+    "strides": 3,
+    "x": 3
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 3,
+   "wrong": 0
+  },
+  "layer_norm": {
+   "args": {
+    "axes": {
+     "ints": 3
+    },
+    "beta": {
+     "blob": 2
+    },
+    "epsilon": {
+     "float": 3
+    },
+    "gamma": {
+     "blob": 2
+    },
+    "x": {
+     "tensor": 3
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 3,
+   "ok_programs": [
+    "layer_norm_c",
+    "layer_norm_nogamma",
+    "layer_norm_w"
+   ],
+   "present": {
+    "axes": 3,
+    "beta": 2,
+    "epsilon": 3,
+    "gamma": 2,
+    "x": 3
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 3,
+   "wrong": 0
+  },
+  "leaky_relu": {
+   "args": {
+    "alpha": {
+     "float": 1
+    },
+    "x": {
+     "tensor": 1
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 1,
+   "ok_programs": [
+    "leaky_relu"
+   ],
+   "present": {
+    "alpha": 1,
+    "x": 1
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 1,
+   "wrong": 0
+  },
+  "less": {
+   "args": {
+    "x": {
+     "tensor": 4
+    },
+    "y": {
+     "float": 1,
+     "int": 2,
+     "tensor": 1
+    }
+   },
+   "error_classes": {
+    "CompilationFailure": 1,
+    "InvalidMILProgram": 2
+   },
+   "fail": 3,
+   "failing_programs": [
+    "rc_cond",
+    "rc_while_loop",
+    "rc_while_loop_1iter"
+   ],
+   "failing_variants": [
+    "rc_cond",
+    "rc_while_loop",
+    "rc_while_loop_1iter"
+   ],
+   "failing_without_dead_ops": 0,
+   "ok": 1,
+   "ok_programs": [
+    "less"
+   ],
+   "present": {
+    "x": 4,
+    "y": 4
+   },
+   "results": [
+    1
+   ],
+   "status": "sensitive",
+   "uses": 4,
+   "wrong": 0
+  },
+  "less_equal": {
+   "args": {
+    "x": {
+     "tensor": 1
+    },
+    "y": {
+     "tensor": 1
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 1,
+   "ok_programs": [
+    "less_equal"
+   ],
+   "present": {
+    "x": 1,
+    "y": 1
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 1,
+   "wrong": 0
+  },
+  "linear": {
+   "args": {
+    "bias": {
+     "blob": 7
+    },
+    "weight": {
+     "blob": 2,
+     "tensor": 5
+    },
+    "x": {
+     "tensor": 7
+    }
+   },
+   "error_classes": {
+    "InvalidMILProgram": 2
+   },
+   "fail": 2,
+   "failing_programs": [
+    "wq_linear_affine_i8_pc1",
+    "wq_linear_blockwise_i8_b32"
+   ],
+   "failing_variants": [
+    "wq_linear_affine_i8_pc1",
+    "wq_linear_blockwise_i8_b32"
+   ],
+   "failing_without_dead_ops": 2,
+   "ok": 5,
+   "ok_programs": [
+    "linear",
+    "linear_nobias",
+    "wq_linear_affine_i8_pc0",
+    "wq_linear_lut4_tensor",
+    "wq_linear_sparse50"
+   ],
+   "present": {
+    "bias": 7,
+    "weight": 7,
+    "x": 7
+   },
+   "results": [
+    1
+   ],
+   "status": "sensitive",
+   "uses": 7,
+   "wrong": 0
+  },
+  "linear_activation": {
+   "args": {
+    "alpha": {
+     "float": 1
+    },
+    "beta": {
+     "float": 1
+    },
+    "x": {
+     "tensor": 1
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 1,
+   "ok_programs": [
+    "linear_activation"
+   ],
+   "present": {
+    "alpha": 1,
+    "beta": 1,
+    "x": 1
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 1,
+   "wrong": 0
+  },
+  "list_length": {
+   "args": {
+    "ls": {
+     "tensor": 1
+    }
+   },
+   "error_classes": {
+    "InvalidMILProgram": 1
+   },
+   "fail": 1,
+   "failing_programs": [
+    "rc_list_length"
+   ],
+   "failing_variants": [],
+   "failing_without_dead_ops": 1,
+   "ok": 0,
+   "ok_programs": [],
+   "present": {
+    "ls": 1
+   },
+   "results": [
+    1
+   ],
+   "status": "unsupported",
+   "uses": 1,
+   "wrong": 0
+  },
+  "list_read": {
+   "args": {
+    "index": {
+     "int": 1
+    },
+    "ls": {
+     "tensor": 1
+    }
+   },
+   "error_classes": {
+    "InvalidMILProgram": 1
+   },
+   "fail": 1,
+   "failing_programs": [
+    "rc_make_list_write_read"
+   ],
+   "failing_variants": [],
+   "failing_without_dead_ops": 1,
+   "ok": 0,
+   "ok_programs": [],
+   "present": {
+    "index": 1,
+    "ls": 1
+   },
+   "results": [
+    1
+   ],
+   "status": "unsupported",
+   "uses": 1,
+   "wrong": 0
+  },
+  "list_write": {
+   "args": {
+    "index": {
+     "int": 2
+    },
+    "ls": {
+     "tensor": 2
+    },
+    "value": {
+     "tensor": 2
+    }
+   },
+   "error_classes": {
+    "InvalidMILProgram": 2
+   },
+   "fail": 2,
+   "failing_programs": [
+    "rc_list_length",
+    "rc_make_list_write_read"
+   ],
+   "failing_variants": [],
+   "failing_without_dead_ops": 2,
+   "ok": 0,
+   "ok_programs": [],
+   "present": {
+    "index": 2,
+    "ls": 2,
+    "value": 2
+   },
+   "results": [
+    1
+   ],
+   "status": "unsupported",
+   "uses": 2,
+   "wrong": 0
+  },
+  "local_response_norm": {
+   "args": {
+    "alpha": {
+     "float": 1
+    },
+    "beta": {
+     "float": 1
+    },
+    "k": {
+     "float": 1
+    },
+    "size": {
+     "int": 1
+    },
+    "x": {
+     "tensor": 1
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 1,
+   "ok_programs": [
+    "local_response_norm"
+   ],
+   "present": {
+    "alpha": 1,
+    "beta": 1,
+    "k": 1,
+    "size": 1,
+    "x": 1
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 1,
+   "wrong": 0
+  },
+  "log": {
+   "args": {
+    "epsilon": {
+     "float": 5
+    },
+    "x": {
+     "tensor": 5
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 5,
+   "ok_programs": [
+    "lg_reduce_prod_w",
+    "log",
+    "rd_comp_atanh",
+    "rd_comp_reduce_prod_c",
+    "rd_comp_reduce_prod_w"
+   ],
+   "present": {
+    "epsilon": 5,
+    "x": 5
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 5,
+   "wrong": 0
+  },
+  "logical_and": {
+   "args": {
+    "x": {
+     "tensor": 6
+    },
+    "y": {
+     "tensor": 6
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 6,
+   "ok_programs": [
+    "lg_logical_or",
+    "logical_and",
+    "rd_comp_logical_or",
+    "rd_comp_logical_xor",
+    "rd_comp_logical_xor",
+    "rd_comp_logical_xor"
+   ],
+   "present": {
+    "x": 6,
+    "y": 6
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 6,
+   "wrong": 0
+  },
+  "logical_not": {
+   "args": {
+    "x": {
+     "tensor": 11
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 11,
+   "ok_programs": [
+    "lg_logical_or",
+    "lg_logical_or",
+    "lg_logical_or",
+    "logical_not",
+    "rd_comp_logical_or",
+    "rd_comp_logical_or"
+   ],
+   "present": {
+    "x": 11
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 11,
+   "wrong": 0
+  },
+  "logical_or": {
+   "args": {
+    "x": {
+     "tensor": 4
+    },
+    "y": {
+     "tensor": 4
+    }
+   },
+   "error_classes": {
+    "InvalidMILProgram": 4
+   },
+   "fail": 4,
+   "failing_programs": [
+    "logical_or",
+    "rd_r2_logical_or",
+    "rd_r3_logical_or",
+    "rd_r5_logical_or"
+   ],
+   "failing_variants": [],
+   "failing_without_dead_ops": 4,
+   "ok": 0,
+   "ok_programs": [],
+   "present": {
+    "x": 4,
+    "y": 4
+   },
+   "results": [
+    1
+   ],
+   "status": "unsupported",
+   "uses": 4,
+   "wrong": 0
+  },
+  "logical_xor": {
+   "args": {
+    "x": {
+     "tensor": 4
+    },
+    "y": {
+     "tensor": 4
+    }
+   },
+   "error_classes": {
+    "InvalidMILProgram": 4
+   },
+   "fail": 4,
+   "failing_programs": [
+    "logical_xor",
+    "rd_r2_logical_xor",
+    "rd_r3_logical_xor",
+    "rd_r5_logical_xor"
+   ],
+   "failing_variants": [],
+   "failing_without_dead_ops": 4,
+   "ok": 0,
+   "ok_programs": [],
+   "present": {
+    "x": 4,
+    "y": 4
+   },
+   "results": [
+    1
+   ],
+   "status": "unsupported",
+   "uses": 4,
+   "wrong": 0
+  },
+  "lstm": {
+   "args": {
+    "activation": {
+     "str": 5
+    },
+    "bias": {
+     "blob": 5
+    },
+    "cell_activation": {
+     "str": 5
+    },
+    "direction": {
+     "str": 5
+    },
+    "initial_c": {
+     "tensor": 5
+    },
+    "initial_h": {
+     "tensor": 5
+    },
+    "output_sequence": {
+     "bool": 5
+    },
+    "recurrent_activation": {
+     "str": 5
+    },
+    "weight_hh": {
+     "blob": 5
+    },
+    "weight_ih": {
+     "blob": 5
+    },
+    "x": {
+     "tensor": 5
+    }
+   },
+   "error_classes": {
+    "InvalidMILProgram": 5
+   },
+   "fail": 5,
+   "failing_programs": [
+    "rc_lstm_s2_h16_fwd",
+    "rc_lstm_s32_h128_fwd",
+    "rc_lstm_s32_h64_fwd",
+    "rc_lstm_s8_h128_fwd",
+    "rc_lstm_s8_h64_fwd"
+   ],
+   "failing_variants": [],
+   "failing_without_dead_ops": 5,
+   "ok": 0,
+   "ok_programs": [],
+   "present": {
+    "activation": 5,
+    "bias": 5,
+    "cell_activation": 5,
+    "direction": 5,
+    "initial_c": 5,
+    "initial_h": 5,
+    "output_sequence": 5,
+    "recurrent_activation": 5,
+    "weight_hh": 5,
+    "weight_ih": 5,
+    "x": 5
+   },
+   "results": [
+    3
+   ],
+   "status": "unsupported",
+   "uses": 5,
+   "wrong": 0
+  },
+  "make_list": {
+   "args": {
+    "dtype": {
+     "str": 2
+    },
+    "dynamic_length": {
+     "bool": 2
+    },
+    "elem_shape": {
+     "tuple": 2
+    },
+    "init_length": {
+     "int": 2
+    }
+   },
+   "error_classes": {
+    "InvalidMILProgram": 2
+   },
+   "fail": 2,
+   "failing_programs": [
+    "rc_list_length",
+    "rc_make_list_write_read"
+   ],
+   "failing_variants": [],
+   "failing_without_dead_ops": 2,
+   "ok": 0,
+   "ok_programs": [],
+   "present": {
+    "dtype": 2,
+    "dynamic_length": 2,
+    "elem_shape": 2,
+    "init_length": 2
+   },
+   "results": [
+    1
+   ],
+   "status": "unsupported",
+   "uses": 2,
+   "wrong": 0
+  },
+  "matmul": {
+   "args": {
+    "transpose_x": {
+     "bool": 12
+    },
+    "transpose_y": {
+     "bool": 12
+    },
+    "x": {
+     "blob": 1,
+     "tensor": 11
+    },
+    "y": {
+     "blob": 2,
+     "tensor": 10
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 12,
+   "ok_programs": [
+    "lg_cumsum_c",
+    "lg_cumsum_w",
+    "lg_gather_c_dyn",
+    "lg_gather_w_dyn",
+    "lg_scatter_add_c",
+    "matmul_batched4"
+   ],
+   "present": {
+    "transpose_x": 12,
+    "transpose_y": 12,
+    "x": 12,
+    "y": 12
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 12,
+   "wrong": 0
+  },
+  "max_pool": {
+   "args": {
+    "ceil_mode": {
+     "bool": 6
+    },
+    "kernel_sizes": {
+     "ints": 6
+    },
+    "pad": {
+     "ints": 6
+    },
+    "pad_type": {
+     "str": 6
+    },
+    "strides": {
+     "ints": 6
+    },
+    "x": {
+     "tensor": 6
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 6,
+   "ok_programs": [
+    "cv_max_k2_s2_ceil",
+    "cv_max_k3_s2_same",
+    "cv_max_k5_s1_valid",
+    "cv_max_k7_s2_custom",
+    "max_pool2x2",
+    "max_pool3x3_same"
+   ],
+   "present": {
+    "ceil_mode": 6,
+    "kernel_sizes": 6,
+    "pad": 6,
+    "pad_type": 6,
+    "strides": 6,
+    "x": 6
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 6,
+   "wrong": 0
+  },
+  "maximum": {
+   "args": {
+    "x": {
+     "tensor": 1
+    },
+    "y": {
+     "tensor": 1
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 1,
+   "ok_programs": [
+    "maximum"
+   ],
+   "present": {
+    "x": 1,
+    "y": 1
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 1,
+   "wrong": 0
+  },
+  "minimum": {
+   "args": {
+    "x": {
+     "tensor": 1
+    },
+    "y": {
+     "tensor": 1
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 1,
+   "ok_programs": [
+    "minimum"
+   ],
+   "present": {
+    "x": 1,
+    "y": 1
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 1,
+   "wrong": 0
+  },
+  "mod": {
+   "args": {
+    "x": {
+     "tensor": 4
+    },
+    "y": {
+     "tensor": 4
+    }
+   },
+   "error_classes": {
+    "InvalidMILProgram": 4
+   },
+   "fail": 4,
+   "failing_programs": [
+    "mod",
+    "rd_r2_mod",
+    "rd_r3_mod",
+    "rd_r5_mod"
+   ],
+   "failing_variants": [],
+   "failing_without_dead_ops": 4,
+   "ok": 0,
+   "ok_programs": [],
+   "present": {
+    "x": 4,
+    "y": 4
+   },
+   "results": [
+    1
+   ],
+   "status": "unsupported",
+   "uses": 4,
+   "wrong": 0
+  },
+  "mul": {
+   "args": {
+    "x": {
+     "blob": 55,
+     "tensor": 5755
+    },
+    "y": {
+     "blob": 2,
+     "float": 5743,
+     "tensor": 65
+    }
+   },
+   "error_classes": {
+    "CompilationFailure": 6,
+    "InvalidMILProgram": 9
+   },
+   "fail": 15,
+   "failing_programs": [
+    "cast_roundtrip_fp32",
+    "cast_roundtrip_int32",
+    "lg_dead_add_shared_const",
+    "lg_dead_chain3",
+    "lg_dead_mul_add",
+    "lg_topk_val_w4"
+   ],
+   "failing_variants": [
+    "cast_roundtrip_fp32",
+    "cast_roundtrip_int32",
+    "lg_dead_add_shared_const",
+    "lg_dead_chain3",
+    "lg_dead_mul_add",
+    "lg_topk_val_w4",
+    "rc_cond",
+    "rc_cond_constpred"
+   ],
+   "failing_without_dead_ops": 5,
+   "ok": 5786,
+   "ok_programs": [
+    "cast_roundtrip_int16",
+    "cast_roundtrip_int8",
+    "cast_roundtrip_uint16",
+    "cast_roundtrip_uint8",
+    "cast_sat_int16",
+    "cast_sat_int8"
+   ],
+   "present": {
+    "x": 5810,
+    "y": 5810
+   },
+   "results": [
+    1
+   ],
+   "status": "sensitive",
+   "uses": 5810,
+   "wrong": 9
+  },
+  "non_maximum_suppression": {
+   "args": {
+    "boxes": {
+     "tensor": 1
+    },
+    "iou_threshold": {
+     "float": 1
+    },
+    "max_boxes": {
+     "int": 1
+    },
+    "per_class_suppression": {
+     "bool": 1
+    },
+    "scores": {
+     "tensor": 1
+    }
+   },
+   "error_classes": {
+    "InvalidMILProgram": 1
+   },
+   "fail": 1,
+   "failing_programs": [
+    "rc_non_maximum_suppression"
+   ],
+   "failing_variants": [],
+   "failing_without_dead_ops": 1,
+   "ok": 0,
+   "ok_programs": [],
+   "present": {
+    "boxes": 1,
+    "iou_threshold": 1,
+    "max_boxes": 1,
+    "per_class_suppression": 1,
+    "scores": 1
+   },
+   "results": [
+    3
+   ],
+   "status": "unsupported",
+   "uses": 1,
+   "wrong": 0
+  },
+  "non_zero": {
+   "args": {
+    "x": {
+     "tensor": 3
+    }
+   },
+   "error_classes": {
+    "InvalidMILProgram": 3
+   },
+   "fail": 3,
+   "failing_programs": [
+    "ix_non_zero_1d_round",
+    "ix_non_zero_2d_round",
+    "ix_non_zero_round"
+   ],
+   "failing_variants": [],
+   "failing_without_dead_ops": 3,
+   "ok": 0,
+   "ok_programs": [],
+   "present": {
+    "x": 3
+   },
+   "results": [
+    1
+   ],
+   "status": "unsupported",
+   "uses": 3,
+   "wrong": 0
+  },
+  "not_equal": {
+   "args": {
+    "x": {
+     "tensor": 1
+    },
+    "y": {
+     "tensor": 1
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 1,
+   "ok_programs": [
+    "not_equal"
+   ],
+   "present": {
+    "x": 1,
+    "y": 1
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 1,
+   "wrong": 0
+  },
+  "one_hot": {
+   "args": {
+    "axis": {
+     "int": 5
+    },
+    "indices": {
+     "tensor": 5
+    },
+    "off_value": {
+     "float": 4,
+     "int": 1
+    },
+    "on_value": {
+     "float": 4,
+     "int": 1
+    },
+    "one_hot_vector_size": {
+     "int": 5
+    }
+   },
+   "error_classes": {
+    "InvalidMILProgram": 5
+   },
+   "fail": 5,
+   "failing_programs": [
+    "ix_one_hot_axis0",
+    "ix_one_hot_axis1_onoff",
+    "ix_one_hot_axis_last",
+    "ix_one_hot_depth2",
+    "one_hot"
+   ],
+   "failing_variants": [],
+   "failing_without_dead_ops": 5,
+   "ok": 0,
+   "ok_programs": [],
+   "present": {
+    "axis": 5,
+    "indices": 5,
+    "off_value": 5,
+    "on_value": 5,
+    "one_hot_vector_size": 5
+   },
+   "results": [
+    1
+   ],
+   "status": "unsupported",
+   "uses": 5,
+   "wrong": 0
+  },
+  "pad": {
+   "args": {
+    "constant_val": {
+     "float": 3
+    },
+    "mode": {
+     "str": 3
+    },
+    "pad": {
+     "ints": 3
+    },
+    "x": {
+     "tensor": 3
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 3,
+   "ok_programs": [
+    "pad_const",
+    "pad_reflect",
+    "pad_replicate"
+   ],
+   "present": {
+    "constant_val": 3,
+    "mode": 3,
+    "pad": 3,
+    "x": 3
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 3,
+   "wrong": 0
+  },
+  "pixel_shuffle": {
+   "args": {
+    "upscale_factor": {
+     "int": 1
+    },
+    "x": {
+     "tensor": 1
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 1,
+   "ok_programs": [
+    "pixel_shuffle"
+   ],
+   "present": {
+    "upscale_factor": 1,
+    "x": 1
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 1,
+   "wrong": 0
+  },
+  "pixel_unshuffle": {
+   "args": {
+    "downscale_factor": {
+     "int": 1
+    },
+    "x": {
+     "tensor": 1
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 1,
+   "ok_programs": [
+    "pixel_unshuffle"
+   ],
+   "present": {
+    "downscale_factor": 1,
+    "x": 1
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 1,
+   "wrong": 0
+  },
+  "pow": {
+   "args": {
+    "x": {
+     "tensor": 1
+    },
+    "y": {
+     "tensor": 1
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 1,
+   "ok_programs": [
+    "pow"
+   ],
+   "present": {
+    "x": 1,
+    "y": 1
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 1,
+   "wrong": 0
+  },
+  "prelu": {
+   "args": {
+    "alpha": {
+     "blob": 1
+    },
+    "x": {
+     "tensor": 1
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 1,
+   "ok_programs": [
+    "prelu"
+   ],
+   "present": {
+    "alpha": 1,
+    "x": 1
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 1,
+   "wrong": 0
+  },
+  "quantize": {
+   "args": {
+    "axis": {
+     "int": 2
+    },
+    "input": {
+     "tensor": 5
+    },
+    "output_dtype": {
+     "str": 5
+    },
+    "scale": {
+     "blob": 2,
+     "float": 3
+    },
+    "zero_point": {
+     "int": 3,
+     "qblob": 2
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 5,
+   "ok_programs": [
+    "wq_act_qdq_i8_axis1",
+    "wq_act_qdq_i8_tensor",
+    "wq_act_qdq_i8_zp7",
+    "wq_act_qdq_u8_axis1_zp",
+    "wq_act_qdq_u8_zp128"
+   ],
+   "present": {
+    "axis": 2,
+    "input": 5,
+    "output_dtype": 5,
+    "scale": 5,
+    "zero_point": 5
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 5,
+   "wrong": 0
+  },
+  "random_bernoulli": {
+   "args": {
+    "prob": {
+     "float": 1
+    },
+    "seed": {
+     "int": 1
+    },
+    "shape": {
+     "ints": 1
+    }
+   },
+   "error_classes": {
+    "InvalidMILProgram": 1
+   },
+   "fail": 1,
+   "failing_programs": [
+    "rc_random_bernoulli"
+   ],
+   "failing_variants": [],
+   "failing_without_dead_ops": 1,
+   "ok": 0,
+   "ok_programs": [],
+   "present": {
+    "prob": 1,
+    "seed": 1,
+    "shape": 1
+   },
+   "results": [
+    1
+   ],
+   "status": "unsupported",
+   "uses": 1,
+   "wrong": 0
+  },
+  "random_categorical": {
+   "args": {
+    "mode": {
+     "str": 1
+    },
+    "seed": {
+     "int": 1
+    },
+    "size": {
+     "int": 1
+    },
+    "x": {
+     "tensor": 1
+    }
+   },
+   "error_classes": {
+    "InvalidMILProgram": 1
+   },
+   "fail": 1,
+   "failing_programs": [
+    "rc_random_categorical"
+   ],
+   "failing_variants": [],
+   "failing_without_dead_ops": 1,
+   "ok": 0,
+   "ok_programs": [],
+   "present": {
+    "mode": 1,
+    "seed": 1,
+    "size": 1,
+    "x": 1
+   },
+   "results": [
+    1
+   ],
+   "status": "unsupported",
+   "uses": 1,
+   "wrong": 0
+  },
+  "random_normal": {
+   "args": {
+    "mean": {
+     "float": 2
+    },
+    "seed": {
+     "int": 2
+    },
+    "shape": {
+     "ints": 2
+    },
+    "stddev": {
+     "float": 2
+    }
+   },
+   "error_classes": {
+    "InvalidMILProgram": 2
+   },
+   "fail": 2,
+   "failing_programs": [
+    "rc_random_normal",
+    "rc_random_normal_bare"
+   ],
+   "failing_variants": [],
+   "failing_without_dead_ops": 1,
+   "ok": 0,
+   "ok_programs": [],
+   "present": {
+    "mean": 2,
+    "seed": 2,
+    "shape": 2,
+    "stddev": 2
+   },
+   "results": [
+    1
+   ],
+   "status": "unsupported",
+   "uses": 2,
+   "wrong": 0
+  },
+  "random_uniform": {
+   "args": {
+    "high": {
+     "float": 10
+    },
+    "low": {
+     "float": 10
+    },
+    "seed": {
+     "int": 10
+    },
+    "shape": {
+     "ints": 10
+    }
+   },
+   "error_classes": {
+    "CompilationFailure": 1
+   },
+   "fail": 1,
+   "failing_programs": [
+    "rc_random_uniform",
+    "rc_random_uniform_bare",
+    "sh_randu_0_16_s1",
+    "sh_randu_0_16_s7",
+    "sh_randu_0_1_s1",
+    "sh_randu_0_1_s7"
+   ],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 0,
+   "ok_programs": [],
+   "present": {
+    "high": 10,
+    "low": 10,
+    "seed": 10,
+    "shape": 10
+   },
+   "results": [
+    1
+   ],
+   "status": "deviates",
+   "uses": 10,
+   "wrong": 9
+  },
+  "range_1d": {
+   "args": {
+    "end": {
+     "float": 1
+    },
+    "start": {
+     "float": 1
+    },
+    "step": {
+     "float": 1
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 1,
+   "ok_programs": [
+    "ix_range_1d_f16"
+   ],
+   "present": {
+    "end": 1,
+    "start": 1,
+    "step": 1
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 1,
+   "wrong": 0
+  },
+  "real_div": {
+   "args": {
+    "x": {
+     "tensor": 7
+    },
+    "y": {
+     "tensor": 7
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 7,
+   "ok_programs": [
+    "lg_tan",
+    "rd_comp_acos",
+    "rd_comp_asin",
+    "rd_comp_atanh",
+    "rd_comp_mod_floor",
+    "rd_comp_tan"
+   ],
+   "present": {
+    "x": 7,
+    "y": 7
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 7,
+   "wrong": 0
+  },
+  "reduce_argmax": {
+   "args": {
+    "axis": {
+     "int": 10
+    },
+    "keep_dims": {
+     "bool": 10
+    },
+    "output_dtype": {
+     "str": 10
+    },
+    "x": {
+     "tensor": 10
+    }
+   },
+   "error_classes": {
+    "InvalidMILProgram": 10
+   },
+   "fail": 10,
+   "failing_programs": [
+    "argmax_c",
+    "rd_argmax_ax0_k",
+    "rd_argmax_ax0_nk",
+    "rd_argmax_ax1_k",
+    "rd_argmax_ax1_nk",
+    "rd_argmax_ax2_k"
+   ],
+   "failing_variants": [],
+   "failing_without_dead_ops": 10,
+   "ok": 0,
+   "ok_programs": [],
+   "present": {
+    "axis": 10,
+    "keep_dims": 10,
+    "output_dtype": 10,
+    "x": 10
+   },
+   "results": [
+    1
+   ],
+   "status": "unsupported",
+   "uses": 10,
+   "wrong": 0
+  },
+  "reduce_argmin": {
+   "args": {
+    "axis": {
+     "int": 9
+    },
+    "keep_dims": {
+     "bool": 9
+    },
+    "output_dtype": {
+     "str": 9
+    },
+    "x": {
+     "tensor": 9
+    }
+   },
+   "error_classes": {
+    "InvalidMILProgram": 9
+   },
+   "fail": 9,
+   "failing_programs": [
+    "argmin_w",
+    "rd_argmin_ax0_k",
+    "rd_argmin_ax0_nk",
+    "rd_argmin_ax1_k",
+    "rd_argmin_ax1_nk",
+    "rd_argmin_ax2_k"
+   ],
+   "failing_variants": [],
+   "failing_without_dead_ops": 9,
+   "ok": 0,
+   "ok_programs": [],
+   "present": {
+    "axis": 9,
+    "keep_dims": 9,
+    "output_dtype": 9,
+    "x": 9
+   },
+   "results": [
+    1
+   ],
+   "status": "unsupported",
+   "uses": 9,
+   "wrong": 0
+  },
+  "reduce_l1_norm": {
+   "args": {
+    "axes": {
+     "ints": 17
+    },
+    "keep_dims": {
+     "bool": 17
+    },
+    "x": {
+     "tensor": 17
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 17,
+   "ok_programs": [
+    "rd_red_l1_norm_ax0_k",
+    "rd_red_l1_norm_ax0_nk",
+    "rd_red_l1_norm_ax123_k",
+    "rd_red_l1_norm_ax123_nk",
+    "rd_red_l1_norm_ax12_k",
+    "rd_red_l1_norm_ax12_nk"
+   ],
+   "present": {
+    "axes": 17,
+    "keep_dims": 17,
+    "x": 17
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 17,
+   "wrong": 0
+  },
+  "reduce_l2_norm": {
+   "args": {
+    "axes": {
+     "ints": 17
+    },
+    "keep_dims": {
+     "bool": 17
+    },
+    "x": {
+     "tensor": 17
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 17,
+   "ok_programs": [
+    "rd_red_l2_norm_ax0_k",
+    "rd_red_l2_norm_ax0_nk",
+    "rd_red_l2_norm_ax123_k",
+    "rd_red_l2_norm_ax123_nk",
+    "rd_red_l2_norm_ax12_k",
+    "rd_red_l2_norm_ax12_nk"
+   ],
+   "present": {
+    "axes": 17,
+    "keep_dims": 17,
+    "x": 17
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 17,
+   "wrong": 0
+  },
+  "reduce_log_sum": {
+   "args": {
+    "axes": {
+     "ints": 17
+    },
+    "keep_dims": {
+     "bool": 17
+    },
+    "x": {
+     "tensor": 17
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 17,
+   "ok_programs": [
+    "rd_red_log_sum_ax0_k",
+    "rd_red_log_sum_ax0_nk",
+    "rd_red_log_sum_ax123_k",
+    "rd_red_log_sum_ax123_nk",
+    "rd_red_log_sum_ax12_k",
+    "rd_red_log_sum_ax12_nk"
+   ],
+   "present": {
+    "axes": 17,
+    "keep_dims": 17,
+    "x": 17
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 17,
+   "wrong": 0
+  },
+  "reduce_log_sum_exp": {
+   "args": {
+    "axes": {
+     "ints": 17
+    },
+    "keep_dims": {
+     "bool": 17
+    },
+    "x": {
+     "tensor": 17
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 17,
+   "ok_programs": [
+    "rd_red_log_sum_exp_ax0_k",
+    "rd_red_log_sum_exp_ax0_nk",
+    "rd_red_log_sum_exp_ax123_k",
+    "rd_red_log_sum_exp_ax123_nk",
+    "rd_red_log_sum_exp_ax12_k",
+    "rd_red_log_sum_exp_ax12_nk"
+   ],
+   "present": {
+    "axes": 17,
+    "keep_dims": 17,
+    "x": 17
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 17,
+   "wrong": 0
+  },
+  "reduce_max": {
+   "args": {
+    "axes": {
+     "ints": 78
+    },
+    "keep_dims": {
+     "bool": 78
+    },
+    "x": {
+     "tensor": 78
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 78,
+   "ok_programs": [
+    "lg_argmax_w_iota",
+    "lg_bis_add_m1000",
+    "lg_bis_add_m60000",
+    "lg_bis_i",
+    "lg_bis_mulc",
+    "lg_bis_mulc_m1000"
+   ],
+   "present": {
+    "axes": 78,
+    "keep_dims": 78,
+    "x": 78
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 78,
+   "wrong": 0
+  },
+  "reduce_mean": {
+   "args": {
+    "axes": {
+     "ints": 18
+    },
+    "keep_dims": {
+     "bool": 18
+    },
+    "x": {
+     "tensor": 18
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 18,
+   "ok_programs": [
+    "global_avg_pool",
+    "rd_red_mean_ax0_k",
+    "rd_red_mean_ax0_nk",
+    "rd_red_mean_ax123_k",
+    "rd_red_mean_ax123_nk",
+    "rd_red_mean_ax12_k"
+   ],
+   "present": {
+    "axes": 18,
+    "keep_dims": 18,
+    "x": 18
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 18,
+   "wrong": 0
+  },
+  "reduce_min": {
+   "args": {
+    "axes": {
+     "ints": 73
+    },
+    "keep_dims": {
+     "bool": 73
+    },
+    "x": {
+     "tensor": 73
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 73,
+   "ok_programs": [
+    "lg_argmax_w_iota",
+    "lg_argmin_c_iota",
+    "lg_argmin_c_iota",
+    "lg_bis_add_m1000",
+    "lg_bis_add_m60000",
+    "lg_bis_i"
+   ],
+   "present": {
+    "axes": 73,
+    "keep_dims": 73,
+    "x": 73
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 73,
+   "wrong": 0
+  },
+  "reduce_prod": {
+   "args": {
+    "axes": {
+     "ints": 20
+    },
+    "keep_dims": {
+     "bool": 20
+    },
+    "x": {
+     "tensor": 20
+    }
+   },
+   "error_classes": {
+    "InvalidMILProgram": 20
+   },
+   "fail": 20,
+   "failing_programs": [
+    "rd_r2_reduce_prod",
+    "rd_r3_reduce_prod",
+    "rd_r5_reduce_prod",
+    "rd_red_prod_ax0_k",
+    "rd_red_prod_ax0_nk",
+    "rd_red_prod_ax123_k"
+   ],
+   "failing_variants": [],
+   "failing_without_dead_ops": 20,
+   "ok": 0,
+   "ok_programs": [],
+   "present": {
+    "axes": 20,
+    "keep_dims": 20,
+    "x": 20
+   },
+   "results": [
+    1
+   ],
+   "status": "unsupported",
+   "uses": 20,
+   "wrong": 0
+  },
+  "reduce_sum": {
+   "args": {
+    "axes": {
+     "ints": 27
+    },
+    "keep_dims": {
+     "bool": 27
+    },
+    "x": {
+     "tensor": 27
+    }
+   },
+   "error_classes": {
+    "CompilationFailure": 1,
+    "InvalidMILProgram": 4
+   },
+   "fail": 5,
+   "failing_programs": [
+    "lg_topk_val_w4",
+    "lg_topk_val_w4",
+    "lg_topk_val_w4",
+    "lg_topk_val_w4",
+    "rc_cond"
+   ],
+   "failing_variants": [
+    "lg_topk_val_w4",
+    "rc_cond"
+   ],
+   "failing_without_dead_ops": 1,
+   "ok": 22,
+   "ok_programs": [
+    "lg_dead_reduce",
+    "lg_reduce_prod_w",
+    "rd_comp_reduce_prod_c",
+    "rd_comp_reduce_prod_w",
+    "rd_red_sum_ax0_k",
+    "rd_red_sum_ax0_nk"
+   ],
+   "present": {
+    "axes": 27,
+    "keep_dims": 27,
+    "x": 27
+   },
+   "results": [
+    1
+   ],
+   "status": "sensitive",
+   "uses": 27,
+   "wrong": 0
+  },
+  "reduce_sum_square": {
+   "args": {
+    "axes": {
+     "ints": 17
+    },
+    "keep_dims": {
+     "bool": 17
+    },
+    "x": {
+     "tensor": 17
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 17,
+   "ok_programs": [
+    "rd_red_sum_square_ax0_k",
+    "rd_red_sum_square_ax0_nk",
+    "rd_red_sum_square_ax123_k",
+    "rd_red_sum_square_ax123_nk",
+    "rd_red_sum_square_ax12_k",
+    "rd_red_sum_square_ax12_nk"
+   ],
+   "present": {
+    "axes": 17,
+    "keep_dims": 17,
+    "x": 17
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 17,
+   "wrong": 0
+  },
+  "relu": {
+   "args": {
+    "x": {
+     "tensor": 5682
+    }
+   },
+   "error_classes": {
+    "CompilationFailure": 38
+   },
+   "fail": 38,
+   "failing_programs": [
+    "cv_bs2_relu_c_65537",
+    "cv_bs2_relu_c_69632",
+    "cv_bs2_relu_c_73728",
+    "cv_bs2_relu_c_77824",
+    "cv_bs2_relu_c_81919",
+    "cv_bs2_relu_w_16385"
+   ],
+   "failing_variants": [
+    "cv_bs2_relu_c_65537",
+    "cv_bs2_relu_c_69632",
+    "cv_bs2_relu_c_73728",
+    "cv_bs2_relu_c_77824",
+    "cv_bs2_relu_c_81919",
+    "cv_bs2_relu_w_16385",
+    "cv_bs2_relu_w_17408",
+    "cv_bs2_relu_w_18432"
+   ],
+   "failing_without_dead_ops": 29,
+   "ok": 5644,
+   "ok_programs": [
+    "cv_sw_relu_c_1",
+    "cv_sw_relu_c_1024",
+    "cv_sw_relu_c_16",
+    "cv_sw_relu_c_16384",
+    "cv_sw_relu_c_256",
+    "cv_sw_relu_c_4096"
+   ],
+   "present": {
+    "x": 5682
+   },
+   "results": [
+    1
+   ],
+   "status": "sensitive",
+   "uses": 5682,
+   "wrong": 0
+  },
+  "relu6": {
+   "args": {
+    "x": {
+     "tensor": 1
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 1,
+   "ok_programs": [
+    "relu6"
+   ],
+   "present": {
+    "x": 1
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 1,
+   "wrong": 0
+  },
+  "resample": {
+   "args": {
+    "align_corners": {
+     "bool": 12
+    },
+    "coordinates": {
+     "tensor": 12
+    },
+    "coordinates_format": {
+     "str": 12
+    },
+    "coordinates_mode": {
+     "str": 12
+    },
+    "coordinates_type": {
+     "str": 12
+    },
+    "padding_mode": {
+     "str": 12
+    },
+    "padding_value": {
+     "float": 12
+    },
+    "sampling_mode": {
+     "str": 12
+    },
+    "x": {
+     "tensor": 12
+    }
+   },
+   "error_classes": {
+    "CompilationFailure": 2
+   },
+   "fail": 2,
+   "failing_programs": [
+    "sh_resample_symmetric_any",
+    "sh_resample_symmetric_inside"
+   ],
+   "failing_variants": [
+    "sh_resample_symmetric_any",
+    "sh_resample_symmetric_inside"
+   ],
+   "failing_without_dead_ops": 2,
+   "ok": 10,
+   "ok_programs": [
+    "cv_resample",
+    "cv_resample_border",
+    "cv_resample_nearest",
+    "sh_resample_border_any",
+    "sh_resample_border_inside",
+    "sh_resample_constant_any_dev"
+   ],
+   "present": {
+    "align_corners": 12,
+    "coordinates": 12,
+    "coordinates_format": 12,
+    "coordinates_mode": 12,
+    "coordinates_type": 12,
+    "padding_mode": 12,
+    "padding_value": 12,
+    "sampling_mode": 12,
+    "x": 12
+   },
+   "results": [
+    1
+   ],
+   "status": "sensitive",
+   "uses": 12,
+   "wrong": 0
+  },
+  "reshape": {
+   "args": {
+    "shape": {
+     "ints": 17
+    },
+    "x": {
+     "tensor": 17
+    }
+   },
+   "error_classes": {
+    "InvalidMILProgram": 1
+   },
+   "fail": 1,
+   "failing_programs": [
+    "lg_argsort_reshape"
+   ],
+   "failing_variants": [
+    "lg_argsort_reshape"
+   ],
+   "failing_without_dead_ops": 1,
+   "ok": 16,
+   "ok_programs": [
+    "lg_cumsum_c",
+    "lg_cumsum_c",
+    "lg_cumsum_w",
+    "lg_cumsum_w",
+    "lg_gather_c_dyn",
+    "lg_gather_c_dyn"
+   ],
+   "present": {
+    "shape": 17,
+    "x": 17
+   },
+   "results": [
+    1
+   ],
+   "status": "sensitive",
+   "uses": 17,
+   "wrong": 0
+  },
+  "resize_bilinear": {
+   "args": {
+    "sampling_mode": {
+     "str": 6
+    },
+    "target_size_height": {
+     "int": 6
+    },
+    "target_size_width": {
+     "int": 6
+    },
+    "x": {
+     "tensor": 6
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 6,
+   "ok_programs": [
+    "cv_rbil_align_corners",
+    "cv_rbil_default",
+    "cv_rbil_down",
+    "cv_rbil_offset_corners",
+    "cv_rbil_strict_align_corners",
+    "resize_bilinear"
+   ],
+   "present": {
+    "sampling_mode": 6,
+    "target_size_height": 6,
+    "target_size_width": 6,
+    "x": 6
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 6,
+   "wrong": 0
+  },
+  "resize_nearest_neighbor": {
+   "args": {
+    "target_size_height": {
+     "int": 3
+    },
+    "target_size_width": {
+     "int": 3
+    },
+    "x": {
+     "tensor": 3
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 3,
+   "ok_programs": [
+    "cv_rnn_default_down",
+    "cv_rnn_up2x",
+    "resize_nearest"
+   ],
+   "present": {
+    "target_size_height": 3,
+    "target_size_width": 3,
+    "x": 3
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 3,
+   "wrong": 0
+  },
+  "reverse": {
+   "args": {
+    "axes": {
+     "ints": 7
+    },
+    "x": {
+     "tensor": 7
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 7,
+   "ok_programs": [
+    "ix_reverse_3d_ax1",
+    "ix_reverse_ax0",
+    "ix_reverse_ax1",
+    "ix_reverse_ax13",
+    "ix_reverse_ax2",
+    "ix_reverse_ax3"
+   ],
+   "present": {
+    "axes": 7,
+    "x": 7
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 7,
+   "wrong": 0
+  },
+  "reverse_sequence": {
+   "args": {
+    "batch_axis": {
+     "int": 3
+    },
+    "lengths": {
+     "ints": 3
+    },
+    "seq_axis": {
+     "int": 3
+    },
+    "x": {
+     "tensor": 3
+    }
+   },
+   "error_classes": {
+    "InvalidMILProgram": 3
+   },
+   "fail": 3,
+   "failing_programs": [
+    "ix_reverse_seq_bax0_sax1",
+    "ix_reverse_seq_bax0_sax3",
+    "ix_reverse_seq_bax1_sax3"
+   ],
+   "failing_variants": [],
+   "failing_without_dead_ops": 3,
+   "ok": 0,
+   "ok_programs": [],
+   "present": {
+    "batch_axis": 3,
+    "lengths": 3,
+    "seq_axis": 3,
+    "x": 3
+   },
+   "results": [
+    1
+   ],
+   "status": "unsupported",
+   "uses": 3,
+   "wrong": 0
+  },
+  "rnn": {
+   "args": {
+    "activation": {
+     "str": 9
+    },
+    "bias": {
+     "blob": 9
+    },
+    "direction": {
+     "str": 9
+    },
+    "initial_h": {
+     "tensor": 9
+    },
+    "output_sequence": {
+     "bool": 9
+    },
+    "weight_hh": {
+     "blob": 9
+    },
+    "weight_ih": {
+     "blob": 9
+    },
+    "x": {
+     "tensor": 9
+    }
+   },
+   "error_classes": {
+    "InvalidMILProgram": 9
+   },
+   "fail": 9,
+   "failing_programs": [
+    "rc_rnn_s2_h16_fwd",
+    "rc_rnn_s32_h128_fwd",
+    "rc_rnn_s32_h128_rev",
+    "rc_rnn_s32_h64_fwd",
+    "rc_rnn_s32_h64_rev",
+    "rc_rnn_s8_h128_fwd"
+   ],
+   "failing_variants": [],
+   "failing_without_dead_ops": 9,
+   "ok": 0,
+   "ok_programs": [],
+   "present": {
+    "activation": 9,
+    "bias": 9,
+    "direction": 9,
+    "initial_h": 9,
+    "output_sequence": 9,
+    "weight_hh": 9,
+    "weight_ih": 9,
+    "x": 9
+   },
+   "results": [
+    2
+   ],
+   "status": "unsupported",
+   "uses": 9,
+   "wrong": 0
+  },
+  "round": {
+   "args": {
+    "x": {
+     "tensor": 9
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 9,
+   "ok_programs": [
+    "rd_rnd_any_round",
+    "rd_rnd_half_round",
+    "rd_rnd_nhalf_round",
+    "rd_rnd_p15_round",
+    "rd_rnd_p25_round",
+    "rd_rnd_plus_quarter_round"
+   ],
+   "present": {
+    "x": 9
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 9,
+   "wrong": 0
+  },
+  "rsqrt": {
+   "args": {
+    "epsilon": {
+     "float": 1
+    },
+    "x": {
+     "tensor": 1
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 1,
+   "ok_programs": [
+    "rsqrt"
+   ],
+   "present": {
+    "epsilon": 1,
+    "x": 1
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 1,
+   "wrong": 0
+  },
+  "scaled_dot_product_attention": {
+   "args": {
+    "attn_mask": {
+     "blob": 4,
+     "other": 1,
+     "tensor": 6
+    },
+    "key": {
+     "tensor": 13
+    },
+    "query": {
+     "tensor": 13
+    },
+    "value": {
+     "tensor": 13
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [
+    "sdpa_causal_bool",
+    "sdpa_causal_m1e4",
+    "sdpa_causal_m65504",
+    "sdpa_causal_minf",
+    "sdpa_const_smooth"
+   ],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 8,
+   "ok_programs": [
+    "sdpa",
+    "sdpa_in_causal_m1e4",
+    "sdpa_in_causal_m65504",
+    "sdpa_in_causal_minf",
+    "sdpa_in_causal_s256",
+    "sdpa_in_causal_s8"
+   ],
+   "present": {
+    "attn_mask": 11,
+    "key": 13,
+    "query": 13,
+    "value": 13
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 13,
+   "wrong": 5
+  },
+  "scaled_tanh": {
+   "args": {
+    "alpha": {
+     "float": 1
+    },
+    "beta": {
+     "float": 1
+    },
+    "x": {
+     "tensor": 1
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 1,
+   "ok_programs": [
+    "scaled_tanh"
+   ],
+   "present": {
+    "alpha": 1,
+    "beta": 1,
+    "x": 1
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 1,
+   "wrong": 0
+  },
+  "scatter": {
+   "args": {
+    "axis": {
+     "int": 4
+    },
+    "data": {
+     "tensor": 4
+    },
+    "indices": {
+     "ints": 4
+    },
+    "mode": {
+     "str": 4
+    },
+    "updates": {
+     "tensor": 4
+    },
+    "validate_indices": {
+     "bool": 4
+    }
+   },
+   "error_classes": {
+    "InvalidMILProgram": 4
+   },
+   "fail": 4,
+   "failing_programs": [
+    "ix_scatter_ax1_add",
+    "ix_scatter_ax1_update",
+    "ix_scatter_ax3_add",
+    "ix_scatter_ax3_update"
+   ],
+   "failing_variants": [],
+   "failing_without_dead_ops": 4,
+   "ok": 0,
+   "ok_programs": [],
+   "present": {
+    "axis": 4,
+    "data": 4,
+    "indices": 4,
+    "mode": 4,
+    "updates": 4,
+    "validate_indices": 4
+   },
+   "results": [
+    1
+   ],
+   "status": "unsupported",
+   "uses": 4,
+   "wrong": 0
+  },
+  "scatter_along_axis": {
+   "args": {
+    "axis": {
+     "int": 4
+    },
+    "data": {
+     "tensor": 4
+    },
+    "indices": {
+     "tconst": 4
+    },
+    "mode": {
+     "str": 4
+    },
+    "updates": {
+     "tensor": 4
+    },
+    "validate_indices": {
+     "bool": 4
+    }
+   },
+   "error_classes": {
+    "InvalidMILProgram": 4
+   },
+   "fail": 4,
+   "failing_programs": [
+    "ix_scatter_along_ax1_add",
+    "ix_scatter_along_ax1_update",
+    "ix_scatter_along_ax3_add",
+    "ix_scatter_along_ax3_update"
+   ],
+   "failing_variants": [],
+   "failing_without_dead_ops": 4,
+   "ok": 0,
+   "ok_programs": [],
+   "present": {
+    "axis": 4,
+    "data": 4,
+    "indices": 4,
+    "mode": 4,
+    "updates": 4,
+    "validate_indices": 4
+   },
+   "results": [
+    1
+   ],
+   "status": "unsupported",
+   "uses": 4,
+   "wrong": 0
+  },
+  "scatter_nd": {
+   "args": {
+    "data": {
+     "tensor": 2
+    },
+    "indices": {
+     "tconst": 2
+    },
+    "mode": {
+     "str": 2
+    },
+    "updates": {
+     "tensor": 2
+    },
+    "validate_indices": {
+     "bool": 2
+    }
+   },
+   "error_classes": {
+    "InvalidMILProgram": 2
+   },
+   "fail": 2,
+   "failing_programs": [
+    "ix_scatter_nd_add",
+    "ix_scatter_nd_update"
+   ],
+   "failing_variants": [],
+   "failing_without_dead_ops": 2,
+   "ok": 0,
+   "ok_programs": [],
+   "present": {
+    "data": 2,
+    "indices": 2,
+    "mode": 2,
+    "updates": 2,
+    "validate_indices": 2
+   },
+   "results": [
+    1
+   ],
+   "status": "unsupported",
+   "uses": 2,
+   "wrong": 0
+  },
+  "select": {
+   "args": {
+    "a": {
+     "tensor": 2
+    },
+    "b": {
+     "tensor": 2
+    },
+    "cond": {
+     "tensor": 2
+    }
+   },
+   "error_classes": {
+    "CompilationFailure": 1
+   },
+   "fail": 1,
+   "failing_programs": [
+    "lg_dead_greater_select"
+   ],
+   "failing_variants": [
+    "lg_dead_greater_select"
+   ],
+   "failing_without_dead_ops": 0,
+   "ok": 1,
+   "ok_programs": [
+    "select"
+   ],
+   "present": {
+    "a": 2,
+    "b": 2,
+    "cond": 2
+   },
+   "results": [
+    1
+   ],
+   "status": "sensitive",
+   "uses": 2,
+   "wrong": 0
+  },
+  "shape": {
+   "args": {
+    "x": {
+     "tensor": 2
+    }
+   },
+   "error_classes": {
+    "InvalidMILProgram": 2
+   },
+   "fail": 2,
+   "failing_programs": [
+    "rc_shape",
+    "rc_shape_int32_out"
+   ],
+   "failing_variants": [],
+   "failing_without_dead_ops": 2,
+   "ok": 0,
+   "ok_programs": [],
+   "present": {
+    "x": 2
+   },
+   "results": [
+    1
+   ],
+   "status": "unsupported",
+   "uses": 2,
+   "wrong": 0
+  },
+  "sigmoid": {
+   "args": {
+    "x": {
+     "tensor": 8
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 8,
+   "ok_programs": [
+    "rc_lim_outputs_12",
+    "rc_lim_outputs_16",
+    "rc_lim_outputs_2",
+    "rc_lim_outputs_3",
+    "rc_lim_outputs_4",
+    "rc_lim_outputs_6"
+   ],
+   "present": {
+    "x": 8
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 8,
+   "wrong": 0
+  },
+  "sigmoid_hard": {
+   "args": {
+    "alpha": {
+     "float": 1
+    },
+    "beta": {
+     "float": 1
+    },
+    "x": {
+     "tensor": 1
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 1,
+   "ok_programs": [
+    "sigmoid_hard"
+   ],
+   "present": {
+    "alpha": 1,
+    "beta": 1,
+    "x": 1
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 1,
+   "wrong": 0
+  },
+  "sign": {
+   "args": {
+    "x": {
+     "tensor": 5
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 5,
+   "ok_programs": [
+    "rc_lim_outputs_12",
+    "rc_lim_outputs_16",
+    "rc_lim_outputs_8",
+    "rd_rnd_half_sign",
+    "sign"
+   ],
+   "present": {
+    "x": 5
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 5,
+   "wrong": 0
+  },
+  "silu": {
+   "args": {
+    "x": {
+     "tensor": 2
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 2,
+   "ok_programs": [
+    "rc_lim_outputs_16",
+    "silu"
+   ],
+   "present": {
+    "x": 2
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 2,
+   "wrong": 0
+  },
+  "sin": {
+   "args": {
+    "x": {
+     "tensor": 5
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 5,
+   "ok_programs": [
+    "lg_tan",
+    "rc_lim_outputs_12",
+    "rc_lim_outputs_16",
+    "rd_comp_tan",
+    "sin"
+   ],
+   "present": {
+    "x": 5
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 5,
+   "wrong": 0
+  },
+  "sinh": {
+   "args": {
+    "x": {
+     "tensor": 4
+    }
+   },
+   "error_classes": {
+    "InvalidMILProgram": 4
+   },
+   "fail": 4,
+   "failing_programs": [
+    "rd_r2_sinh",
+    "rd_r3_sinh",
+    "rd_r5_sinh",
+    "sinh"
+   ],
+   "failing_variants": [],
+   "failing_without_dead_ops": 4,
+   "ok": 0,
+   "ok_programs": [],
+   "present": {
+    "x": 4
+   },
+   "results": [
+    1
+   ],
+   "status": "unsupported",
+   "uses": 4,
+   "wrong": 0
+  },
+  "slice_by_index": {
+   "args": {
+    "begin": {
+     "ints": 18
+    },
+    "begin_mask": {
+     "bools": 2
+    },
+    "end": {
+     "ints": 18
+    },
+    "end_mask": {
+     "bools": 2
+    },
+    "squeeze_mask": {
+     "bools": 1
+    },
+    "stride": {
+     "ints": 6
+    },
+    "x": {
+     "tensor": 18
+    }
+   },
+   "error_classes": {
+    "InvalidMILProgram": 10
+   },
+   "fail": 10,
+   "failing_programs": [
+    "lg_argmax_w",
+    "lg_argmax_w_f16out",
+    "lg_argmin_c",
+    "lg_argsort_slice",
+    "lg_topk_idx_w4",
+    "lg_topk_val_w4"
+   ],
+   "failing_variants": [
+    "lg_argmax_w",
+    "lg_argmax_w_f16out",
+    "lg_argmin_c",
+    "lg_argsort_slice",
+    "lg_topk_idx_w4",
+    "lg_topk_val_w4"
+   ],
+   "failing_without_dead_ops": 6,
+   "ok": 8,
+   "ok_programs": [
+    "ix_slice_idx_masks_stride",
+    "ix_slice_idx_negindex",
+    "ix_slice_idx_negstride_all",
+    "ix_slice_idx_squeeze_ax1",
+    "ix_slice_idx_stride2_ax3",
+    "lg_scatter_add_c"
+   ],
+   "present": {
+    "begin": 18,
+    "begin_mask": 2,
+    "end": 18,
+    "end_mask": 2,
+    "squeeze_mask": 1,
+    "stride": 6,
+    "x": 18
+   },
+   "results": [
+    1
+   ],
+   "status": "sensitive",
+   "uses": 18,
+   "wrong": 0
+  },
+  "slice_by_size": {
+   "args": {
+    "begin": {
+     "ints": 3
+    },
+    "size": {
+     "ints": 3
+    },
+    "x": {
+     "tensor": 3
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 3,
+   "ok_programs": [
+    "ix_slice_size_fixed",
+    "ix_slice_size_neg1",
+    "slice_by_size"
+   ],
+   "present": {
+    "begin": 3,
+    "size": 3,
+    "x": 3
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 3,
+   "wrong": 0
+  },
+  "slice_update": {
+   "args": {
+    "begin": {
+     "ints": 4
+    },
+    "begin_mask": {
+     "bools": 1
+    },
+    "end": {
+     "ints": 4
+    },
+    "end_mask": {
+     "bools": 1
+    },
+    "stride": {
+     "ints": 4
+    },
+    "update": {
+     "tensor": 4
+    },
+    "x": {
+     "tensor": 4
+    }
+   },
+   "error_classes": {
+    "InvalidMILProgram": 1
+   },
+   "fail": 1,
+   "failing_programs": [
+    "ix_slice_update_stride2"
+   ],
+   "failing_variants": [
+    "ix_slice_update_stride2"
+   ],
+   "failing_without_dead_ops": 1,
+   "ok": 3,
+   "ok_programs": [
+    "ix_slice_update_ax1",
+    "ix_slice_update_masks",
+    "ix_slice_update_stride1_small"
+   ],
+   "present": {
+    "begin": 4,
+    "begin_mask": 1,
+    "end": 4,
+    "end_mask": 1,
+    "stride": 4,
+    "update": 4,
+    "x": 4
+   },
+   "results": [
+    1
+   ],
+   "status": "sensitive",
+   "uses": 4,
+   "wrong": 0
+  },
+  "sliding_windows": {
+   "args": {
+    "axis": {
+     "int": 2
+    },
+    "size": {
+     "int": 2
+    },
+    "stride": {
+     "int": 2
+    },
+    "x": {
+     "tensor": 2
+    }
+   },
+   "error_classes": {
+    "InvalidMILProgram": 2
+   },
+   "fail": 2,
+   "failing_programs": [
+    "ix_sliding_windows_ax1_w8s4",
+    "ix_sliding_windows_ax3_w4s2"
+   ],
+   "failing_variants": [],
+   "failing_without_dead_ops": 2,
+   "ok": 0,
+   "ok_programs": [],
+   "present": {
+    "axis": 2,
+    "size": 2,
+    "stride": 2,
+    "x": 2
+   },
+   "results": [
+    1
+   ],
+   "status": "unsupported",
+   "uses": 2,
+   "wrong": 0
+  },
+  "softmax": {
+   "args": {
+    "axis": {
+     "int": 3
+    },
+    "x": {
+     "tensor": 3
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 3,
+   "ok_programs": [
+    "sdpa_decomp_causal_s256",
+    "softmax_c",
+    "softmax_w"
+   ],
+   "present": {
+    "axis": 3,
+    "x": 3
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 3,
+   "wrong": 0
+  },
+  "softplus": {
+   "args": {
+    "x": {
+     "tensor": 3
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 3,
+   "ok_programs": [
+    "rc_lim_outputs_12",
+    "rc_lim_outputs_16",
+    "softplus"
+   ],
+   "present": {
+    "x": 3
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 3,
+   "wrong": 0
+  },
+  "softsign": {
+   "args": {
+    "x": {
+     "tensor": 3
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 3,
+   "ok_programs": [
+    "rc_lim_outputs_12",
+    "rc_lim_outputs_16",
+    "softsign"
+   ],
+   "present": {
+    "x": 3
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 3,
+   "wrong": 0
+  },
+  "space_to_batch": {
+   "args": {
+    "block_shape": {
+     "ints": 2
+    },
+    "paddings": {
+     "tconst": 2
+    },
+    "x": {
+     "tensor": 2
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 2,
+   "ok_programs": [
+    "ix_space_to_batch_b12",
+    "ix_space_to_batch_b14"
+   ],
+   "present": {
+    "block_shape": 2,
+    "paddings": 2,
+    "x": 2
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 2,
+   "wrong": 0
+  },
+  "space_to_depth": {
+   "args": {
+    "block_size": {
+     "int": 1
+    },
+    "x": {
+     "tensor": 1
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 1,
+   "ok_programs": [
+    "space_to_depth"
+   ],
+   "present": {
+    "block_size": 1,
+    "x": 1
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 1,
+   "wrong": 0
+  },
+  "split": {
+   "args": {
+    "axis": {
+     "int": 6
+    },
+    "num_splits": {
+     "int": 1
+    },
+    "split_sizes": {
+     "ints": 5
+    },
+    "x": {
+     "tensor": 6
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 6,
+   "ok_programs": [
+    "ix_split_uneven_ax1",
+    "ix_split_uneven_ax1_13_51",
+    "ix_split_uneven_ax3",
+    "ix_split_uneven_ax3_1_31",
+    "split_c2",
+    "split_w_sizes"
+   ],
+   "present": {
+    "axis": 6,
+    "num_splits": 1,
+    "split_sizes": 5,
+    "x": 6
+   },
+   "results": [
+    2,
+    3
+   ],
+   "status": "supported",
+   "uses": 6,
+   "wrong": 0
+  },
+  "sqrt": {
+   "args": {
+    "x": {
+     "tensor": 3
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 3,
+   "ok_programs": [
+    "rd_comp_acos",
+    "rd_comp_asin",
+    "sqrt"
+   ],
+   "present": {
+    "x": 3
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 3,
+   "wrong": 0
+  },
+  "square": {
+   "args": {
+    "x": {
+     "tensor": 7
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 7,
+   "ok_programs": [
+    "rc_lim_outputs_12",
+    "rc_lim_outputs_16",
+    "rc_lim_outputs_6",
+    "rc_lim_outputs_8",
+    "rd_comp_acos",
+    "rd_comp_asin"
+   ],
+   "present": {
+    "x": 7
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 7,
+   "wrong": 0
+  },
+  "squeeze": {
+   "args": {
+    "axes": {
+     "ints": 4
+    },
+    "x": {
+     "tensor": 5
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 5,
+   "ok_programs": [
+    "ix_squeeze_all",
+    "ix_squeeze_ax0",
+    "ix_squeeze_ax02",
+    "rc_squeeze",
+    "squeeze"
+   ],
+   "present": {
+    "axes": 4,
+    "x": 5
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 5,
+   "wrong": 0
+  },
+  "stack": {
+   "args": {
+    "axis": {
+     "int": 6
+    },
+    "values": {
+     "tuple": 6
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 6,
+   "ok_programs": [
+    "ix_stack2_ax0",
+    "ix_stack2_ax1",
+    "ix_stack2_ax2",
+    "ix_stack2_ax3",
+    "ix_stack2_ax4",
+    "stack"
+   ],
+   "present": {
+    "axis": 6,
+    "values": 6
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 6,
+   "wrong": 0
+  },
+  "sub": {
+   "args": {
+    "x": {
+     "float": 55,
+     "tensor": 5
+    },
+    "y": {
+     "tensor": 60
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 60,
+   "ok_programs": [
+    "lg_argmax_w_iota",
+    "lg_argmin_c_iota",
+    "lg_bis_add_m1000",
+    "lg_bis_add_m60000",
+    "lg_bis_i",
+    "lg_bis_mulc"
+   ],
+   "present": {
+    "x": 60,
+    "y": 60
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 60,
+   "wrong": 0
+  },
+  "tan": {
+   "args": {
+    "x": {
+     "tensor": 4
+    }
+   },
+   "error_classes": {
+    "InvalidMILProgram": 4
+   },
+   "fail": 4,
+   "failing_programs": [
+    "rd_r2_tan",
+    "rd_r3_tan",
+    "rd_r5_tan",
+    "tan"
+   ],
+   "failing_variants": [],
+   "failing_without_dead_ops": 4,
+   "ok": 0,
+   "ok_programs": [],
+   "present": {
+    "x": 4
+   },
+   "results": [
+    1
+   ],
+   "status": "unsupported",
+   "uses": 4,
+   "wrong": 0
+  },
+  "tanh": {
+   "args": {
+    "x": {
+     "tensor": 7
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 7,
+   "ok_programs": [
+    "rc_lim_outputs_12",
+    "rc_lim_outputs_16",
+    "rc_lim_outputs_3",
+    "rc_lim_outputs_4",
+    "rc_lim_outputs_6",
+    "rc_lim_outputs_8"
+   ],
+   "present": {
+    "x": 7
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 7,
+   "wrong": 0
+  },
+  "threshold": {
+   "args": {
+    "alpha": {
+     "float": 1
+    },
+    "x": {
+     "tensor": 1
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 1,
+   "ok_programs": [
+    "threshold"
+   ],
+   "present": {
+    "alpha": 1,
+    "x": 1
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 1,
+   "wrong": 0
+  },
+  "thresholded_relu": {
+   "args": {
+    "alpha": {
+     "float": 1
+    },
+    "x": {
+     "tensor": 1
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 1,
+   "ok_programs": [
+    "thresholded_relu"
+   ],
+   "present": {
+    "alpha": 1,
+    "x": 1
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 1,
+   "wrong": 0
+  },
+  "tile": {
+   "args": {
+    "reps": {
+     "ints": 4
+    },
+    "x": {
+     "tensor": 4
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 4,
+   "ok_programs": [
+    "ix_tile_c2",
+    "ix_tile_mixed",
+    "ix_tile_w4",
+    "tile_c2"
+   ],
+   "present": {
+    "reps": 4,
+    "x": 4
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 4,
+   "wrong": 0
+  },
+  "topk": {
+   "args": {
+    "ascending": {
+     "bool": 19
+    },
+    "axis": {
+     "int": 19
+    },
+    "k": {
+     "int": 19
+    },
+    "output_indices_dtype": {
+     "str": 19
+    },
+    "return_indices": {
+     "bool": 19
+    },
+    "sort": {
+     "bool": 19
+    },
+    "x": {
+     "tensor": 19
+    }
+   },
+   "error_classes": {
+    "InvalidMILProgram": 19
+   },
+   "fail": 19,
+   "failing_programs": [
+    "rd_sortvals_ax1_asc",
+    "rd_sortvals_ax1_desc",
+    "rd_sortvals_ax3_asc",
+    "rd_sortvals_ax3_desc",
+    "rd_topk_k1_ax1_asc",
+    "rd_topk_k1_ax1_desc"
+   ],
+   "failing_variants": [],
+   "failing_without_dead_ops": 13,
+   "ok": 0,
+   "ok_programs": [],
+   "present": {
+    "ascending": 19,
+    "axis": 19,
+    "k": 19,
+    "output_indices_dtype": 19,
+    "return_indices": 19,
+    "sort": 19,
+    "x": 19
+   },
+   "results": [
+    2
+   ],
+   "status": "unsupported",
+   "uses": 19,
+   "wrong": 0
+  },
+  "transpose": {
+   "args": {
+    "perm": {
+     "ints": 2
+    },
+    "x": {
+     "tensor": 2
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 2,
+   "ok_programs": [
+    "transpose_0231",
+    "transpose_0321"
+   ],
+   "present": {
+    "perm": 2,
+    "x": 2
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 2,
+   "wrong": 0
+  },
+  "upsample_bilinear": {
+   "args": {
+    "align_corners": {
+     "bool": 3
+    },
+    "scale_factor_height": {
+     "int": 3
+    },
+    "scale_factor_width": {
+     "int": 3
+    },
+    "x": {
+     "tensor": 3
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 3,
+   "ok_programs": [
+    "cv_upbil_align",
+    "cv_upbil_noalign",
+    "upsample_bilinear"
+   ],
+   "present": {
+    "align_corners": 3,
+    "scale_factor_height": 3,
+    "scale_factor_width": 3,
+    "x": 3
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 3,
+   "wrong": 0
+  },
+  "upsample_nearest_neighbor": {
+   "args": {
+    "scale_factor_height": {
+     "int": 2
+    },
+    "scale_factor_width": {
+     "int": 2
+    },
+    "x": {
+     "tensor": 2
+    }
+   },
+   "error_classes": {},
+   "fail": 0,
+   "failing_programs": [],
+   "failing_variants": [],
+   "failing_without_dead_ops": 0,
+   "ok": 2,
+   "ok_programs": [
+    "cv_upnn_s3",
+    "upsample_nearest"
+   ],
+   "present": {
+    "scale_factor_height": 2,
+    "scale_factor_width": 2,
+    "x": 2
+   },
+   "results": [
+    1
+   ],
+   "status": "supported",
+   "uses": 2,
+   "wrong": 0
+  }
+ },
+ "programs": {
+  "build": 5,
+  "fail": 323,
+  "ok": 670,
+  "wrong": 22
+ }
+}

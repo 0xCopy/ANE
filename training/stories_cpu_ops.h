@@ -2,10 +2,11 @@
 #pragma once
 #include "stories_config.h"
 
+#include <assert.h>
 
 static void rmsnorm(float *out, const float *x, const float *w, int d, int S) {
-    float *rms_tmp = (float*)malloc(S * sizeof(float));
-    float *ss = (float*)calloc(S, sizeof(float));
+    float *rms_tmp = xmf(S);
+    float *ss = xcf(S);
     for (int i=0; i<d; i++) {
         vDSP_vmul(x+i*S, 1, x+i*S, 1, rms_tmp, 1, (vDSP_Length)S);
         vDSP_vadd(rms_tmp, 1, ss, 1, ss, 1, (vDSP_Length)S);
@@ -21,17 +22,17 @@ static void rmsnorm(float *out, const float *x, const float *w, int d, int S) {
 }
 
 static void rmsnorm_bwd(float *dx, float *dw, const float *dy, const float *x, const float *w, int d, int S) {
-    float *rms_tmp = (float*)malloc(S * sizeof(float));
-    float *ss = (float*)calloc(S, sizeof(float));
+    float *rms_tmp = xmf(S);
+    float *ss = xcf(S);
     for (int i=0; i<d; i++) {
         vDSP_vmul(x+i*S, 1, x+i*S, 1, rms_tmp, 1, (vDSP_Length)S);
         vDSP_vadd(rms_tmp, 1, ss, 1, ss, 1, (vDSP_Length)S);
     }
     float invd = 1.0f/d, eps=1e-5f;
     vDSP_vsmsa(ss, 1, &invd, &eps, ss, 1, (vDSP_Length)S);
-    float *rrms = (float*)malloc(S*4);
+    float *rrms = xmf(S);
     int n = S; vvrsqrtf(rrms, ss, &n);
-    float *dot = (float*)calloc(S, sizeof(float));
+    float *dot = xcf(S);
     for (int i=0; i<d; i++) {
         vDSP_vmul(dy+i*S, 1, x+i*S, 1, rms_tmp, 1, (vDSP_Length)S);
         vDSP_vsma(rms_tmp, 1, &w[i], dot, 1, dot, 1, (vDSP_Length)S);
@@ -54,12 +55,31 @@ static void rmsnorm_bwd(float *dx, float *dw, const float *dy, const float *x, c
 
 static void adam_update(float *w, const float *g, AdamState *s, int t, float lr, float b1, float b2, float eps) {
     float bc1 = 1.0f - powf(b1, t), bc2 = 1.0f - powf(b2, t);
-    for (size_t i=0; i<s->n; i++) {
-        s->m[i] = b1*s->m[i] + (1-b1)*g[i];
-        s->v[i] = b2*s->v[i] + (1-b2)*g[i]*g[i];
-        float mh = s->m[i]/bc1, vh = s->v[i]/bc2;
-        w[i] -= lr * mh / (sqrtf(vh) + eps);
-    }
+    size_t n = s->n;
+    float one_minus_b1 = 1.0f - b1;
+    float one_minus_b2 = 1.0f - b2;
+    float neg_lr_over_bc1 = -lr / bc1;
+    float inv_bc2 = 1.0f / bc2;
+
+    // m = b1*m + (1-b1)*g
+    vDSP_vsmul(s->m, 1, &b1, s->m, 1, n);
+    vDSP_vsma(g, 1, &one_minus_b1, s->m, 1, s->m, 1, n);
+
+    // v = b2*v + (1-b2)*g^2
+    float *tmp = (float*)malloc(n * sizeof(float));
+    vDSP_vsq(g, 1, tmp, 1, n);
+    vDSP_vsmul(s->v, 1, &b2, s->v, 1, n);
+    vDSP_vsma(tmp, 1, &one_minus_b2, s->v, 1, s->v, 1, n);
+
+    // update = m / (sqrt(v/bc2) + eps), then w -= (lr/bc1) * update
+    vDSP_vsmul(s->v, 1, &inv_bc2, tmp, 1, n);
+    int nn = (int)n;
+    vvsqrtf(tmp, tmp, &nn);
+    vDSP_vsadd(tmp, 1, &eps, tmp, 1, n);
+    vDSP_vdiv(tmp, 1, s->m, 1, tmp, 1, n);
+    vDSP_vsma(tmp, 1, &neg_lr_over_bc1, w, 1, w, 1, n);
+
+    free(tmp);
 }
 
 // Cross-entropy loss + gradient for logits (column-major: [VOCAB, SEQ])
@@ -70,7 +90,7 @@ static void adam_update(float *w, const float *g, AdamState *s, int t, float lr,
 // For vDSP: transpose to row-major scratch [S, V] to vectorize softmax per position
 static float cross_entropy_loss(float *dlogits, const float *logits, const uint16_t *targets, int V, int S) {
     // Work in transposed layout [S, V] where each row is one position's logits (contiguous)
-    float *buf = (float*)malloc(S * V * 4);
+    float *buf = xmf((size_t)S * V);
     // Transpose [V,S] → [S,V]: buf[t*V+v] = logits[v*S+t]
     vDSP_mtrans(logits, 1, buf, 1, (vDSP_Length)S, (vDSP_Length)V);
 

@@ -13,12 +13,18 @@
 #include "stories_io.h"
 #include "stories_mil.h"
 #include "stories_cpu_ops.h"
+#include "data_validation.h"
 #include "ane_rmsnorm_bwd.h"
 #include "ane_classifier.h"
 
 #define CKPT_PATH_DEFAULT "ane_stories110M_ckpt.bin"
 #define MODEL_PATH_DEFAULT "stories110M.bin"
 #define DATA_PATH_DEFAULT "tinystories_data00.bin"
+
+static const char *get_path(const char *env_var, const char *default_val) {
+    const char *v = getenv(env_var);
+    return (v && v[0]) ? v : default_val;
+}
 
 // ===== Weight loading from llama2.c format =====
 static bool load_pretrained(LayerWeights *lw, float *rms_final, float *embed, const char *path) {
@@ -206,7 +212,7 @@ int main(int argc, char *argv[]) {
         const char *model_path = MODEL_PATH_DEFAULT;
         const char *data_path = DATA_PATH_DEFAULT;
         bool do_resume = false;
-        bool ane_extras = true;  // classifier, softmax, rmsnorm_bwd on ANE
+        bool ane_extras = true;
         int pos = 0;
         for (int i=1; i<argc; i++) {
             if (strcmp(argv[i], "--resume") == 0) do_resume = true;
@@ -252,6 +258,7 @@ int main(int argc, char *argv[]) {
         if (!resuming) {
             printf("=== ANE Training: Stories110M (ANE-offloaded) ===\n");
             printf("dim=%d hidden=%d heads=%d seq=%d vocab=%d layers=%d\n", DIM, HIDDEN, HEADS, SEQ, VOCAB, NLAYERS);
+            printf("model=%s data=%s ckpt=%s\n", model_path, data_path, ckpt_path);
             if (ane_extras) printf("NEW: final_rmsnorm, classifier_fwd, softmax, rmsnorm_bwd on ANE\n");
             else printf("ANE extras DISABLED (classifier/softmax/rmsnorm_bwd on CPU)\n");
             {
@@ -280,12 +287,41 @@ int main(int argc, char *argv[]) {
             printf("Hint: run `bash download_data.sh` in training/ or pass --data /path/to/tinystories_data00.bin\n");
             return 1;
         }
-        struct stat st; fstat(data_fd, &st);
-        size_t data_len = st.st_size;
+        struct stat st;
+        if (fstat(data_fd, &st) != 0) { perror("fstat"); close(data_fd); return 1; }
+        size_t data_len = (size_t)st.st_size;
+        size_t n_tokens = 0, extra_bytes = 0;
+        if (!token_data_bytes_to_token_count(data_len, &n_tokens, &extra_bytes)) {
+            fprintf(stderr,
+                    "Token data validation failed: file size %zu bytes has %zu extra byte(s); expected 16-bit tokens\n",
+                    data_len, extra_bytes);
+            close(data_fd);
+            return 1;
+        }
+        if (n_tokens == 0) {
+            fprintf(stderr, "Token data validation failed: token file is empty\n");
+            close(data_fd);
+            return 1;
+        }
         uint16_t *token_data = (uint16_t*)mmap(NULL, data_len, PROT_READ, MAP_PRIVATE, data_fd, 0);
-        if (token_data == MAP_FAILED) { printf("mmap failed\n"); return 1; }
-        size_t n_tokens = data_len / 2;
+        if (token_data == MAP_FAILED) { perror("mmap"); close(data_fd); return 1; }
+        close(data_fd); // mapping remains valid; avoid fd leaks across exec() restarts
         printf("Token data: %zu tokens (%.1f MB)\n", n_tokens, data_len/1e6);
+
+        TokenDataValidationError data_err = {0};
+        TokenDataValidationCode data_code = token_data_validate(token_data, n_tokens, SEQ, VOCAB, &data_err);
+        if (data_code == TOKEN_DATA_ERR_TOO_SHORT) {
+            fprintf(stderr, "Token data validation failed: need at least %zu tokens (SEQ+1), got %zu\n",
+                    data_err.required_tokens, n_tokens);
+            munmap(token_data, data_len);
+            return 1;
+        }
+        if (data_code == TOKEN_DATA_ERR_OOB_TOKEN) {
+            fprintf(stderr, "Token data validation failed: token %u at index %zu is outside vocab [0, %d)\n",
+                    data_err.bad_token, data_err.bad_index, VOCAB);
+            munmap(token_data, data_len);
+            return 1;
+        }
 
         // Gradient buffers
         float *dy = (float*)malloc(SEQ*DIM*4);
@@ -347,7 +383,7 @@ int main(int argc, char *argv[]) {
             // Check compile budget — account for new kernels
             // Per batch: 60 layer kernels [+ 24 rmsnorm_bwd + 1 classifier + 1 final_rms = 86 with extras]
             int kernels_needed = TOTAL_WEIGHT_KERNELS + (ane_extras ? 2*NLAYERS + 2 : 0);
-            if (g_compile_count + kernels_needed > MAX_COMPILES) {
+            if (g_compile_count + kernels_needed > get_max_compiles()) {
                 for (int L=0; L<NLAYERS; L++) {
                     free_layer_kernels(&kern[L]); free_kern(sdpaBwd2[L]);
                     free_kern(rmsAttBwd[L]); free_kern(rmsFFNBwd[L]);
@@ -389,7 +425,7 @@ int main(int argc, char *argv[]) {
                     }
                 }
             }
-            if (!compile_ok) { g_compile_count = MAX_COMPILES; continue; }
+            if (!compile_ok) { g_compile_count = get_max_compiles(); continue; }
 
             // Re-compile sdpaBwd2 if needed
             for (int L=0; L<NLAYERS; L++) {
@@ -406,7 +442,7 @@ int main(int argc, char *argv[]) {
                 classifierKern = compile_classifier_fwd(embed);
                 if (!finalRmsKern || !classifierKern) {
                     printf("finalRms or classifier compile failed\n");
-                    g_compile_count = MAX_COMPILES; continue;
+                    g_compile_count = get_max_compiles(); continue;
                 }
                 if (!softmaxKern) {
                     softmaxKern = compile_softmax_kern();
@@ -427,7 +463,7 @@ int main(int argc, char *argv[]) {
             uint64_t tt = mach_absolute_time();
             double t_ane=0,t_io=0,t_elem=0,t_rms=0,t_cblas_wait=0,t_cls=0;
 
-            for (int a=0; a<ACCUM_STEPS && step<total_steps; a++, step++) {
+            for (int a=0; a<get_accum_steps() && step<total_steps; a++, step++) {
                 uint64_t t0,t1;
                 size_t max_pos = n_tokens - SEQ - 1;
                 size_t pos = (size_t)(drand48() * max_pos);
@@ -740,7 +776,7 @@ int main(int argc, char *argv[]) {
             layer_acts_free(&acts[L]); layer_grads_free(&grads[L]);
         }
         free_kern(softmaxKern); free_kern(finalRmsKern); free_kern(classifierKern);
-        munmap(token_data, data_len); close(data_fd);
+        munmap(token_data, data_len);
         free(rms_final); free(embed); free(grms_final); free(gembed);
         adam_free(&arms_final); adam_free(&aembed);
         free(dy); free(dffn); free(dh1); free(dh3); free(dx_ffn); free(dx2);
