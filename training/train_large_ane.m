@@ -311,6 +311,7 @@ int main(int argc, char *argv[]) {
             return 1;
         }
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
         int data_fd = open(DATA_PATH, O_RDONLY);
         if (data_fd < 0) { printf("Cannot open %s\n", DATA_PATH); return 1; }
@@ -336,6 +337,8 @@ int main(int argc, char *argv[]) {
 >>>>>>> 60b0512be32bf88f096481ac105f5558c0afa631
 =======
 >>>>>>> be96079bbf2511a7b4a5569a026cf03883ebfbaf
+=======
+>>>>>>> e030ffb2137ed4b0423c5285cb367f3809197b7c
         printf("Token data: %zu tokens (%.1f MB)\n", n_tokens, data_len/1e6);
 
         TokenDataValidationError data_err = {0};

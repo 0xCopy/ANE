@@ -295,6 +295,7 @@ int main(int argc, char *argv[]) {
 
 <<<<<<< HEAD
         // mmap token data
+<<<<<<< HEAD
         int data_fd = open(data_path, O_RDONLY);
         if (data_fd < 0) { printf("Cannot open %s\n", data_path); return 1; }
         struct stat st; fstat(data_fd, &st);
@@ -309,6 +310,22 @@ int main(int argc, char *argv[]) {
             return 1;
         }
         printf("Token data: %zu tokens (%.1f MB)\n", n_tokens, data_len/1e6);
+=======
+        int data_fd = open(DATA_PATH, O_RDONLY);
+        if (data_fd < 0) { printf("Cannot open %s\n", DATA_PATH); return 1; }
+        struct stat st; fstat(data_fd, &st);
+        size_t data_len = st.st_size;
+        uint16_t *token_data = (uint16_t*)mmap(NULL, data_len, PROT_READ, MAP_PRIVATE, data_fd, 0);
+        if (token_data == MAP_FAILED) { printf("mmap failed\n"); return 1; }
+        size_t n_tokens = data_len / 2;
+        if (n_tokens <= (size_t)(SEQ + 1)) {
+            printf("Token data too short: need at least %d tokens, got %zu\n", SEQ + 2, n_tokens);
+            munmap(token_data, data_len);
+            close(data_fd);
+            return 1;
+        }
+        printf("Token data: %zu tokens (%.1f MB)\n", n_tokens, data_len/1e6);
+>>>>>>> e030ffb2137ed4b0423c5285cb367f3809197b7c
 
         // Vocab compaction
         VocabMap vm = vocab_map_build(token_data, n_tokens, VOCAB);
