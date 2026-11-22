@@ -3,12 +3,8 @@ CFLAGS = -O2 -Wall -DACCELERATE_NEW_LAPACK -fobjc-arc
 FRAMEWORKS = -framework Foundation -framework CoreML -framework IOSurface
 LDFLAGS = $(FRAMEWORKS) -ldl
 
-<<<<<<< HEAD
 HEADERS_LARGE = stories_config.h stories_io.h stories_mil.h stories_cpu_ops.h data_validation.h
 HEADERS_OPT = $(HEADERS_LARGE) stories_cpu_ops_opt.h
-=======
-HEADERS_LARGE = stories_config.h stories_io.h stories_mil.h stories_cpu_ops.h
->>>>>>> d3m-dirty-merge
 
 HEADERS_ANE = $(HEADERS_LARGE) ane_rmsnorm_bwd.h ane_classifier.h
 

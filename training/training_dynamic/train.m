@@ -3,10 +3,7 @@
 // Compile kernels ONCE at startup, update weights via IOSurface every step.
 #include "mil_dynamic.h"
 #include "cpu_ops.h"
-<<<<<<< HEAD
 #include "../data_validation.h"
-=======
->>>>>>> d3m-dirty-merge
 
 // Dynamic kernel set per layer
 typedef struct {
@@ -290,7 +287,6 @@ int main(int argc, char *argv[]) {
             transpose_weight(W3t_buf[L], lw[L].W3, HIDDEN, DIM);
         }
 
-<<<<<<< HEAD
         // mmap token data
         int data_fd = open(data_path, O_RDONLY);
         if (data_fd < 0) {
@@ -336,20 +332,6 @@ int main(int argc, char *argv[]) {
 
         // Vocab compaction: map 32K sparse vocab → ~9K compact
         VocabMap vm = vocab_map_build(token_data, n_tokens, VOCAB);
-=======
-        // mmap token data
-        int data_fd = open(data_path, O_RDONLY);
-        if (data_fd < 0) { printf("Cannot open %s\n", data_path); return 1; }
-        struct stat st; fstat(data_fd, &st);
-        size_t data_len = st.st_size;
-        uint16_t *token_data = (uint16_t*)mmap(NULL, data_len, PROT_READ, MAP_PRIVATE, data_fd, 0);
-        if (token_data == MAP_FAILED) { printf("mmap failed\n"); return 1; }
-        size_t n_tokens = data_len / 2;
-        printf("Token data: %zu tokens (%.1f MB)\n", n_tokens, data_len/1e6);
-
-        // Vocab compaction
-        VocabMap vm = vocab_map_build(token_data, n_tokens, VOCAB);
->>>>>>> d3m-dirty-merge
         int CV = vm.compact_vocab;
         printf("Vocab compaction: %d → %d active tokens (%.1fx reduction)\n", VOCAB, CV, (float)VOCAB/CV);
 
@@ -963,11 +945,7 @@ int main(int argc, char *argv[]) {
         free(da_buf); free(k_tiled); free(v_tiled);
         free(dq_full); free(dk_full); free(dv_full);
         free(dq); free(dk_buf); free(dv);
-<<<<<<< HEAD
         munmap(token_data, data_len);   // the descriptor was closed right after mmap
-=======
-        munmap(token_data, data_len); close(data_fd);
->>>>>>> d3m-dirty-merge
     }
     return 0;
 }

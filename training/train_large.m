@@ -304,7 +304,6 @@ int main(int argc, char *argv[]) {
         }
         printf("Token data: %zu tokens (%.1f MB)\n", n_tokens, data_len/1e6);
 
-<<<<<<< HEAD
         TokenDataValidationError data_err = {0};
         TokenDataValidationCode data_code = token_data_validate(token_data, n_tokens, SEQ, VOCAB, &data_err);
         if (data_code == TOKEN_DATA_ERR_TOO_SHORT) {
@@ -320,8 +319,6 @@ int main(int argc, char *argv[]) {
             return 1;
         }
 
-=======
->>>>>>> d3m-dirty-merge
         // Gradient buffers shared across layers (reused each step)
         float *dy = (float*)malloc(SEQ*DIM*4);            // gradient flowing backward
         float *dffn = (float*)malloc(SEQ*DIM*4);
