@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 # Build artifacts
 *.o
 *.dSYM/
@@ -81,3 +82,34 @@ training/*.bin
 # External assets (models, datasets)
 assets/
 >>>>>>> 357576698277b5ba88ed30f279a5f390baaf5937
+=======
+# Build artifacts
+*.o
+*.a
+*.dylib
+build/
+.gradle/
+
+# Compiled binaries (ObjC demos)
+contrib/kmp-ane/mnist/mnist_ane
+contrib/kmp-ane/tmp/mnist_demo
+tmp/mnist_demo
+tmp/test_matmul
+tmp/test_mil_parse
+
+# MNIST data (downloadable)
+**/data/train-images-idx3-ubyte
+**/data/train-labels-idx1-ubyte
+**/data/t10k-images-idx3-ubyte
+**/data/t10k-labels-idx1-ubyte
+
+# Gradle wrapper jar (optional - uncomment to track)
+# gradle/wrapper/gradle-wrapper.jar
+
+# Logs
+run.log
+*.log
+
+# macOS
+.DS_Store
+>>>>>>> 04b258e3aa818cb64108c66e256cab40ebfd8a18

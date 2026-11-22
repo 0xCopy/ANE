@@ -1,0 +1,507 @@
+// Main.kt — MNIST training on ANE via KotlinGrad expressions
+//
+// Demonstrates two execution modes:
+//   1. CPU:  Pure KotlinGrad reverse-mode AD (Autograd.kt tape)
+//   2. ANE:  Forward matmuls on ANE, backward + optimizer on CPU
+//
+// The ANE path compiles two matmul kernels (784→128, 128→10) ONCE
+// and passes weights as inputs each step — zero recompilation.
+//
+// Build:  ./gradlew macosArm64Binaries
+// Run:    ./build/bin/macosArm64/mnist_trainerDebugExecutable/mnist_trainer.kexe [data_dir]
+//
+package dev.ane.mnist
+
+import dev.ane.autograd.*
+import dev.ane.grad.Tensor
+import dev.ane.grad.addInPlace
+import dev.ane.grad.addScaledInPlace
+import dev.ane.runtime.ANEDevice
+import dev.ane.runtime.ANEKernelHandle
+import dev.ane.runtime.ANEStatus
+import kotlinx.cinterop.*
+import platform.posix.*
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  MNIST IDX Data Loading
+// ═══════════════════════════════════════════════════════════════════════════
+
+@OptIn(ExperimentalForeignApi::class)
+private fun readBE32(f: CPointer<FILE>): Int {
+    val b = ByteArray(4)
+    b.usePinned { fread(it.addressOf(0), 1u, 4u, f) }
+    return ((b[0].toInt() and 0xFF) shl 24) or
+           ((b[1].toInt() and 0xFF) shl 16) or
+           ((b[2].toInt() and 0xFF) shl 8) or
+            (b[3].toInt() and 0xFF)
+}
+
+@OptIn(ExperimentalForeignApi::class)
+fun loadMnistImages(path: String): FloatArray {
+    val f = fopen(path, "rb") ?: error("Cannot open $path")
+    readBE32(f) // magic
+    val n = readBE32(f)
+    val rows = readBE32(f)
+    val cols = readBE32(f)
+    val size = n * rows * cols
+    val raw = ByteArray(size)
+    raw.usePinned { fread(it.addressOf(0), 1u, size.toULong(), f) }
+    fclose(f)
+    return FloatArray(size) { (raw[it].toInt() and 0xFF) / 255f }
+}
+
+@OptIn(ExperimentalForeignApi::class)
+fun loadMnistLabels(path: String): IntArray {
+    val f = fopen(path, "rb") ?: error("Cannot open $path")
+    readBE32(f) // magic
+    val n = readBE32(f)
+    val raw = ByteArray(n)
+    raw.usePinned { fread(it.addressOf(0), 1u, n.toULong(), f) }
+    fclose(f)
+    return IntArray(n) { raw[it].toInt() and 0xFF }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  KotlinGrad CPU Trainer
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * MNIST model using KotlinGrad-style automatic differentiation.
+ *
+ * Architecture: x(784) → W1(784,128) → ReLU → W2(128,10) → LogSoftmax → NLL
+ *
+ * All computation on CPU via the reverse-mode tape in Autograd.kt.
+ */
+class KotlinGradMnist(val lr: Float = 0.01f) {
+    // Weights stored as [in_dim, out_dim] for x.matmul(W) convention
+    val W1 = Parameter(heInit(784, 128))
+    val b1 = Parameter(Tensor.zeros(1, 128))
+    val W2 = Parameter(heInit(128, 10))
+    val b2 = Parameter(Tensor.zeros(1, 10))
+
+    val params = listOf(W1, b1, W2, b2)
+
+    fun trainStep(images: FloatArray, labels: IntArray, batchSize: Int): StepResult {
+        // Zero gradients
+        params.forEach { it.zeroGrad() }
+
+        // ── KotlinGrad forward (builds computation graph) ──
+        val x = Variable(Tensor(images, intArrayOf(batchSize, 784)))
+        val h = x.matmul(W1).addBias(b1).relu()
+        val logits = h.matmul(W2).addBias(b2)
+        val logProbs = logits.logSoftmax()
+        val loss = logProbs.nllLoss(labels)
+
+        // ── Backward (reverse-mode AD through the tape) ──
+        loss.backward()
+
+        // ── SGD update ──
+        params.forEach { p ->
+            p.value.addScaledInPlace(p.grad!!, -lr)
+        }
+
+        // Accuracy
+        val acc = computeAccuracy(logits.value, labels)
+        return StepResult(loss.value[0], acc)
+    }
+
+    fun evaluate(images: FloatArray, labels: IntArray, batchSize: Int): Float {
+        var totalCorrect = 0
+        var total = 0
+        val n = labels.size
+        var offset = 0
+        while (offset + batchSize <= n) {
+            val batchImg = images.copyOfRange(offset * 784, (offset + batchSize) * 784)
+            val batchLbl = labels.copyOfRange(offset, offset + batchSize)
+
+            val x = Variable(Tensor(batchImg, intArrayOf(batchSize, 784)))
+            val h = x.matmul(W1).addBias(b1).relu()
+            val logits = h.matmul(W2).addBias(b2)
+
+            totalCorrect += countCorrect(logits.value, batchLbl)
+            total += batchSize
+            offset += batchSize
+        }
+        return if (total > 0) totalCorrect.toFloat() / total * 100f else 0f
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  ANE Trainer (Forward on ANE, Backward on CPU)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * MNIST model with ANE-accelerated forward pass.
+ *
+ * Uses MIL matmul kernels (weights as inputs → compiled once, no recompilation).
+ * Data flows through ANE IOSurfaces in channel-first [C, batch] format.
+ * Backward pass + optimizer runs on CPU.
+ */
+class ANEMnist(val batchSize: Int, val lr: Float = 0.01f, val momentum: Float = 0.9f) {
+    val inDim = 784
+    val hidDim = 128
+    val outDim = 10
+
+    // Weights [out, in] — ANE matmul convention: y = W @ x
+    val W1 = FloatArray(hidDim * inDim).also { heInitInPlace(it, hidDim, inDim) }
+    val W2 = FloatArray(outDim * hidDim).also { heInitInPlace(it, outDim, hidDim) }
+    val dW1 = FloatArray(hidDim * inDim)
+    val dW2 = FloatArray(outDim * hidDim)
+    val vW1 = FloatArray(hidDim * inDim)
+    val vW2 = FloatArray(outDim * hidDim)
+
+    var kern1: ANEKernelHandle? = null
+    var kern2: ANEKernelHandle? = null
+
+    // Activation buffers (channel-first: [channels, batch])
+    var xCf   = FloatArray(inDim * batchSize)
+    var hPre  = FloatArray(hidDim * batchSize)
+    var hPost = FloatArray(hidDim * batchSize)
+    var logits = FloatArray(outDim * batchSize)
+
+    @OptIn(ExperimentalForeignApi::class)
+    fun compileKernels(): Boolean {
+        // Generate MIL for both layers via the C bridge
+        val mil1Ptr = dev.ane.cinterop.ane_bridge_mil_gen_matmul(inDim, hidDim, batchSize)
+        val mil1Str = mil1Ptr?.toKString() ?: return false.also { println("  [ANE] MIL gen failed for layer 1") }
+        free(mil1Ptr)
+
+        kern1 = ANEDevice.compile(
+            milText = mil1Str, weightData = null,
+            nInputs = 2,
+            inputBytes = longArrayOf(inDim.toLong() * batchSize * 4, hidDim.toLong() * inDim * 4),
+            nOutputs = 1,
+            outputBytes = longArrayOf(hidDim.toLong() * batchSize * 4)
+        )
+        if (kern1 == null) { println("  [ANE] Compile failed for layer 1"); return false }
+        println("  [ANE] Layer 1 compiled: ${inDim}→${hidDim}, spatial=$batchSize")
+
+        val mil2Ptr = dev.ane.cinterop.ane_bridge_mil_gen_matmul(hidDim, outDim, batchSize)
+        val mil2Str = mil2Ptr?.toKString() ?: return false
+        free(mil2Ptr)
+
+        kern2 = ANEDevice.compile(
+            milText = mil2Str, weightData = null,
+            nInputs = 2,
+            inputBytes = longArrayOf(hidDim.toLong() * batchSize * 4, outDim.toLong() * hidDim * 4),
+            nOutputs = 1,
+            outputBytes = longArrayOf(outDim.toLong() * batchSize * 4)
+        )
+        if (kern2 == null) { println("  [ANE] Compile failed for layer 2"); return false }
+        println("  [ANE] Layer 2 compiled: ${hidDim}→${outDim}, spatial=$batchSize")
+        println("  [ANE] 2 kernels ready — 0 recompiles needed")
+        return true
+    }
+
+    fun trainStep(images: FloatArray, labels: IntArray): StepResult {
+        // ── Transpose images to channel-first: [784, batch] ──
+        transpose(xCf, images, batchSize, inDim)
+
+        // ── Forward Layer 1 on ANE ──
+        ANEDevice.writeInput(kern1!!, 0, xCf)
+        ANEDevice.writeInput(kern1!!, 1, W1)
+        ANEDevice.eval(kern1!!)
+        hPre = ANEDevice.readOutput(kern1!!, 0, hidDim * batchSize) ?: hPre
+
+        // ── ReLU (CPU) ──
+        for (i in hPre.indices) hPost[i] = if (hPre[i] > 0f) hPre[i] else 0f
+
+        // ── Forward Layer 2 on ANE ──
+        ANEDevice.writeInput(kern2!!, 0, hPost)
+        ANEDevice.writeInput(kern2!!, 1, W2)
+        ANEDevice.eval(kern2!!)
+        logits = ANEDevice.readOutput(kern2!!, 0, outDim * batchSize) ?: logits
+
+        // ── Cross-entropy loss (CPU, channel-first layout) ──
+        var loss = 0f
+        var correct = 0
+        for (b in 0 until batchSize) {
+            var mx = Float.NEGATIVE_INFINITY
+            for (c in 0 until outDim) {
+                val v = logits[c * batchSize + b]
+                if (v > mx) mx = v
+            }
+            var se = 0f
+            for (c in 0 until outDim) se += kotlin.math.exp(logits[c * batchSize + b] - mx)
+            loss -= (logits[labels[b] * batchSize + b] - mx - kotlin.math.ln(se))
+
+            // Argmax for accuracy
+            var best = 0; var bv = logits[b]
+            for (c in 1 until outDim) {
+                val v = logits[c * batchSize + b]
+                if (v > bv) { bv = v; best = c }
+            }
+            if (best == labels[b]) correct++
+        }
+        loss /= batchSize
+
+        // ── Backward (CPU, channel-first layout) ──
+        val dL = FloatArray(outDim * batchSize)
+        for (b in 0 until batchSize) {
+            var mx = Float.NEGATIVE_INFINITY
+            for (c in 0 until outDim) {
+                val v = logits[c * batchSize + b]
+                if (v > mx) mx = v
+            }
+            var se = 0f
+            for (c in 0 until outDim) {
+                dL[c * batchSize + b] = kotlin.math.exp(logits[c * batchSize + b] - mx)
+                se += dL[c * batchSize + b]
+            }
+            for (c in 0 until outDim) dL[c * batchSize + b] /= se
+            dL[labels[b] * batchSize + b] -= 1f
+            for (c in 0 until outDim) dL[c * batchSize + b] /= batchSize
+        }
+
+        // dW2 = dL @ h_post^T  (channel-first accumulation)
+        dW2.fill(0f)
+        for (o in 0 until outDim)
+            for (h in 0 until hidDim)
+                for (b in 0 until batchSize)
+                    dW2[o * hidDim + h] += dL[o * batchSize + b] * hPost[h * batchSize + b]
+
+        // d_h_post = W2^T @ dL
+        val dHp = FloatArray(hidDim * batchSize)
+        for (h in 0 until hidDim)
+            for (b in 0 until batchSize)
+                for (o in 0 until outDim)
+                    dHp[h * batchSize + b] += W2[o * hidDim + h] * dL[o * batchSize + b]
+
+        // ReLU backward + dW1
+        dW1.fill(0f)
+        for (h in 0 until hidDim)
+            for (i in 0 until inDim)
+                for (b in 0 until batchSize) {
+                    val dh = if (hPre[h * batchSize + b] > 0f) dHp[h * batchSize + b] else 0f
+                    dW1[h * inDim + i] += dh * xCf[i * batchSize + b]
+                }
+
+        // ── SGD with momentum ──
+        for (i in W1.indices) { vW1[i] = momentum * vW1[i] - lr * dW1[i]; W1[i] += vW1[i] }
+        for (i in W2.indices) { vW2[i] = momentum * vW2[i] - lr * dW2[i]; W2[i] += vW2[i] }
+
+        return StepResult(loss, correct.toFloat() / batchSize * 100f)
+    }
+
+    fun evaluate(images: FloatArray, labels: IntArray): Float {
+        var totalCorrect = 0; var total = 0
+        var offset = 0
+        while (offset + batchSize <= labels.size) {
+            transpose(xCf, images, batchSize, inDim, offset * inDim)
+            ANEDevice.writeInput(kern1!!, 0, xCf)
+            ANEDevice.writeInput(kern1!!, 1, W1)
+            ANEDevice.eval(kern1!!)
+            hPre = ANEDevice.readOutput(kern1!!, 0, hidDim * batchSize) ?: hPre
+            for (i in hPre.indices) hPost[i] = if (hPre[i] > 0f) hPre[i] else 0f
+            ANEDevice.writeInput(kern2!!, 0, hPost)
+            ANEDevice.writeInput(kern2!!, 1, W2)
+            ANEDevice.eval(kern2!!)
+            logits = ANEDevice.readOutput(kern2!!, 0, outDim * batchSize) ?: logits
+
+            for (b in 0 until batchSize) {
+                var best = 0; var bv = logits[b]
+                for (c in 1 until outDim) {
+                    val v = logits[c * batchSize + b]
+                    if (v > bv) { bv = v; best = c }
+                }
+                if (best == labels[offset + b]) totalCorrect++
+            }
+            total += batchSize; offset += batchSize
+        }
+        return if (total > 0) totalCorrect.toFloat() / total * 100f else 0f
+    }
+
+    fun cleanup() {
+        kern1?.let { ANEDevice.freeKernel(it) }
+        kern2?.let { ANEDevice.freeKernel(it) }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  Helpers
+// ═══════════════════════════════════════════════════════════════════════════
+
+data class StepResult(val loss: Float, val accuracy: Float)
+
+/** He / Kaiming init for x.matmul(W) convention: W is [inDim, outDim]. */
+fun heInit(inDim: Int, outDim: Int): Tensor {
+    val scale = kotlin.math.sqrt(2f / inDim)
+    return Tensor.rand(inDim, outDim, scale = scale)
+}
+
+/** He init for ANE convention: W is [outDim, inDim]. */
+fun heInitInPlace(arr: FloatArray, outDim: Int, inDim: Int) {
+    val scale = kotlin.math.sqrt(2f / inDim)
+    // Simple LCG PRNG
+    var seed = 42L
+    for (i in arr.indices) {
+        seed = (seed * 6364136223846793005L + 1442695040888963407L)
+        val u = ((seed ushr 33).toFloat() / Int.MAX_VALUE.toFloat())
+        arr[i] = (u - 0.5f) * 2f * scale
+    }
+}
+
+/** Transpose [rows, cols] row-major → [cols, rows] channel-first. */
+fun transpose(dst: FloatArray, src: FloatArray, rows: Int, cols: Int, srcOffset: Int = 0) {
+    for (r in 0 until rows)
+        for (c in 0 until cols)
+            dst[c * rows + r] = src[srcOffset + r * cols + c]
+}
+
+fun computeAccuracy(logits: Tensor, labels: IntArray): Float {
+    val batch = logits.shape[0]; val cls = logits.shape[1]
+    var correct = 0
+    for (b in 0 until batch) {
+        var best = 0; var bv = logits[b * cls]
+        for (c in 1 until cls) {
+            val v = logits[b * cls + c]
+            if (v > bv) { bv = v; best = c }
+        }
+        if (best == labels[b]) correct++
+    }
+    return correct.toFloat() / batch * 100f
+}
+
+fun countCorrect(logits: Tensor, labels: IntArray): Int {
+    val batch = logits.shape[0]; val cls = logits.shape[1]
+    var correct = 0
+    for (b in 0 until batch) {
+        var best = 0; var bv = logits[b * cls]
+        for (c in 1 until cls) {
+            val v = logits[b * cls + c]
+            if (v > bv) { bv = v; best = c }
+        }
+        if (best == labels[b]) correct++
+    }
+    return correct
+}
+
+fun getTimeMs(): Double {
+    val ts = nativeHeap.alloc<timespec>()
+    clock_gettime(CLOCK_MONOTONIC.toUInt(), ts.ptr)
+    val ms = ts.tv_sec * 1000.0 + ts.tv_nsec / 1_000_000.0
+    nativeHeap.free(ts)
+    return ms
+}
+
+fun Double.fmt(decimals: Int): String {
+    val s = this.toString()
+    val dot = s.indexOf('.')
+    return if (dot < 0) s else s.substring(0, minOf(s.length, dot + decimals + 1))
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  Main
+// ═══════════════════════════════════════════════════════════════════════════
+
+@OptIn(ExperimentalForeignApi::class)
+fun main(args: Array<String>) {
+    val dataDir = args.firstOrNull() ?: "data"
+
+    println("╔══════════════════════════════════════════════════════╗")
+    println("║   MNIST on ANE — KotlinGrad × Apple Neural Engine   ║")
+    println("╠══════════════════════════════════════════════════════╣")
+    println("║  Network:    784 → 128 (ReLU) → 10                 ║")
+    println("║  Optimizer:  SGD (CPU) / SGD+momentum (ANE)         ║")
+    println("║  ANE mode:   matmul kernels, 0 recompiles           ║")
+    println("╚══════════════════════════════════════════════════════╝")
+    println()
+
+    // ── Load data ──
+    println("Loading MNIST from $dataDir/ ...")
+    val trainImages = loadMnistImages("$dataDir/train-images-idx3-ubyte")
+    val trainLabels = loadMnistLabels("$dataDir/train-labels-idx1-ubyte")
+    val testImages  = loadMnistImages("$dataDir/t10k-images-idx3-ubyte")
+    val testLabels  = loadMnistLabels("$dataDir/t10k-labels-idx1-ubyte")
+    println("  Train: ${trainLabels.size} samples, Test: ${testLabels.size} samples\n")
+
+    val batchSize = 128
+    val epochs = 5
+    val bpe = trainLabels.size / batchSize
+
+    // ══════════════════════════════════════════════════════════════════════
+    //  CPU Training — KotlinGrad Autograd Tape
+    // ══════════════════════════════════════════════════════════════════════
+    println("═══ CPU Mode: KotlinGrad Reverse-Mode AD ═══")
+    println("  (${bpe} batches/epoch, batch=$batchSize)\n")
+
+    val cpuModel = KotlinGradMnist(lr = 0.01f)
+    var cpuTotalMs = 0.0
+    var cpuSteps = 0
+
+    for (epoch in 0 until epochs) {
+        val t0 = getTimeMs()
+        var eLoss = 0f
+        for (step in 0 until bpe) {
+            val off = step * batchSize
+            val bImg = trainImages.copyOfRange(off * 784, (off + batchSize) * 784)
+            val bLbl = trainLabels.copyOfRange(off, off + batchSize)
+            val r = cpuModel.trainStep(bImg, bLbl, batchSize)
+            eLoss += r.loss
+            cpuSteps++
+        }
+        val epochMs = getTimeMs() - t0
+        cpuTotalMs += epochMs
+        val testAcc = cpuModel.evaluate(testImages, testLabels, batchSize)
+        val avgLoss = eLoss / bpe
+        println("  Epoch ${epoch+1}/$epochs  loss=${"%.4f".format(avgLoss)}  " +
+                "test_acc=${"%.1f".format(testAcc)}%%  (${epochMs.toLong()}ms)")
+    }
+    val cpuMsStep = cpuTotalMs / cpuSteps
+    println("  → CPU: ${"%.2f".format(cpuMsStep)}ms/step\n")
+
+    // ══════════════════════════════════════════════════════════════════════
+    //  ANE Training — KotlinGrad expressions → ANE matmul kernels
+    // ══════════════════════════════════════════════════════════════════════
+    val aneInit = ANEDevice.init()
+    if (aneInit == ANEStatus.OK && ANEDevice.isAvailable()) {
+        println("═══ ANE Mode: KotlinGrad → ANE Matmul Kernels ═══")
+
+        val aneModel = ANEMnist(batchSize = batchSize, lr = 0.01f)
+        if (aneModel.compileKernels()) {
+            println()
+            var aneTotalMs = 0.0
+            var aneSteps = 0
+
+            for (epoch in 0 until epochs) {
+                val t0 = getTimeMs()
+                var eLoss = 0f
+                for (step in 0 until bpe) {
+                    val off = step * batchSize
+                    val bImg = trainImages.copyOfRange(off * 784, (off + batchSize) * 784)
+                    val bLbl = trainLabels.copyOfRange(off, off + batchSize)
+                    val r = aneModel.trainStep(bImg, bLbl)
+                    eLoss += r.loss
+                    aneSteps++
+                }
+                val epochMs = getTimeMs() - t0
+                aneTotalMs += epochMs
+                val testAcc = aneModel.evaluate(testImages, testLabels)
+                println("  Epoch ${epoch+1}/$epochs  loss=${"%.4f".format(eLoss / bpe)}  " +
+                        "test_acc=${"%.1f".format(testAcc)}%%  (${epochMs.toLong()}ms)")
+            }
+            val aneMsStep = aneTotalMs / aneSteps
+            println("  → ANE: ${"%.2f".format(aneMsStep)}ms/step\n")
+
+            // ── Comparison ──
+            val speedup = cpuMsStep / aneMsStep
+            println("╔══════════════════════════════════════════════════════╗")
+            println("║            ANE vs CPU Timing Summary                ║")
+            println("╠══════════════════════════════════════════════════════╣")
+            println("║  CPU (KotlinGrad tape):  ${"%.2f".format(cpuMsStep).padEnd(8)}ms/step            ║")
+            println("║  ANE (matmul kernels):   ${"%.2f".format(aneMsStep).padEnd(8)}ms/step            ║")
+            println("║  Speedup:                ${"%.1f".format(speedup)}×                        ║")
+            println("╠══════════════════════════════════════════════════════╣")
+            println("║  ANE: 2 kernel compiles, 0 recompiles              ║")
+            println("║  Forward: ANE matmul, CPU ReLU                     ║")
+            println("║  Backward: CPU (SGD + momentum)                    ║")
+            println("╚══════════════════════════════════════════════════════╝")
+
+            aneModel.cleanup()
+        } else {
+            println("  ANE kernel compilation failed. macOS 15+ on Apple Silicon required.")
+        }
+    } else {
+        println("ANE not available (init=$aneInit). Skipping ANE.")
+    }
+}
