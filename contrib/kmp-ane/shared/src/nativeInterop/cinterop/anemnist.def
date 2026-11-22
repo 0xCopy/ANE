@@ -1,0 +1,13 @@
+# anemnist.def — Kotlin/Native cinterop definition for ANEMnist C bridge
+headers = ANEMnist.h
+headerFilter = ANEMnist.h
+
+compilerOpts = -I../../objc-bridge
+
+# The ObjC bridge must be compiled separately into libane_mnist.a
+# then linked here along with required Apple frameworks.
+linkerOpts = -L../../objc-bridge/build \
+    -lane_mnist \
+    -framework Foundation \
+    -framework IOSurface \
+    -ldl -lobjc
