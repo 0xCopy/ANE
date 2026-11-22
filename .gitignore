@@ -27,3 +27,11 @@ run.log
 
 # macOS
 .DS_Store
+*.so
+*.exe
+train_large
+train_large.*
+*.rej
+*.rej.*
+*.orig
+*.dSYM/

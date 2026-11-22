@@ -78,6 +78,16 @@ typedef struct {
 static int model_load_weights(Model *m, const char *path) {
     FILE *f = fopen(path, "rb");
     if (!f) { fprintf(stderr, "Cannot open %s\n", path); return -1; }
+
+    #define FREAD_CHECK(buf, count, file, label) do { \
+        size_t _n = fread(buf, sizeof(float), count, file); \
+        if (_n != (size_t)(count)) { \
+            fprintf(stderr, "ERROR: short read on %s: got %zu, expected %zu (file truncated?)\n", \
+                    label, _n, (size_t)(count)); \
+            fclose(file); return -1; \
+        } \
+    } while(0)
+
     if (fread(&m->cfg, sizeof(Config), 1, f) != 1) {
         fprintf(stderr, "ERROR: failed to read config from %s\n", path);
         fclose(f); return -1;
@@ -92,10 +102,7 @@ static int model_load_weights(Model *m, const char *path) {
     int d = m->cfg.dim, hd = m->cfg.hidden_dim, nl = m->cfg.n_layers, vs = m->cfg.vocab_size;
 
     m->token_embedding = (float*)malloc(vs * d * sizeof(float));
-    if (fread(m->token_embedding, sizeof(float), vs * d, f) != (size_t)(vs * d)) {
-        fprintf(stderr, "ERROR: short read on token_embedding (file truncated?)\n");
-        fclose(f); return -1;
-    }
+    FREAD_CHECK(m->token_embedding, vs * d, f, "token_embedding");
 
     float *rms_att_all = (float*)malloc(nl * d * sizeof(float));
     float *wq_all = (float*)malloc(nl * d * d * sizeof(float));
@@ -106,15 +113,6 @@ static int model_load_weights(Model *m, const char *path) {
     float *w1_all = (float*)malloc(nl * hd * d * sizeof(float));
     float *w2_all = (float*)malloc(nl * d * hd * sizeof(float));
     float *w3_all = (float*)malloc(nl * hd * d * sizeof(float));
-
-    #define FREAD_CHECK(buf, count, file, label) do { \
-        size_t _n = fread(buf, sizeof(float), count, file); \
-        if (_n != (size_t)(count)) { \
-            fprintf(stderr, "ERROR: short read on %s: got %zu, expected %zu (file truncated?)\n", \
-                    label, _n, (size_t)(count)); \
-            fclose(file); return -1; \
-        } \
-    } while(0)
 
     FREAD_CHECK(rms_att_all, nl * d, f, "rms_att");
     FREAD_CHECK(wq_all, nl * d * d, f, "wq");
