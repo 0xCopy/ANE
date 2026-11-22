@@ -88,9 +88,18 @@ test_qos_sweep: test_qos_sweep.m
 test_ane_advanced: test_ane_advanced.m
 	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
 
+<<<<<<< HEAD
 test_chaining: test_chaining.m
 	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
 
+=======
+m5_performance_suite: m5_performance_suite.m ane_runtime.h
+	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
+
+m5_pipeline_suite: m5_pipeline_suite.m ane_runtime.h ane_mil_gen.h
+	$(CC) $(CFLAGS) -Wno-unused-function -Wno-gnu-folding-constant -o $@ $< $(LDFLAGS)
+
+>>>>>>> 6f398781d734ae1cc53139358829082c0f83000c
 probes: $(PROBES)
 
 data: tokenize
@@ -113,7 +122,11 @@ verify-flags:
 
 clean:
 <<<<<<< HEAD
+<<<<<<< HEAD
 	rm -f train train_large train_large_ane train_opt $(PROBES) test_rmsnorm_bwd test_classifier
+=======
+	rm -f train train_large train_large_ane $(PROBES) test_rmsnorm_bwd test_classifier m5_performance_suite m5_pipeline_suite
+>>>>>>> 6f398781d734ae1cc53139358829082c0f83000c
 
 .PHONY: clean tokenize probes
 =======
