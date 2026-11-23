@@ -117,3 +117,6 @@ train_large
 # Gradle wrapper jar (optional - uncomment to track)
 # gradle/wrapper/gradle-wrapper.jar
 run.log
+
+# KMP-ANE MNIST data (downloaded by prepare_mnist.py)
+contrib/kmp-ane/data/
