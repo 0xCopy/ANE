@@ -248,6 +248,11 @@ void ane_bridge_free_kernel(ANEBridgeKernel *kernel) {
         for (int i = 0; i < kernel->nInputs;  i++) CFRelease(kernel->ioInputs[i]);
         for (int i = 0; i < kernel->nOutputs; i++) CFRelease(kernel->ioOutputs[i]);
         [[NSFileManager defaultManager] removeItemAtPath:kernel->tmpDir error:nil];
+        // The kernel is calloc'd, so ARC never releases its strong ObjC fields on free().
+        // Nil them first (assignment releases) or every kernel leaks its model/request/tmpDir.
+        kernel->model = nil;
+        kernel->request = nil;
+        kernel->tmpDir = nil;
         free(kernel->ioInputs);
         free(kernel->ioOutputs);
         free(kernel->inputBytes);
