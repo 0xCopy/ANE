@@ -33,7 +33,7 @@ $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
 $(BUILD_DIR)/ANEBridge.o: objc-bridge/ANEBridge.m objc-bridge/ANEBridge.h | $(BUILD_DIR)
-	$(CC) $(CFLAGS) $(OBJC_FLAGS) -framework Foundation -framework IOSurface -c $< -o $@
+	$(CC) $(CFLAGS) $(OBJC_FLAGS) -c $< -o $@
 
 $(BRIDGE_LIB): $(BRIDGE_OBJS)
 	$(AR) rcs $@ $(BRIDGE_OBJS)
@@ -61,27 +61,13 @@ run-kg: kmp-kg data
 	@echo "═══ Running MNIST trainer (KotlinGrad + ANE) ═══"
 	$(KG_BIN)
 
-# ── Smoke test (C bridge only) ──────────────────────────────────────────────
-test: $(BRIDGE_LIB)
-	@echo "=== Smoke test ==="
-	$(CC) -O2 -fobjc-arc -isysroot $(SDKROOT) \
-		-framework Foundation -framework IOSurface -ldl -lobjc \
-		-Iobjc-bridge -L$(BUILD_DIR) -lanebridge \
-		-x objective-c -o $(BUILD_DIR)/smoke_test - <<'EOF'
-	#import "ANEBridge.h"
-	#include <stdio.h>
-	int main() {
-	    ANEBridgeStatus s = ane_bridge_init();
-	    printf("ane_bridge_init() = %d\n", s);
-	    printf("available = %d\n", ane_bridge_is_available());
-	    char *mil = ane_bridge_mil_gen_conv(4, 8, 2);
-	    if (mil) { printf("MIL gen OK (%zu bytes)\n", strlen(mil)); free(mil); }
-	    else     { printf("MIL gen returned NULL\n"); }
-	    return 0;
-	}
-	EOF
-	$(BUILD_DIR)/smoke_test
-	@echo "=== Smoke test passed ==="
+# ── Bridge regression test (C only, needs ANE hardware) ─────────────────────
+test: $(BRIDGE_LIB) objc-bridge/test_bridge.c
+	$(CC) -O2 -isysroot $(SDKROOT) -Iobjc-bridge objc-bridge/test_bridge.c \
+		-L$(BUILD_DIR) -lanebridge \
+		-framework Foundation -framework IOSurface -framework Accelerate -ldl -lobjc \
+		-o $(BUILD_DIR)/test_bridge
+	$(BUILD_DIR)/test_bridge
 
 clean:
 	rm -rf $(BUILD_DIR)

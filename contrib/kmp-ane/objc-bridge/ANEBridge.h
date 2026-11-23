@@ -55,6 +55,10 @@ ANEBridgeStatus ane_bridge_init(void);
 /// Returns true after a successful ane_bridge_init().
 bool ane_bridge_is_available(void);
 
+/// Text of the last ANE compile/load/eval error ("" if none). The framework's
+/// NSError is otherwise lost behind the status code.
+const char *ane_bridge_last_error(void);
+
 // ---------------------------------------------------------------------------
 // Kernel — compile / eval / free
 // ---------------------------------------------------------------------------
@@ -104,7 +108,8 @@ void ane_bridge_free_kernel(ANEBridgeKernel *kernel);
 /// Generate MIL for a 1×1 conv linear: x[1,in_ch,1,S] → y[1,out_ch,1,S]
 char *ane_bridge_mil_gen_conv(int in_ch, int out_ch, int spatial);
 
-/// Generate MIL for a matmul: W[1,out,in] @ x[1,in,S] → y[1,out,S]
+/// Generate MIL for a 2-input matmul: W[1,1,out,in] @ x[1,1,in,S] → y[1,1,out,S].
+/// Input 0 is W (named "a"), input 1 is x (named "b"); see ane_bridge_compile_matmul.
 char *ane_bridge_mil_gen_matmul(int in_ch, int out_ch, int spatial);
 
 /// Generate MIL for fused QKV (3 parallel convs from same input)
@@ -153,26 +158,48 @@ ANEBridgeStatus ane_bridge_conv_eval(ANEBridgeKernel *kernel,
                                       int S, int in_dim, int out_dim);
 
 // ---------------------------------------------------------------------------
-// Matmul helpers (2-input kernels — weights passed at eval time, no recompile)
+// Channel-first matmul helpers: y = W @ x, weights passed at eval time (no
+// recompile). Built on the dynamic matmul below; prefer that for new code.
 // ---------------------------------------------------------------------------
 
-/// Compile a matmul kernel: y = W @ x
-/// W[1, out_ch, in_ch], x[1, in_ch, spatial] → y[1, out_ch, spatial]
-/// The kernel takes 2 inputs (x at index 0, W at index 1).
+/// Compile y = W @ x with W[out_ch, in_ch], x[in_ch, spatial] → y[out_ch, spatial].
+/// The kernel takes 2 inputs: W at index 0, x at index 1.
 ANEBridgeStatus ane_bridge_compile_matmul(int in_ch, int out_ch, int spatial,
                                            ANEBridgeKernel **out_kernel);
 
-/// Evaluate a matmul kernel. Writes W and x, evals, reads y.
-/// All data is in channel-first layout: [1, channels, spatial] as flat f32.
+/// Evaluate a matmul kernel. Writes W and x, evals, reads y (all flat f32, layouts as above).
 ANEBridgeStatus ane_bridge_matmul_eval(ANEBridgeKernel *kernel,
                                         const float *W, const float *x, float *y,
                                         int in_ch, int out_ch, int spatial);
 
-/// Convenience: row-major matmul. Transposes to/from channel-first internally.
+/// Convenience: row-major activations. Transposes to/from channel-first internally.
 /// W[out_ch, in_ch], x[spatial, in_ch] → y[spatial, out_ch]
 ANEBridgeStatus ane_bridge_matmul_eval_rowmajor(ANEBridgeKernel *kernel,
                                                  const float *W, const float *x, float *y,
                                                  int in_ch, int out_ch, int spatial);
+
+// ---------------------------------------------------------------------------
+// Dynamic matmul — both operands are inputs, so ONE compile serves every
+// weight update (no per-step recompile, no per-process compile budget).
+// Covers a linear layer's forward and both backward products:
+//   forward  y  = x  @ W^T   -> compile_mm(M,K, N,K, false, true)
+//   backward dx = dy @ W     -> compile_mm(M,N, N,K, false, false)
+//   backward dW = dy^T @ x   -> compile_mm(M,N, M,K, true,  false)
+// ---------------------------------------------------------------------------
+
+/// Compile Y = op(A) @ op(B), where op is an optional transpose done on the ANE.
+/// A is stored [a_rows, a_cols] and B [b_rows, b_cols], row-major f32.
+ANEBridgeStatus ane_bridge_compile_mm(int a_rows, int a_cols,
+                                       int b_rows, int b_cols,
+                                       bool transpose_a, bool transpose_b,
+                                       ANEBridgeKernel **out_kernel);
+
+/// Evaluate a compile_mm kernel: writes A and B, runs, reads Y (row-major f32).
+/// The ANE computes in fp16, where anything below ~6e-5 is flushed to zero, so
+/// each operand is scaled to max |v| = 1 on the way in and the product is scaled
+/// back on the way out. Without this, gradient-sized operands come back as zeros.
+ANEBridgeStatus ane_bridge_mm_eval(ANEBridgeKernel *kernel,
+                                    const float *a, const float *b, float *y);
 
 // ---------------------------------------------------------------------------
 // Timing
