@@ -3,9 +3,13 @@
 package dev.ane.runtime
 
 import dev.ane.cinterop.*
+import cnames.structs.ANEBridgeKernel
 import kotlinx.cinterop.*
+import platform.posix.size_tVar
 
-actual typealias ANEKernelHandle = CPointer<ANEBridgeKernel>
+// Kotlin 2.4 rejects an actual typealias to a parameterized type (CPointer<...>) for a plain expect class,
+// so the handle is a small wrapper around the C pointer.
+actual class ANEKernelHandle(val ptr: CPointer<ANEBridgeKernel>)
 
 @OptIn(ExperimentalForeignApi::class)
 actual object ANEDevice {
@@ -30,7 +34,7 @@ actual object ANEDevice {
                 inCh, outCh, spatial,
                 outPtr.ptr
             )
-            if (status == ANE_OK) outPtr.value else null
+            if (status == ANE_OK) outPtr.value?.let { ANEKernelHandle(it) } else null
         }
     }
 
@@ -45,7 +49,7 @@ actual object ANEDevice {
         val status = x.usePinned { xPin ->
             y.usePinned { yPin ->
                 ane_bridge_conv_eval(
-                    kernel, xPin.addressOf(0), yPin.addressOf(0),
+                    kernel.ptr, xPin.addressOf(0), yPin.addressOf(0),
                     S, inDim, outDim
                 )
             }
@@ -54,7 +58,7 @@ actual object ANEDevice {
     }
 
     actual fun freeKernel(kernel: ANEKernelHandle) {
-        ane_bridge_free_kernel(kernel)
+        ane_bridge_free_kernel(kernel.ptr)
     }
 
     actual fun compile(
@@ -98,13 +102,13 @@ actual object ANEDevice {
                 )
             }
         }
-        if (status == ANE_OK) outPtr.value else null
+        if (status == ANE_OK) outPtr.value?.let { ANEKernelHandle(it) } else null
     }
 
     actual fun writeInput(kernel: ANEKernelHandle, index: Int, data: FloatArray): ANEStatus {
         val code = data.usePinned { pinned ->
             ane_bridge_write_input(
-                kernel, index,
+                kernel.ptr, index,
                 pinned.addressOf(0),
                 (data.size * 4).toULong()
             )
@@ -116,7 +120,7 @@ actual object ANEDevice {
         val result = FloatArray(size)
         val code = result.usePinned { pinned ->
             ane_bridge_read_output(
-                kernel, index,
+                kernel.ptr, index,
                 pinned.addressOf(0),
                 (size * 4).toULong()
             )
@@ -125,6 +129,6 @@ actual object ANEDevice {
     }
 
     actual fun eval(kernel: ANEKernelHandle): ANEStatus {
-        return ANEStatus.fromCode(ane_bridge_eval(kernel))
+        return ANEStatus.fromCode(ane_bridge_eval(kernel.ptr))
     }
 }

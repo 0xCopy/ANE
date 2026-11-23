@@ -30,6 +30,14 @@ kotlin {
     // JDK 25 / GraalVM CE toolchain, as in ../TrikeShed (the locked runtime there)
     jvmToolchain(25)
 
+    compilerOptions {
+        // As ../TrikeShed: cinterop APIs are opt-in since Kotlin 1.9.20
+        freeCompilerArgs.addAll(
+            "-opt-in=kotlinx.cinterop.ExperimentalForeignApi",
+            "-opt-in=kotlinx.cinterop.UnsafeNumber",
+        )
+    }
+
     // Primary target: Apple Silicon with ANE
     macosArm64 {
         compilations.getByName("main") {

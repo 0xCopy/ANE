@@ -22,8 +22,9 @@ import dev.ane.runtime.ANEKernelHandle
 import dev.ane.runtime.ANEStatus
 import kotlin.math.*
 
-// Platform-agnostic nanosecond timer (uses expected function from MnistData)
-private fun nanoTime(): Long = dev.ane.mnist.System.currentTimeMillis() * 1_000_000L
+// Platform-agnostic monotonic nanosecond timer
+private val timerOrigin = kotlin.time.TimeSource.Monotonic.markNow()
+private fun nanoTime(): Long = timerOrigin.elapsedNow().inWholeNanoseconds
 
 // ═══════════════════════════════════════════════════════════════════════
 //  § 1. PUBLIC DSL — KotlinGrad-style differentiable expressions
@@ -37,10 +38,11 @@ class Var(
     val data: Tensor,
     /** Parent edges for topological sort */
     internal val parents: List<Var> = emptyList(),
-    /** Backward closure: receives upstream gradient, propagates to parents */
-    internal val backwardFn: ((Tensor) -> Unit)? = null,
     /** Human-readable label for debugging */
-    val label: String = ""
+    val label: String = "",
+    /** Backward closure: receives upstream gradient, propagates to parents.
+     *  Last so call sites can pass it as a trailing lambda: Var(y, parents, "op") { dy -> ... } */
+    internal val backwardFn: ((Tensor) -> Unit)? = null
 ) {
     /** Accumulated gradient (same shape as data) */
     var grad: Tensor? = null
@@ -140,7 +142,9 @@ class GradScope internal constructor() {
             _batchSize = spatial
         }
 
-        _aneKernels[key]?.let { ANEDevice.freeKernel(it) }
+        // remove() not get(): if the compile below fails (ANE per-process compile limit) the map must not keep
+        // the freed handle, or the next call frees it a second time and crashes in objc_msgSend.
+        _aneKernels.remove(key)?.let { ANEDevice.freeKernel(it) }
         val kernel = ANEDevice.compileConv(weights, inCh, outCh, spatial)
         if (kernel != null) _aneKernels[key] = kernel
         return kernel
@@ -348,7 +352,7 @@ class GradScope internal constructor() {
  * }
  * ```
  */
-inline fun differentiable(block: GradScope.() -> Var): Var {
+fun differentiable(block: GradScope.() -> Var): Var {
     val scope = GradScope()
     scope.initANE()
     try {

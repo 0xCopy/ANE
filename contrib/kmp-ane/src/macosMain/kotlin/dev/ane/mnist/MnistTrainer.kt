@@ -194,8 +194,7 @@ fun main() {
         val testAcc = testCorrect.toFloat() / (testSteps * BATCH_SIZE) * 100f
 
         val backend = if (useANE) "ANE" else "CPU"
-        println("Epoch %2d/%d │ loss=%.4f │ train=%.1f%% │ test=%.1f%% │ [%s]".format(
-            epoch, EPOCHS, avgLoss, trainAcc, testAcc, backend))
+        println("Epoch ${epoch.toString().padStart(2)}/$EPOCHS │ loss=${fixed(avgLoss, 4)} │ train=${fixed(trainAcc, 1)}% │ test=${fixed(testAcc, 1)}% │ [$backend]")
     }
 
     println("─".repeat(70))

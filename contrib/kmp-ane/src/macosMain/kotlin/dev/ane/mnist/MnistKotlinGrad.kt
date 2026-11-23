@@ -315,7 +315,7 @@ fun kgMain() {
             if ((step + 1) % 100 == 0) {
                 val aneMs = scope.aneTimeNs / 1_000_000.0
                 val cpuMs = scope.cpuTimeNs / 1_000_000.0
-                println("$epoch,${step + 1},${"%.6f".format(epochLoss / (step + 1))},${"%.1f".format(aneMs)},${"%.1f".format(cpuMs)},")
+                println("$epoch,${step + 1},${fixed(epochLoss / (step + 1), 6)},${fixed(aneMs, 1)},${fixed(cpuMs, 1)},")
             }
         }
 
@@ -332,8 +332,8 @@ fun kgMain() {
         val avgLoss = epochLoss / stepsPerEpoch
         val aneMs = scope.aneTimeNs / 1_000_000.0
         val cpuMs = scope.cpuTimeNs / 1_000_000.0
-        println("$epoch,$stepsPerEpoch,${"%.6f".format(avgLoss)},${"%.1f".format(aneMs)},${"%.1f".format(cpuMs)},${"%.2f".format(testAcc)}")
-        println("# Epoch $epoch/${ KG.N_EPOCHS}  loss=${"%.4f".format(avgLoss)}  test=${"%.1f".format(testAcc)}%  (${elapsed}ms)")
+        println("$epoch,$stepsPerEpoch,${fixed(avgLoss, 6)},${fixed(aneMs, 1)},${fixed(cpuMs, 1)},${fixed(testAcc, 2)}")
+        println("# Epoch $epoch/${ KG.N_EPOCHS}  loss=${fixed(avgLoss, 4)}  test=${fixed(testAcc, 1)}%  (${elapsed}ms)")
         println()
     }
 
@@ -344,13 +344,13 @@ fun kgMain() {
 
     println()
     println("════════════════════════════════════════════════════")
-    println("  Final test accuracy: ${"%.1f".format(finalAcc)}%")
+    println("  Final test accuracy: ${fixed(finalAcc, 1)}%")
     println()
     println("  Timing breakdown:")
-    println("    ANE matmul forward:  ${"%.0f".format(totalAne)} ms")
-    println("    CPU (back + rest):   ${"%.0f".format(totalCpu)} ms")
+    println("    ANE matmul forward:  ${fixed(totalAne, 0)} ms")
+    println("    CPU (back + rest):   ${fixed(totalCpu, 0)} ms")
     if (totalAne + totalCpu > 0)
-        println("    ANE utilization:     ${"%.1f".format(totalAne / (totalAne + totalCpu) * 100)}%")
+        println("    ANE utilization:     ${fixed(totalAne / (totalAne + totalCpu) * 100, 1)}%")
     println()
     println("  Stack: KotlinGrad DSL → GradScope (private ANE) → cinterop")
     println("       → ANEBridge.m → ane_runtime.h → AppleNeuralEngine.framework")
