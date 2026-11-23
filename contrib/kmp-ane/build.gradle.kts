@@ -16,7 +16,7 @@
 //   make all && make run
 
 plugins {
-    kotlin("multiplatform") version "2.1.0"
+    kotlin("multiplatform") version "2.4.21"
 }
 
 group = "dev.ane"
@@ -27,6 +27,9 @@ repositories {
 }
 
 kotlin {
+    // JDK 25 / GraalVM CE toolchain, as in ../TrikeShed (the locked runtime there)
+    jvmToolchain(25)
+
     // Primary target: Apple Silicon with ANE
     macosArm64 {
         compilations.getByName("main") {
