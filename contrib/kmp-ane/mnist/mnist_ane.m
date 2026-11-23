@@ -6,8 +6,11 @@
 // Optimizer: SGD with momentum
 //
 // Strategy: use gradient accumulation to amortize the recompile cost.
-// Each weight update requires recompiling 2 kernels (~119 compile limit/process).
-// With ACCUM_STEPS=50 and batch=128: ~6 full epochs before hitting the limit.
+// Each weight update requires recompiling 2 kernels (baked weights).
+// The "~119 compiles per process" ceiling this demo was built around was a leak in
+// ane_free(), not an ANE limit: with it fixed, -DACCUM_STEPS=5 runs 1130 compiles
+// and all 6 epochs. MAX_COMPILES stays as a safety stop only.
+// (contrib/kmp-ane's Kotlin trainers avoid recompiling altogether: weights are kernel inputs.)
 //
 // Build:  make mnist
 // Usage:  python3 fetch_mnist.py && ./mnist_ane
@@ -37,8 +40,12 @@ int g_fp16_io = 0;  // M1/M2: set to 1 when the cast op is unsupported (declared
 #define LR          0.01f
 #define MOM         0.9f
 #define N_EPOCHS    6
+#ifndef ACCUM_STEPS
 #define ACCUM_STEPS 50    // gradient accumulation steps per weight update
-#define MAX_COMPILES 118  // leave 1 spare of the ~119 ANE limit
+#endif
+#ifndef MAX_COMPILES
+#define MAX_COMPILES 100000  // safety stop; the old 118 worked around the ane_free() leak
+#endif
 
 // ─── MNIST IDX file parser ──────────────────────────────────────────────────
 static uint32_t read_be32(FILE *f) {
