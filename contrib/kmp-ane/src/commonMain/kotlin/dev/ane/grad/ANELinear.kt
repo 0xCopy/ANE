@@ -1,19 +1,11 @@
 // ANELinear.kt — ANE-accelerated linear layer expression for the autograd graph
-// When ANE is available, the forward matmul runs on Apple Neural Engine via
-// ane_bridge_conv_eval. Backward always runs on CPU (matching the main project's
-// approach: forward on ANE, dW on CPU).
+// The forward matmul and both backward matmuls run on the Apple Neural Engine through
+// dynamic-weight kernels (see ANEMatmul): the weights are kernel inputs, so nothing is
+// recompiled when they change. CPU is the fallback when the ANE is unavailable.
 package dev.ane.grad
 
-import dev.ane.runtime.ANEDevice
-import dev.ane.runtime.ANEKernelHandle
-import dev.ane.runtime.ANEStatus
-
 /**
- * An autograd expression that does y = x @ W^T + bias, where the matmul
- * can be offloaded to ANE as a 1×1 convolution.
- *
- * The ANE kernel bakes weights, so we recompile whenever weights are updated.
- * For MNIST this is fine — the compile cost is ~2ms per kernel.
+ * An autograd expression that does y = x @ W^T + bias.
  */
 class ANELinearOp(
     val x: Expr,
@@ -21,8 +13,6 @@ class ANELinearOp(
     val bias: Parameter?,
     val useANE: Boolean
 ) : Expr() {
-
-    private var aneKernel: ANEKernelHandle? = null
 
     override val value: Tensor = computeForward()
 
@@ -33,10 +23,19 @@ class ANELinearOp(
             val inDim = weight.value.shape[1]
 
             // dx = dy @ W   (dy:[B, outDim] @ W:[outDim, inDim] → dx:[B, inDim])
-            x.accumGrad(cpuMM(dy, weight.value))
+            // Skipped for data inputs: nobody reads their gradient.
+            if (x !is Variable && x !is Constant) {
+                val dx = ane { ANEMatmul.product(dy.data, batch, outDim, weight.value.data, outDim, inDim) }
+                    ?.let { Tensor(it, intArrayOf(batch, inDim)) }
+                    ?: cpuMM(dy, weight.value)
+                x.accumGrad(dx)
+            }
 
             // dW = dy^T @ x  (dy^T:[outDim, B] @ x:[B, inDim] → dW:[outDim, inDim])
-            weight.accumGrad(cpuMM(transposeT(dy), x.value))
+            val dW = ane { ANEMatmul.product(dy.data, batch, outDim, x.value.data, batch, inDim, transposeA = true) }
+                ?.let { Tensor(it, intArrayOf(outDim, inDim)) }
+                ?: cpuMM(transposeT(dy), x.value)
+            weight.accumGrad(dW)
 
             // dBias = sum(dy, axis=0)
             if (bias != null) {
@@ -49,35 +48,16 @@ class ANELinearOp(
         }
     }
 
+    private inline fun ane(block: () -> FloatArray?): FloatArray? = if (useANE) block() else null
+
     private fun computeForward(): Tensor {
         val (batch, inDim) = x.value.shape
         val outDim = weight.value.shape[0]
 
-        val y: FloatArray
-
-        if (useANE && ANEDevice.isAvailable() && batch > 0) {
-            // ANE path: compile baked-weight kernel, eval
-            val kernel = ANEDevice.compileConv(
-                weight.value.data, inDim, outDim, batch
-            )
-            if (kernel != null) {
-                aneKernel = kernel
-                val result = ANEDevice.convEval(kernel, x.value.data, batch, inDim, outDim)
-                if (result != null) {
-                    y = result
-                } else {
-                    // Fallback to CPU
-                    y = cpuForward(batch, inDim, outDim)
-                }
-                // Free kernel immediately (weights will change next step)
-                ANEDevice.freeKernel(kernel)
-                aneKernel = null
-            } else {
-                y = cpuForward(batch, inDim, outDim)
-            }
-        } else {
-            y = cpuForward(batch, inDim, outDim)
-        }
+        // y = x @ W^T
+        val y = (if (batch > 0) ane {
+            ANEMatmul.product(x.value.data, batch, inDim, weight.value.data, outDim, inDim, transposeB = true)
+        } else null) ?: cpuForward(batch, inDim, outDim)
 
         // Add bias
         if (bias != null) {

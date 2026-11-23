@@ -6,7 +6,7 @@ headers = ANEBridge.h
 headerFilter = ANEBridge.h
 
 compilerOpts = -Iobjc-bridge
-linkerOpts = -Lbuild -lanebridge -framework Foundation -framework IOSurface -ldl -lobjc
+linkerOpts = -Lbuild -lanebridge -framework Foundation -framework IOSurface -framework Accelerate -ldl -lobjc
 
 # Static library mode (paths are relative to project root, not .def file)
 staticLibraries = libanebridge.a

@@ -61,6 +61,35 @@ actual object ANEDevice {
         ane_bridge_free_kernel(kernel.ptr)
     }
 
+    actual fun compileMatmul(
+        aRows: Int, aCols: Int, bRows: Int, bCols: Int,
+        transposeA: Boolean, transposeB: Boolean
+    ): ANEKernelHandle? = memScoped {
+        val outPtr = alloc<CPointerVar<ANEBridgeKernel>>()
+        val status = ane_bridge_compile_mm(
+            aRows, aCols, bRows, bCols, transposeA, transposeB, outPtr.ptr
+        )
+        if (status == ANE_OK) outPtr.value?.let { ANEKernelHandle(it) } else null
+    }
+
+    actual fun matmulEval(
+        kernel: ANEKernelHandle, a: FloatArray, b: FloatArray, outSize: Int
+    ): FloatArray? {
+        val y = FloatArray(outSize)
+        val status = a.usePinned { aPin ->
+            b.usePinned { bPin ->
+                y.usePinned { yPin ->
+                    ane_bridge_mm_eval(
+                        kernel.ptr, aPin.addressOf(0), bPin.addressOf(0), yPin.addressOf(0)
+                    )
+                }
+            }
+        }
+        return if (status == ANE_OK) y else null
+    }
+
+    actual fun lastError(): String = ane_bridge_last_error()?.toKString() ?: ""
+
     actual fun compile(
         milText: String,
         weightData: ByteArray?,

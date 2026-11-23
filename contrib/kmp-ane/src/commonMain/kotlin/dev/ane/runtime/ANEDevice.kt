@@ -56,6 +56,23 @@ expect object ANEDevice {
     fun freeKernel(kernel: ANEKernelHandle)
 
     /**
+     * Compile a dynamic matmul kernel: Y = op(A) @ op(B), op = optional transpose on the ANE.
+     * Both operands are kernel inputs, so one compile serves every weight update.
+     * A is stored [aRows, aCols], B [bRows, bCols], row-major.
+     */
+    fun compileMatmul(aRows: Int, aCols: Int, bRows: Int, bCols: Int,
+                      transposeA: Boolean, transposeB: Boolean): ANEKernelHandle?
+
+    /**
+     * Evaluate a [compileMatmul] kernel. [outSize] is the element count of Y and must
+     * match the shapes the kernel was compiled for.
+     */
+    fun matmulEval(kernel: ANEKernelHandle, a: FloatArray, b: FloatArray, outSize: Int): FloatArray?
+
+    /** Text of the last ANE compile/load/eval error, "" if none. */
+    fun lastError(): String
+
+    /**
      * Compile arbitrary MIL with optional weights.
      */
     fun compile(milText: String, weightData: ByteArray?,

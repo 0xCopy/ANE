@@ -7,8 +7,8 @@
 // shared across platform-specific implementations.
 //
 // Architecture: 784 → 128 (ReLU) → 64 (ReLU) → 10
-// Forward:  ANE matmul kernels (baked weights via 1×1 conv)
-// Backward: CPU reverse-mode AD via Autograd tape
+// Forward:  ANE matmul kernels (weights passed as kernel inputs, compiled once per shape)
+// Backward: reverse-mode AD via Autograd tape; its matmuls run on the ANE as well
 // Optimizer: Adam (lr=0.001)
 //
 package dev.ane.mnist

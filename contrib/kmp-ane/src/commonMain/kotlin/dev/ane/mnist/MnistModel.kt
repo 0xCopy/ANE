@@ -1,6 +1,6 @@
 // MnistModel.kt — A 3-layer MLP for MNIST on ANE
 // Architecture: 784 → 128 (ReLU) → 64 (ReLU) → 10 (LogSoftmax)
-// Forward matmuls can dispatch to ANE; backward always on CPU.
+// Forward and backward matmuls dispatch to the ANE (see grad/ANEMatmul.kt); the rest is CPU.
 package dev.ane.mnist
 
 import dev.ane.grad.*

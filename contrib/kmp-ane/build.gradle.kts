@@ -57,6 +57,7 @@ kotlin {
                     "-lanebridge",
                     "-framework", "Foundation",
                     "-framework", "IOSurface",
+                    "-framework", "Accelerate",
                     "-ldl",
                     "-lobjc"
                 )
@@ -68,6 +69,7 @@ kotlin {
                     "-lanebridge",
                     "-framework", "Foundation",
                     "-framework", "IOSurface",
+                    "-framework", "Accelerate",
                     "-ldl",
                     "-lobjc"
                 )
@@ -94,6 +96,7 @@ kotlin {
                     "-lanebridge",
                     "-framework", "Foundation",
                     "-framework", "IOSurface",
+                    "-framework", "Accelerate",
                     "-ldl",
                     "-lobjc"
                 )
@@ -105,6 +108,7 @@ kotlin {
                     "-lanebridge",
                     "-framework", "Foundation",
                     "-framework", "IOSurface",
+                    "-framework", "Accelerate",
                     "-ldl",
                     "-lobjc"
                 )

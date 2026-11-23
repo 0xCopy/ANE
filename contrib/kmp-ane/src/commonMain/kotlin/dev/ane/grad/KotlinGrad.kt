@@ -17,9 +17,6 @@
 //
 package dev.ane.grad
 
-import dev.ane.runtime.ANEDevice
-import dev.ane.runtime.ANEKernelHandle
-import dev.ane.runtime.ANEStatus
 import kotlin.math.*
 
 // Platform-agnostic monotonic nanosecond timer
@@ -46,6 +43,10 @@ class Var(
 ) {
     /** Accumulated gradient (same shape as data) */
     var grad: Tensor? = null
+        internal set
+
+    /** False for data inputs: ops skip the gradient w.r.t. this node (nobody reads it). */
+    var requiresGrad: Boolean = true
         internal set
 
     internal fun accumGrad(upstream: Tensor) {
@@ -93,18 +94,19 @@ class Param(
 
 /**
  * Scoped DSL receiver. All differentiable ops execute inside this scope.
- * The scope owns the ANE kernel cache and dispatches matmuls to hardware.
+ * The scope dispatches matmuls (forward and backward) to the ANE via [ANEMatmul].
  */
 class GradScope internal constructor() {
 
     // ── Private ANE driver state (not visible to DSL users) ─────────
-    private val _aneKernels = mutableMapOf<String, ANEKernelHandle>()
+    // Kernels live in the process-wide ANEMatmul cache (one compile per shape),
+    // so a scope owns no ANE resources and can be opened per step.
     private var _aneAvailable = false
-    private var _batchSize = -1
 
-    /** Timing accumulators for ANE vs CPU (nanoseconds) */
+    /** Time in matmuls that ran on the ANE, forward and backward (nanoseconds) */
     internal var aneTimeNs: Long = 0L
         private set
+    /** Time in matmuls that fell back to the CPU (nanoseconds) */
     internal var cpuTimeNs: Long = 0L
         private set
 
@@ -113,68 +115,41 @@ class GradScope internal constructor() {
     /** Try to initialize ANE. Called automatically. */
     internal fun initANE(): Boolean {
         if (_aneAvailable) return true
-        _aneAvailable = (ANEDevice.init() == ANEStatus.OK && ANEDevice.isAvailable())
+        _aneAvailable = ANEMatmul.isAvailable
         return _aneAvailable
     }
 
-    /** Release all ANE kernels. Called when scope closes. */
-    internal fun close() {
-        for ((_, k) in _aneKernels) ANEDevice.freeKernel(k)
-        _aneKernels.clear()
-    }
+    /** Scopes own no ANE resources (see ANEMatmul); kept for API compatibility. */
+    internal fun close() {}
 
     // ── Private ANE dispatch (hidden from public DSL) ───────────────
 
-    /**
-     * Compile or retrieve a cached ANE conv kernel for the given
-     * weight shape. Returns null if ANE unavailable.
-     */
-    private fun aneCompileConv(
-        key: String, weights: FloatArray,
-        inCh: Int, outCh: Int, spatial: Int
-    ): ANEKernelHandle? {
-        if (!_aneAvailable) return null
-
-        // Recompile if batch size changed
-        if (spatial != _batchSize) {
-            for ((_, k) in _aneKernels) ANEDevice.freeKernel(k)
-            _aneKernels.clear()
-            _batchSize = spatial
-        }
-
-        // remove() not get(): if the compile below fails (ANE per-process compile limit) the map must not keep
-        // the freed handle, or the next call frees it a second time and crashes in objc_msgSend.
-        _aneKernels.remove(key)?.let { ANEDevice.freeKernel(it) }
-        val kernel = ANEDevice.compileConv(weights, inCh, outCh, spatial)
-        if (kernel != null) _aneKernels[key] = kernel
-        return kernel
-    }
-
-    /**
-     * Execute a matmul on ANE: y = x @ W^T
-     * x: [M, K],  W: [N, K] → y: [M, N]
-     * Returns null if ANE is not available or eval fails.
-     */
-    private fun aneMatmul(
-        key: String, x: Tensor, w: Tensor
+    /** One matmul on the ANE, timed. Null → the caller computes it on the CPU. */
+    private fun aneProduct(
+        a: FloatArray, aRows: Int, aCols: Int,
+        b: FloatArray, bRows: Int, bCols: Int,
+        outRows: Int, outCols: Int,
+        transposeA: Boolean = false, transposeB: Boolean = false
     ): Tensor? {
         if (!_aneAvailable) return null
-        val (M, K) = x.shape
-        val N = w.rows
-        val kernel = aneCompileConv(key, w.data, K, N, M) ?: return null
-
         val t0 = nanoTime()
-        val result = ANEDevice.convEval(kernel, x.data, M, K, N)
+        val y = ANEMatmul.product(a, aRows, aCols, b, bRows, bCols, transposeA, transposeB) ?: return null
         aneTimeNs += nanoTime() - t0
+        return Tensor(y, intArrayOf(outRows, outCols))
+    }
 
-        return result?.let { Tensor(it, intArrayOf(M, N)) }
+    private inline fun onCpu(block: () -> Tensor): Tensor {
+        val t0 = nanoTime()
+        val r = block()
+        cpuTimeNs += nanoTime() - t0
+        return r
     }
 
     // ── Public DSL operators ────────────────────────────────────────
 
     /** Wrap raw tensor data as a non-trainable input variable. */
     fun input(data: Tensor, label: String = "input"): Var =
-        Var(data, label = label)
+        Var(data, label = label).also { it.requiresGrad = false }
 
     /** Wrap a Param as a Var in this scope. */
     fun param(p: Param): Var = p.weight
@@ -183,7 +158,8 @@ class GradScope internal constructor() {
      * Matrix multiply: y = a @ b^T
      * a: [M, K],  b: [N, K]  →  y: [M, N]
      *
-     * Dispatches to ANE when available; falls back to CPU.
+     * Forward and both backward products run on the ANE through dynamic-weight
+     * kernels (weights are inputs, nothing is recompiled); CPU is the fallback.
      * Backward: dA = dY @ B,  dB = dY^T @ A
      */
     infix fun Var.matmul(w: Var): Var {
@@ -191,21 +167,19 @@ class GradScope internal constructor() {
         val M = a.rows; val K = a.cols
         val N = w.rows
 
-        // Forward: try ANE, fall back to CPU
-        val aneKey = "${w.label}_${M}x${K}x${N}"
-        val y = aneMatmul(aneKey, a.data, w.data) ?: run {
-            val t0 = nanoTime()
-            val result = gradScopeMatmul(a.data, w.data)
-            cpuTimeNs += nanoTime() - t0
-            result
-        }
+        val y = aneProduct(a.data.data, M, K, w.data.data, N, K, outRows = M, outCols = N, transposeB = true)
+            ?: onCpu { gradScopeMatmul(a.data, w.data) }
 
         return Var(y, parents = listOf(a, w), label = "matmul") { dy ->
-            // dA = dY @ W  (not transposed: [M,N] @ [N,K] → [M,K])
-            val dA = gradScopeMatmulUntransposed(dy, w.data)
-            a.accumGrad(dA)
-            // dW = dY^T @ A  → [N,M] @ [M,K] → [N,K]
-            val dW = gradScopeTransposeMatmul(dy, a.data)
+            // dA = dY @ W  ([M,N] @ [N,K] → [M,K]); skipped for data inputs
+            if (a.requiresGrad) {
+                val dA = aneProduct(dy.data, M, N, w.data.data, N, K, outRows = M, outCols = K)
+                    ?: onCpu { gradScopeMatmulUntransposed(dy, w.data) }
+                a.accumGrad(dA)
+            }
+            // dW = dY^T @ A  ([N,M] @ [M,K] → [N,K])
+            val dW = aneProduct(dy.data, M, N, a.data.data, M, K, outRows = N, outCols = K, transposeA = true)
+                ?: onCpu { gradScopeTransposeMatmul(dy, a.data) }
             w.accumGrad(dW)
         }
     }
@@ -379,7 +353,11 @@ class TrainingScope {
     /** CPU time this scope has accumulated (nanoseconds). */
     val cpuTimeNs: Long get() = scope.cpuTimeNs
 
-    fun close() = scope.close()
+    /** Ends training: frees the cached ANE kernels. */
+    fun close() {
+        scope.close()
+        ANEMatmul.releaseAll()
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════════

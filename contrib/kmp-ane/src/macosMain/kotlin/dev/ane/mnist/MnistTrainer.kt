@@ -1,11 +1,12 @@
 // MnistTrainer.kt — End-to-end MNIST training on Apple Neural Engine
 //
 // Uses the KotlinGrad-style Autograd.kt tape for automatic differentiation,
-// with ANELinear.kt mapping forward matmuls to ANE conv kernels.
+// with ANELinear.kt mapping the matmuls to ANE dynamic-weight kernels.
 //
 // Architecture: 784 → 128 (ReLU) → 64 (ReLU) → 10
-// Forward: linear layers compiled to ANE 1×1 conv kernels (baked weights)
-// Backward: automatic differentiation via Autograd tape, dW on CPU
+// Forward:  x @ W^T on the ANE, weights passed as kernel inputs (compiled once per shape)
+// Backward: automatic differentiation via Autograd tape; dx and dW matmuls on the ANE too.
+// CPU:      bias, ReLU, loss, Adam, data handling.
 //
 // Data: raw binary files from prepare_mnist.py
 //   mnist_train_images.bin — 60000 × 784 × float32
@@ -69,7 +70,7 @@ fun main() {
     println("╔══════════════════════════════════════════════╗")
     println("║  MNIST Trainer — KMP → Swift → ObjC → ANE   ║")
     println("║                                              ║")
-    println("║  KotlinGrad expressions → ANE conv kernels   ║")
+    println("║  KotlinGrad expressions → ANE matmul kernels ║")
     println("╚══════════════════════════════════════════════╝")
     println()
 
@@ -110,7 +111,7 @@ fun main() {
     val totalParams = params.sumOf { it.value.size }
     println("[Model]   $totalParams parameters")
     println("[Model]   $INPUT_DIM → $HIDDEN1 (ReLU) → $HIDDEN2 (ReLU) → $NUM_CLASSES")
-    println("[Backend] ${if (useANE) "ANE forward, CPU backward" else "CPU only"}")
+    println("[Backend] ${if (useANE) "ANE forward + backward matmuls (dynamic weights, no recompiles); CPU for the rest" else "CPU only"}")
 
     // --- Optimizer ---
     val optimizer = Adam(params, lr = LR)
@@ -121,10 +122,15 @@ fun main() {
     println("─".repeat(70))
 
     // --- Training loop ---
+    val clock = kotlin.time.TimeSource.Monotonic.markNow()
     for (epoch in 1..EPOCHS) {
         var epochLoss = 0f
         var epochCorrect = 0
         var epochTotal = 0
+        val epochStart = clock.elapsedNow()
+        val aneEvals0 = ANEMatmul.aneEvals
+        val cpuFallbacks0 = ANEMatmul.cpuFallbacks
+        val aneNs0 = ANEMatmul.aneNs
 
         for (step in 0 until stepsPerEpoch) {
             val offset = step * BATCH_SIZE
@@ -193,12 +199,22 @@ fun main() {
         }
         val testAcc = testCorrect.toFloat() / (testSteps * BATCH_SIZE) * 100f
 
-        val backend = if (useANE) "ANE" else "CPU"
-        println("Epoch ${epoch.toString().padStart(2)}/$EPOCHS │ loss=${fixed(avgLoss, 4)} │ train=${fixed(trainAcc, 1)}% │ test=${fixed(testAcc, 1)}% │ [$backend]")
+        // Where the matmuls of this epoch actually ran (counted, not assumed).
+        val onAne = ANEMatmul.aneEvals - aneEvals0
+        val onCpu = ANEMatmul.cpuFallbacks - cpuFallbacks0
+        val backend = when {
+            !useANE || onAne == 0L -> "CPU"
+            onCpu == 0L -> "ANE: $onAne matmuls, ${fixed((ANEMatmul.aneNs - aneNs0) / 1e9, 1)}s"
+            else -> "ANE $onAne / CPU fallback $onCpu matmuls"
+        }
+        val epochSec = (clock.elapsedNow() - epochStart).inWholeMilliseconds / 1000.0
+        println("Epoch ${epoch.toString().padStart(2)}/$EPOCHS │ loss=${fixed(avgLoss, 4)} │ train=${fixed(trainAcc, 1)}% │ test=${fixed(testAcc, 1)}% │ ${fixed(epochSec, 1)}s │ [$backend]")
     }
 
     println("─".repeat(70))
-    println("Training complete.")
+    println("Training complete. ANE kernels compiled: ${ANEMatmul.compiles} (${fixed(ANEMatmul.compileNs / 1e6, 0)} ms), " +
+            "matmuls on ANE: ${ANEMatmul.aneEvals}, on CPU: ${ANEMatmul.cpuFallbacks}")
+    ANEMatmul.releaseAll()
     println()
     println("Stack: Kotlin (KMP) → aneLinear() → ANEDevice (cinterop)")
     println("     → ANEBridge.m (ObjC) → ane_runtime.h → AppleNeuralEngine.framework")
